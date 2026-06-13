@@ -1,0 +1,80 @@
+{
+  "wpn_iron_sword": {
+    "id": "wpn_iron_sword",
+    "name": "鉄の剣",
+    "weaponType": "sword",
+    "might": 5,
+    "hit": 90,
+    "crit": 0,
+    "rangeMin": 1,
+    "rangeMax": 1,
+    "weight": 5,
+    "durability": 40,
+    "effectiveTags": []
+  },
+  "wpn_iron_axe": {
+    "id": "wpn_iron_axe",
+    "name": "鉄の斧",
+    "weaponType": "axe",
+    "might": 8,
+    "hit": 75,
+    "crit": 0,
+    "rangeMin": 1,
+    "rangeMax": 1,
+    "weight": 10,
+    "durability": 40,
+    "effectiveTags": []
+  },
+  "wpn_iron_lance": {
+    "id": "wpn_iron_lance",
+    "name": "鉄の槍",
+    "weaponType": "lance",
+    "might": 7,
+    "hit": 80,
+    "crit": 0,
+    "rangeMin": 1,
+    "rangeMax": 1,
+    "weight": 8,
+    "durability": 40,
+    "effectiveTags": []
+  },
+  "wpn_steel_sword": {
+    "id": "wpn_steel_sword",
+    "name": "鋼の剣",
+    "weaponType": "sword",
+    "might": 8,
+    "hit": 85,
+    "crit": 5,
+    "rangeMin": 1,
+    "rangeMax": 1,
+    "weight": 6,
+    "durability": 50,
+    "effectiveTags": []
+  },
+  "wpn_javelin": {
+    "id": "wpn_javelin",
+    "name": "ジャベリン",
+    "weaponType": "lance",
+    "might": 6,
+    "hit": 70,
+    "crit": 0,
+    "rangeMin": 1,
+    "rangeMax": 2,
+    "weight": 8,
+    "durability": 20,
+    "effectiveTags": []
+  },
+  "wpn_wind": {
+    "id": "wpn_wind",
+    "name": "ウインド",
+    "weaponType": "magic",
+    "might": 5,
+    "hit": 90,
+    "crit": 0,
+    "rangeMin": 1,
+    "rangeMax": 2,
+    "weight": 0,
+    "durability": 30,
+    "effectiveTags": []
+  }
+}

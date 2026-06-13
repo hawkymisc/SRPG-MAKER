@@ -1,0 +1,38 @@
+{
+  "terrain_plain": {
+    "id": "terrain_plain",
+    "name": "平地",
+    "moveCosts": { "infantry": 1, "cavalry": 1, "flying": 1, "armored": 1 },
+    "avoidBonus": 0,
+    "defBonus": 0,
+    "healPerTurn": 0,
+    "impassable": false
+  },
+  "terrain_forest": {
+    "id": "terrain_forest",
+    "name": "森",
+    "moveCosts": { "infantry": 2, "cavalry": 3, "flying": 1, "armored": 3 },
+    "avoidBonus": 20,
+    "defBonus": 1,
+    "healPerTurn": 0,
+    "impassable": false
+  },
+  "terrain_fort": {
+    "id": "terrain_fort",
+    "name": "砦",
+    "moveCosts": { "infantry": 1, "cavalry": 1, "flying": 1, "armored": 1 },
+    "avoidBonus": 10,
+    "defBonus": 3,
+    "healPerTurn": 10,
+    "impassable": false
+  },
+  "terrain_wall": {
+    "id": "terrain_wall",
+    "name": "壁",
+    "moveCosts": { "infantry": 99, "cavalry": 99, "flying": 1, "armored": 99 },
+    "avoidBonus": 0,
+    "defBonus": 0,
+    "healPerTurn": 0,
+    "impassable": true
+  }
+}

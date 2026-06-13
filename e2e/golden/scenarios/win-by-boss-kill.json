@@ -1,0 +1,18 @@
+{
+  "name": "win-by-boss-kill",
+  "description": "ボス撃破で勝利条件を満たすこと",
+  "specRef": "spec 2.1",
+  "seed": 42,
+  "setup": {
+    "map": "templates/sample/maps/test10.json",
+    "units": [
+      { "ref": "unit_alm", "x": 2, "y": 2, "faction": "player", "equip": "wpn_steel_sword" },
+      { "ref": "unit_boss", "x": 3, "y": 2, "faction": "enemy", "equip": "wpn_steel_sword", "isBoss": true }
+    ],
+    "winCondition": { "type": "defeat_boss", "bossRef": "unit_boss" }
+  },
+  "actions": [
+    { "type": "Attack", "actor": "unit_alm", "target": "unit_boss" },
+    { "type": "EndPhase" }
+  ]
+}

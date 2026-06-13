@@ -1,0 +1,24 @@
+{
+  "units": [
+    {
+      "ref": "unit_alm",
+      "x": 1,
+      "y": 1,
+      "hp": 20,
+      "exp": 0,
+      "equipDurability": 40
+    }
+  ],
+  "log": [
+    {
+      "kind": "win",
+      "turn": 2,
+      "phase": "player",
+      "message": "Victory condition met"
+    }
+  ],
+  "rngConsumed": 0,
+  "turn": 2,
+  "phase": "player",
+  "outcome": "win"
+}

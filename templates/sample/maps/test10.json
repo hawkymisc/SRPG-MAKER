@@ -1,0 +1,24 @@
+{
+  "id": "map_test10",
+  "name": "テストマップ10x10",
+  "width": 10,
+  "height": 10,
+  "layers": {
+    "bottom": [
+      "terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain",
+      "terrain_plain","terrain_plain","terrain_forest","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_forest","terrain_plain","terrain_plain",
+      "terrain_plain","terrain_forest","terrain_forest","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_forest","terrain_plain","terrain_plain",
+      "terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_fort","terrain_fort","terrain_plain","terrain_plain","terrain_plain","terrain_plain",
+      "terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_fort","terrain_fort","terrain_plain","terrain_plain","terrain_plain","terrain_plain",
+      "terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain",
+      "terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain",
+      "terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain",
+      "terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain",
+      "terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain"
+    ]
+  },
+  "placements": [],
+  "reinforcements": [],
+  "winCondition": { "type": "defeat_all_enemies" },
+  "loseCondition": { "allPlayerDefeated": true }
+}

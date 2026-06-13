@@ -1,0 +1,8 @@
+{
+  "skl_critical_up": {
+    "id": "skl_critical_up",
+    "name": "急所狙い",
+    "description": "必殺+10",
+    "critBonus": 10
+  }
+}

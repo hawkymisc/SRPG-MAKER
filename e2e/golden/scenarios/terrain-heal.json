@@ -1,0 +1,18 @@
+{
+  "name": "terrain-heal",
+  "description": "砦マスでターン終了時にHP回復すること",
+  "specRef": "spec 5.2.2",
+  "seed": 1,
+  "setup": {
+    "map": "templates/sample/maps/test10.json",
+    "units": [
+      { "ref": "unit_alm", "x": 4, "y": 3, "faction": "player", "equip": "wpn_iron_sword", "hp": 10 }
+    ]
+  },
+  "actions": [
+    { "type": "Wait", "actor": "unit_alm" },
+    { "type": "EndPhase" },
+    { "type": "EndPhase" },
+    { "type": "EndPhase" }
+  ]
+}

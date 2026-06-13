@@ -1,0 +1,8 @@
+{
+  "itm_vulnerary": {
+    "id": "itm_vulnerary",
+    "name": "傷薬",
+    "uses": 3,
+    "effect": { "type": "heal", "amount": 10 }
+  }
+}

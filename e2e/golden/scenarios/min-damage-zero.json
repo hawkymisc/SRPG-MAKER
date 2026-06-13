@@ -1,0 +1,16 @@
+{
+  "name": "min-damage-zero",
+  "description": "ダメージ計算が0未満にならないこと",
+  "specRef": "spec 5.2.2",
+  "seed": 42,
+  "setup": {
+    "map": "templates/sample/maps/test10.json",
+    "units": [
+      { "ref": "unit_alm", "x": 2, "y": 2, "faction": "player", "equip": "wpn_iron_sword" },
+      { "ref": "unit_lukas", "x": 3, "y": 2, "faction": "enemy", "equip": "wpn_iron_lance" }
+    ]
+  },
+  "actions": [
+    { "type": "Attack", "actor": "unit_alm", "target": "unit_lukas" }
+  ]
+}

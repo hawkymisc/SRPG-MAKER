@@ -1,0 +1,31 @@
+{
+  "units": [
+    {
+      "ref": "unit_alm",
+      "x": 4,
+      "y": 3,
+      "hp": 10,
+      "exp": 0,
+      "equipDurability": 40
+    }
+  ],
+  "log": [
+    {
+      "kind": "wait",
+      "turn": 1,
+      "phase": "player",
+      "actor": "unit_alm_1",
+      "message": "アルム waited"
+    },
+    {
+      "kind": "win",
+      "turn": 1,
+      "phase": "player",
+      "message": "Victory condition met"
+    }
+  ],
+  "rngConsumed": 0,
+  "turn": 1,
+  "phase": "player",
+  "outcome": "win"
+}

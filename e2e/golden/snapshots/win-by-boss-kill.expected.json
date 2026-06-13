@@ -1,0 +1,48 @@
+{
+  "units": [
+    {
+      "ref": "unit_alm",
+      "x": 2,
+      "y": 2,
+      "hp": 20,
+      "exp": 0,
+      "equipDurability": 49
+    },
+    {
+      "ref": "unit_boss",
+      "x": 3,
+      "y": 2,
+      "hp": 23,
+      "exp": 0,
+      "equipDurability": 50
+    }
+  ],
+  "log": [
+    {
+      "kind": "damage",
+      "turn": 1,
+      "phase": "player",
+      "actor": "unit_alm_1",
+      "target": "unit_boss_2",
+      "message": "アルム dealt 7 damage to ボス",
+      "strike": {
+        "hit": true,
+        "crit": false,
+        "damage": 7,
+        "hitRoll": 0.6011037519201636,
+        "critRoll": 0.44829055899754167,
+        "hitRate": 78.5,
+        "critRate": 3,
+        "attackPower": 15
+      },
+      "rngRolls": [
+        0.6011037519201636,
+        0.44829055899754167
+      ]
+    }
+  ],
+  "rngConsumed": 2,
+  "turn": 1,
+  "phase": "enemy",
+  "outcome": "ongoing"
+}

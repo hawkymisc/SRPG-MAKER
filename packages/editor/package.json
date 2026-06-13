@@ -1,0 +1,19 @@
+{
+  "name": "@srpg/editor",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@srpg/shared": "workspace:*",
+    "react": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.23",
+    "typescript": "^5.9.3",
+    "vitest": "^2.1.9"
+  }
+}

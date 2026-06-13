@@ -1,0 +1,46 @@
+{
+  "units": [
+    {
+      "ref": "unit_brigand",
+      "x": 2,
+      "y": 2,
+      "hp": 24,
+      "exp": 0,
+      "equipDurability": 39
+    },
+    {
+      "ref": "unit_alm",
+      "x": 3,
+      "y": 2,
+      "hp": 20,
+      "exp": 0,
+      "equipDurability": 40
+    }
+  ],
+  "log": [
+    {
+      "kind": "miss",
+      "turn": 1,
+      "phase": "player",
+      "actor": "unit_brigand_1",
+      "target": "unit_alm_2",
+      "message": "山賊 missed アルム",
+      "strike": {
+        "hit": false,
+        "crit": false,
+        "damage": 0,
+        "hitRoll": 0.6011037519201636,
+        "hitRate": 50,
+        "critRate": 0,
+        "attackPower": 15
+      },
+      "rngRolls": [
+        0.6011037519201636
+      ]
+    }
+  ],
+  "rngConsumed": 1,
+  "turn": 1,
+  "phase": "enemy",
+  "outcome": "ongoing"
+}

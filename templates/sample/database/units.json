@@ -1,0 +1,42 @@
+{
+  "unit_alm": {
+    "id": "unit_alm",
+    "name": "アルム",
+    "classId": "class_lord",
+    "level": 1,
+    "stats": { "hp": 20, "str": 7, "mag": 0, "skl": 6, "spd": 7, "lck": 5, "def": 5, "res": 2, "mov": 5 },
+    "growth": { "hp": 60, "str": 45, "mag": 5, "skl": 50, "spd": 50, "lck": 40, "def": 35, "res": 20 },
+    "items": ["wpn_iron_sword"],
+    "skills": []
+  },
+  "unit_lukas": {
+    "id": "unit_lukas",
+    "name": "ルーカ",
+    "classId": "class_soldier",
+    "level": 2,
+    "stats": { "hp": 24, "str": 8, "mag": 0, "skl": 6, "spd": 6, "lck": 4, "def": 7, "res": 1, "mov": 5 },
+    "growth": { "hp": 70, "str": 50, "mag": 0, "skl": 40, "spd": 35, "lck": 30, "def": 45, "res": 10 },
+    "items": ["wpn_iron_lance"],
+    "skills": []
+  },
+  "unit_brigand": {
+    "id": "unit_brigand",
+    "name": "山賊",
+    "classId": "class_brigand",
+    "level": 1,
+    "stats": { "hp": 24, "str": 8, "mag": 0, "skl": 4, "spd": 5, "lck": 2, "def": 4, "res": 0, "mov": 5 },
+    "growth": { "hp": 80, "str": 55, "mag": 0, "skl": 25, "spd": 30, "lck": 15, "def": 30, "res": 5 },
+    "items": ["wpn_iron_axe"],
+    "skills": []
+  },
+  "unit_boss": {
+    "id": "unit_boss",
+    "name": "ボス",
+    "classId": "class_brigand",
+    "level": 5,
+    "stats": { "hp": 30, "str": 12, "mag": 0, "skl": 8, "spd": 8, "lck": 5, "def": 8, "res": 2, "mov": 5 },
+    "growth": { "hp": 60, "str": 40, "mag": 0, "skl": 30, "spd": 25, "lck": 20, "def": 35, "res": 10 },
+    "items": ["wpn_steel_sword"],
+    "skills": []
+  }
+}

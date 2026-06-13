@@ -1,0 +1,17 @@
+{
+  "name": "triangle-advantage",
+  "description": "剣→斧の三すくみ有利で命中・威力補正が乗ること",
+  "specRef": "spec 5.2.2",
+  "seed": 42,
+  "setup": {
+    "map": "templates/sample/maps/test10.json",
+    "units": [
+      { "ref": "unit_alm", "x": 2, "y": 2, "faction": "player", "equip": "wpn_iron_sword" },
+      { "ref": "unit_brigand", "x": 3, "y": 2, "faction": "enemy", "equip": "wpn_iron_axe" }
+    ]
+  },
+  "actions": [
+    { "type": "Attack", "actor": "unit_alm", "target": "unit_brigand" },
+    { "type": "EndPhase" }
+  ]
+}

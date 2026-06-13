@@ -1,0 +1,18 @@
+# 依存
+node_modules/
+
+# ビルド・検証成果物
+dist/
+coverage/
+packages/*/coverage/
+
+# ゴールデン更新承認マーカー(コミット禁止)
+.allow-golden-update
+
+# jq バイナリ(scripts/ensure-jq.ps1 で取得)
+.claude/tools/jq.exe
+
+# OS / エディタ
+.DS_Store
+Thumbs.db
+*.log

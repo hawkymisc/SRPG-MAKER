@@ -1,0 +1,55 @@
+{
+  "units": [
+    {
+      "ref": "unit_alm",
+      "x": 2,
+      "y": 2,
+      "hp": 20,
+      "exp": 0,
+      "equipDurability": null
+    },
+    {
+      "ref": "unit_brigand",
+      "x": 3,
+      "y": 2,
+      "hp": 15,
+      "exp": 0,
+      "equipDurability": 40
+    }
+  ],
+  "log": [
+    {
+      "kind": "damage",
+      "turn": 1,
+      "phase": "player",
+      "actor": "unit_alm_1",
+      "target": "unit_brigand_2",
+      "message": "アルム dealt 9 damage to 山賊",
+      "strike": {
+        "hit": true,
+        "crit": false,
+        "damage": 9,
+        "hitRoll": 0.6011037519201636,
+        "critRoll": 0.44829055899754167,
+        "hitRate": 100,
+        "critRate": 1,
+        "attackPower": 13
+      },
+      "rngRolls": [
+        0.6011037519201636,
+        0.44829055899754167
+      ]
+    },
+    {
+      "kind": "weapon_break",
+      "turn": 1,
+      "phase": "player",
+      "actor": "unit_alm_1",
+      "message": "鉄の剣 broke"
+    }
+  ],
+  "rngConsumed": 2,
+  "turn": 1,
+  "phase": "player",
+  "outcome": "ongoing"
+}

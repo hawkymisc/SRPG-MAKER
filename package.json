@@ -1,0 +1,22 @@
+{
+  "name": "srpg-maker",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "typecheck": "pnpm -r typecheck",
+    "lint": "eslint .",
+    "test": "pnpm -r test",
+    "test:golden": "tsx e2e/golden/harness.mts",
+    "test:e2e": "node -e \"console.log('e2e: 未整備(M2/M3で整備)')\""
+  },
+  "dependencies": {
+    "@srpg/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "eslint": "^9.0.0",
+    "tsx": "^4.19.4",
+    "typescript": "^5.5.0",
+    "typescript-eslint": "^8.0.0"
+  }
+}

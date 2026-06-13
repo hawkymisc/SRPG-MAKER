@@ -1,0 +1,17 @@
+{
+  "name": "triangle-disadvantage",
+  "description": "斧→剣の三すくみ不利で命中・威力が低下すること",
+  "specRef": "spec 5.2.2",
+  "seed": 42,
+  "setup": {
+    "map": "templates/sample/maps/test10.json",
+    "units": [
+      { "ref": "unit_brigand", "x": 2, "y": 2, "faction": "player", "equip": "wpn_iron_axe" },
+      { "ref": "unit_alm", "x": 3, "y": 2, "faction": "enemy", "equip": "wpn_iron_sword" }
+    ]
+  },
+  "actions": [
+    { "type": "Attack", "actor": "unit_brigand", "target": "unit_alm" },
+    { "type": "EndPhase" }
+  ]
+}
