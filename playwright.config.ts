@@ -1,5 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
+const previewHost = "127.0.0.1";
+
 export default defineConfig({
   testDir: "e2e",
   fullyParallel: false,
@@ -8,9 +10,7 @@ export default defineConfig({
   workers: 1,
   reporter: "list",
   use: {
-    baseURL: "http://127.0.0.1:5174",
     trace: "on-first-retry",
-    viewport: { width: 520, height: 420 },
     deviceScaleFactor: 1,
   },
   expect: {
@@ -19,12 +19,40 @@ export default defineConfig({
       animations: "disabled",
     },
   },
-  webServer: {
-    command: "npx vite build && npx vite preview --port 5174 --strictPort --host 127.0.0.1",
-    cwd: "packages/runtime",
-    url: "http://127.0.0.1:5174",
-    reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
-  },
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+  webServer: [
+    {
+      command: `npx vite build && npx vite preview --port 5173 --strictPort --host ${previewHost}`,
+      cwd: "packages/editor",
+      url: `http://${previewHost}:5173`,
+      reuseExistingServer: true,
+      timeout: 120_000,
+    },
+    {
+      command: `npx vite build && npx vite preview --port 5174 --strictPort --host ${previewHost}`,
+      cwd: "packages/runtime",
+      url: `http://${previewHost}:5174`,
+      reuseExistingServer: true,
+      timeout: 120_000,
+    },
+  ],
+  projects: [
+    {
+      name: "chromium",
+      testMatch: /runtime-screenshots\.spec\.ts/,
+      use: {
+        ...devices["Desktop Chrome"],
+        baseURL: `http://${previewHost}:5174`,
+        viewport: { width: 520, height: 420 },
+      },
+    },
+    {
+      name: "editor",
+      testMatch: /editor-flow\.spec\.ts/,
+      use: {
+        ...devices["Desktop Chrome"],
+        baseURL: `http://${previewHost}:5173`,
+        viewport: { width: 1100, height: 820 },
+      },
+    },
+  ],
 });

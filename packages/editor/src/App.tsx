@@ -1,0 +1,71 @@
+import { useEffect } from "react";
+import { useProjectStore } from "./store/projectStore.js";
+import { ProjectTab } from "./components/ProjectTab.js";
+import { DatabaseTab } from "./components/DatabaseTab.js";
+import { MapTab } from "./components/MapTab.js";
+import { TestPlayTab } from "./components/TestPlayTab.js";
+
+const TABS = [
+  { id: "project" as const, label: "プロジェクト" },
+  { id: "database" as const, label: "データベース" },
+  { id: "map" as const, label: "マップ" },
+  { id: "testplay" as const, label: "テストプレイ" },
+];
+
+export function App() {
+  const activeTab = useProjectStore((s) => s.activeTab);
+  const setActiveTab = useProjectStore((s) => s.setActiveTab);
+  const project = useProjectStore((s) => s.project);
+  const initNewProject = useProjectStore((s) => s.initNewProject);
+  const dirty = useProjectStore((s) => s.dirty);
+
+  useEffect(() => {
+    if (!project) {
+      void initNewProject();
+    }
+  }, [project, initNewProject]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.key === "1") setActiveTab("project");
+      if (e.ctrlKey && e.key === "2") setActiveTab("database");
+      if (e.ctrlKey && e.key === "3") setActiveTab("map");
+      if (e.ctrlKey && e.key === "4") setActiveTab("testplay");
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [setActiveTab]);
+
+  return (
+    <div className="app" data-testid="editor-app">
+      <header className="app-header">
+        <h1>SRPGツクール</h1>
+        {project ? (
+          <span className="project-title" data-testid="header-project-name">
+            {project.name}
+            {dirty ? " *" : ""}
+          </span>
+        ) : null}
+      </header>
+      <nav className="main-tabs" aria-label="メインタブ">
+        {TABS.map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            className={activeTab === tab.id ? "active" : ""}
+            onClick={() => setActiveTab(tab.id)}
+            data-testid={`tab-${tab.id}`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </nav>
+      <main className="app-main">
+        {activeTab === "project" ? <ProjectTab /> : null}
+        {activeTab === "database" ? <DatabaseTab /> : null}
+        {activeTab === "map" ? <MapTab /> : null}
+        {activeTab === "testplay" ? <TestPlayTab /> : null}
+      </main>
+    </div>
+  );
+}

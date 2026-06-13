@@ -9,7 +9,10 @@
     "test": "pnpm -r test",
     "test:golden": "tsx e2e/golden/harness.mts",
     "test:e2e": "playwright test",
+    "test:e2e:editor": "playwright test --project=editor",
+    "test:e2e:runtime": "playwright test --project=chromium",
     "test:e2e:update": "playwright test --update-snapshots",
+    "dev:editor": "pnpm --filter @srpg/editor dev",
     "dev:runtime": "pnpm --filter @srpg/runtime dev",
     "baseline:m2": "tsx scripts/m2-baseline.mts"
   },

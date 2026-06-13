@@ -1,4 +1,4 @@
-import { createPhaserGame } from "../game/createGame.js";
+import { bootstrapRuntime } from "../editorTestPlayBridge.js";
 
 const shell = document.getElementById("game-shell");
 if (!shell) {
@@ -10,4 +10,4 @@ canvasHost.id = "game";
 canvasHost.style.position = "relative";
 shell.appendChild(canvasHost);
 
-createPhaserGame(canvasHost);
+void bootstrapRuntime(canvasHost);

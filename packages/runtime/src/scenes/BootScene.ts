@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { loadChapter } from "../data/loadChapter.js";
+import { loadChapter, loadChapterFromEditorStorage } from "../data/loadChapter.js";
 import { BattleSession } from "../game/BattleSession.js";
 import { REGISTRY_KEYS } from "../game/registry.js";
 import { DEFAULT_BATTLE_SEED } from "../constants.js";
@@ -18,13 +18,20 @@ export class BootScene extends Phaser.Scene {
     generateTerrainTextures(this);
     generateUnitTextures(this);
 
-    const chapter = await loadChapter(import.meta.env.BASE_URL);
-    const session = BattleSession.fromChapter(chapter, DEFAULT_BATTLE_SEED);
+    const editorPayload = loadChapterFromEditorStorage();
+    const chapter = editorPayload
+      ? { map: editorPayload.map, database: editorPayload.database }
+      : await loadChapter(import.meta.env.BASE_URL);
+    const seed = editorPayload?.seed ?? DEFAULT_BATTLE_SEED;
+    const session = BattleSession.fromChapter(chapter, seed);
 
     this.registry.set(REGISTRY_KEYS.chapter, chapter);
     this.registry.set(REGISTRY_KEYS.session, session);
-    this.registry.set(REGISTRY_KEYS.seed, DEFAULT_BATTLE_SEED);
+    this.registry.set(REGISTRY_KEYS.seed, seed);
     this.registry.set(REGISTRY_KEYS.autoPlayAll, false);
+    if (editorPayload?.debug?.invincible) {
+      this.registry.set(REGISTRY_KEYS.debugInvincible, true);
+    }
 
     this.scene.start("Title");
   }

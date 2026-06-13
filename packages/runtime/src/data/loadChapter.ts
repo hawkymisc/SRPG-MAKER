@@ -15,6 +15,8 @@ export interface ChapterData {
   database: BattleDatabase;
 }
 
+export const EDITOR_TESTPLAY_KEY = "srpg-editor-testplay";
+
 type DbKey = "units" | "classes" | "weapons" | "items" | "skills" | "terrain";
 
 function parseRecordFile<T extends { id: string }>(
@@ -44,6 +46,37 @@ export function buildDatabase(rawParts: Record<DbKey, unknown>): BattleDatabase 
     skills: parseRecordFile(rawParts.skills, SkillSchema),
     terrain: parseRecordFile(rawParts.terrain, TerrainSchema),
   };
+}
+
+export interface EditorTestPlayPayload {
+  map: MapData;
+  database: BattleDatabase;
+  seed?: number;
+  debug?: { invincible?: boolean };
+}
+
+export function loadChapterFromEditorStorage(): EditorTestPlayPayload | null {
+  if (typeof sessionStorage === "undefined") return null;
+  const raw = sessionStorage.getItem(EDITOR_TESTPLAY_KEY);
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw) as EditorTestPlayPayload;
+    return {
+      map: MapSchema.parse(parsed.map),
+      database: buildDatabase({
+        units: parsed.database.units,
+        classes: parsed.database.classes,
+        weapons: parsed.database.weapons,
+        items: parsed.database.items,
+        skills: parsed.database.skills,
+        terrain: parsed.database.terrain,
+      }),
+      ...(parsed.seed !== undefined ? { seed: parsed.seed } : {}),
+      ...(parsed.debug ? { debug: parsed.debug } : {}),
+    };
+  } catch {
+    return null;
+  }
 }
 
 async function fetchJson(url: string): Promise<unknown> {
