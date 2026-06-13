@@ -1,0 +1,29 @@
+{
+  "id": "map_chapter01",
+  "name": "序章・試練の平原",
+  "width": 10,
+  "height": 10,
+  "layers": {
+    "bottom": [
+      "terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain",
+      "terrain_plain","terrain_plain","terrain_forest","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_forest","terrain_plain","terrain_plain",
+      "terrain_plain","terrain_forest","terrain_forest","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_forest","terrain_plain","terrain_plain",
+      "terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_fort","terrain_fort","terrain_plain","terrain_plain","terrain_plain","terrain_plain",
+      "terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_fort","terrain_fort","terrain_plain","terrain_plain","terrain_plain","terrain_plain",
+      "terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain",
+      "terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain",
+      "terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain",
+      "terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain",
+      "terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain","terrain_plain"
+    ]
+  },
+  "placements": [
+    { "ref": "unit_alm", "x": 1, "y": 4, "faction": "player", "equip": "wpn_iron_sword" },
+    { "ref": "unit_lukas", "x": 1, "y": 5, "faction": "player", "equip": "wpn_iron_lance" },
+    { "ref": "unit_brigand", "x": 7, "y": 4, "faction": "enemy", "equip": "wpn_iron_axe", "aiType": "charge" },
+    { "ref": "unit_brigand", "x": 7, "y": 5, "faction": "enemy", "equip": "wpn_iron_axe", "aiType": "charge" }
+  ],
+  "reinforcements": [],
+  "winCondition": { "type": "defeat_all_enemies" },
+  "loseCondition": { "allPlayerDefeated": true }
+}

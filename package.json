@@ -8,12 +8,16 @@
     "lint": "eslint .",
     "test": "pnpm -r test",
     "test:golden": "tsx e2e/golden/harness.mts",
-    "test:e2e": "node -e \"console.log('e2e: 未整備(M2/M3で整備)')\""
+    "test:e2e": "playwright test",
+    "test:e2e:update": "playwright test --update-snapshots",
+    "dev:runtime": "pnpm --filter @srpg/runtime dev",
+    "baseline:m2": "tsx scripts/m2-baseline.mts"
   },
   "dependencies": {
     "@srpg/shared": "workspace:*"
   },
   "devDependencies": {
+    "@playwright/test": "^1.52.0",
     "eslint": "^9.0.0",
     "tsx": "^4.19.4",
     "typescript": "^5.5.0",

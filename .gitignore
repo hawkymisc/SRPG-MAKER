@@ -12,6 +12,12 @@ packages/*/coverage/
 # jq バイナリ(scripts/ensure-jq.ps1 で取得)
 .claude/tools/jq.exe
 
+# Playwright
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+
 # OS / エディタ
 .DS_Store
 Thumbs.db
