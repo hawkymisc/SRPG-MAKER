@@ -48,6 +48,7 @@ export class CombatPreviewPanel {
       defenderWeapon,
       terrainDef,
       state.context.config,
+      state.context.combatHooks,
     );
     this.root.innerHTML = [
       `<div style="color:#ffd54f;margin-bottom:4px">戦闘予測</div>`,

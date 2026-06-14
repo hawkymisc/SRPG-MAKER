@@ -10,6 +10,7 @@ import {
   WeaponSchema,
   ChapterSchema,
   mapFileStem,
+  PluginManifestSchema,
   type Project,
 } from "@srpg/shared";
 
@@ -51,7 +52,7 @@ export interface TemplateLoadOptions {
 export async function loadSampleTemplate(options: TemplateLoadOptions = {}): Promise<Project> {
   const base = (options.baseUrl ?? "/").replace(/\/$/, "");
   const mapId = options.mapId ?? "chapter01";
-  const [units, classes, weapons, items, skills, terrain, mapRaw] = await Promise.all([
+  const [units, classes, weapons, items, skills, terrain, mapRaw, pluginRaw] = await Promise.all([
     fetchJson(`${base}/database/units.json`),
     fetchJson(`${base}/database/classes.json`),
     fetchJson(`${base}/database/weapons.json`),
@@ -59,6 +60,7 @@ export async function loadSampleTemplate(options: TemplateLoadOptions = {}): Pro
     fetchJson(`${base}/database/skills.json`),
     fetchJson(`${base}/database/terrain.json`),
     fetchJson(`${base}/maps/${mapId}.json`),
+    fetchJson(`${base}/plugins/plugin_sword_bonus/plugin.json`).catch(() => null),
   ]);
 
   const database: Record<DbKey, Record<string, unknown>> = {
@@ -85,6 +87,9 @@ export async function loadSampleTemplate(options: TemplateLoadOptions = {}): Pro
     }),
   };
 
+  const pluginManifest =
+    pluginRaw !== null ? PluginManifestSchema.parse(pluginRaw) : undefined;
+
   return ProjectSchema.parse({
     schemaVersion: SCHEMA_VERSION,
     name: options.projectName ?? "サンプルプロジェクト",
@@ -93,5 +98,11 @@ export async function loadSampleTemplate(options: TemplateLoadOptions = {}): Pro
     maps: { [map.id]: map },
     chapters,
     startChapterId: chapterId,
+    ...(pluginManifest
+      ? {
+          plugins: { [pluginManifest.id]: pluginManifest },
+          enabledPlugins: [pluginManifest.id],
+        }
+      : {}),
   });
 }

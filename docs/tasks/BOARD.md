@@ -16,7 +16,7 @@
 | M5-T2 | 拠点画面 | runtime-dev + editor-dev | DONE | BaseScene + 編成/ショップ/会話/出撃 |
 | M5-T3 | 成長率・クラスチェンジ | battle-logic-dev | DONE | roster永続化 + 拠点転職 |
 | M5-T4 | ビジュアルイベントエディタ | editor-dev | DONE | 会話プレビュー + 顔付きメッセージ |
-| M5-T5 | プラグインAPI | schema-architect | BACKLOG | plugin-api パッケージ |
+| M5-T5 | プラグインAPI | schema-architect | DONE | plugin-api + CombatHooks |
 | M5-T6 | Electron書き出し | editor-dev | BACKLOG | デスクトップ配布 |
 
 ### M1 (完了)
@@ -77,3 +77,4 @@
 - 2026-06-15 M5-T2 完了: CampaignState・BaseScene(編成/ショップ/会話/出撃)・勝利→拠点ループ。
 - 2026-06-15 M5-T3 完了: ロスター level/stats/classId 永続化・拠点クラスチェンジ(Lv.10+)。
 - 2026-06-15 M5-T4 完了: 会話プレビューパネル・MessageWindow 顔/話者名演出。
+- 2026-06-15 M5-T5 完了: plugin-api パッケージ・CombatHooks・宣言的プラグインルール。

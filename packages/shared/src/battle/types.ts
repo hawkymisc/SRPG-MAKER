@@ -8,6 +8,7 @@ import type { Weapon } from "../schemas/weapon.js";
 import type { Stats } from "../schemas/stats.js";
 import type { VariableId, SwitchId } from "../schemas/ids.js";
 import type { BattleConfig } from "./config.js";
+import type { CombatHooks } from "./hooks.js";
 
 export interface WeaponInstance {
   weaponId: string;
@@ -53,6 +54,7 @@ export interface BattleContext {
   config: BattleConfig;
   map: MapData;
   database: BattleDatabase;
+  combatHooks?: CombatHooks;
 }
 
 export type BattleOutcome = "ongoing" | "win" | "lose";

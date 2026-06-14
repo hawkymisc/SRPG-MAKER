@@ -246,7 +246,10 @@ export class BaseScene extends Phaser.Scene {
       chapter.database,
       chapterDef,
     );
-    const session = BattleSession.fromChapter(chapter, this.seed, placements);
+    const combatHooks = this.registry.get(REGISTRY_KEYS.combatHooks) as
+      | import("@srpg/shared").CombatHooks
+      | undefined;
+    const session = BattleSession.fromChapter(chapter, this.seed, placements, combatHooks);
     session.state = {
       ...session.state,
       variables: Object.assign({}, session.state.variables, this.campaignSession.state.variables),

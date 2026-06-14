@@ -7,6 +7,7 @@ import {
   isMagicalWeapon,
   type BattleConfig,
 } from "./config.js";
+import { applyCombatHook, type CombatHookContext, type CombatHooks } from "./hooks.js";
 import type { BattleUnit, StrikeResult } from "./types.js";
 
 export interface CombatPreview {
@@ -85,11 +86,40 @@ export function previewCombat(
   defenderWeapon: Weapon | null,
   terrain: Terrain | undefined,
   config: BattleConfig,
+  hooks?: CombatHooks,
 ): CombatPreview {
-  const attackPower = calcAttackPower(attacker, attackerWeapon, defenderWeapon, config);
-  const hitRate = calcHitRate(attacker, defender, attackerWeapon, defenderWeapon, terrain, config);
-  const critRate = calcCritRate(attacker, defender, attackerWeapon, config);
-  const damage = calcDamage(attackPower, defender, attackerWeapon, terrain, config);
+  const ctx: CombatHookContext = {
+    attacker,
+    defender,
+    attackerWeapon,
+    defenderWeapon,
+    terrain,
+    config,
+  };
+  const attackPower = applyCombatHook(
+    hooks,
+    "attackPower",
+    ctx,
+    calcAttackPower(attacker, attackerWeapon, defenderWeapon, config),
+  );
+  const hitRate = applyCombatHook(
+    hooks,
+    "hitRate",
+    ctx,
+    calcHitRate(attacker, defender, attackerWeapon, defenderWeapon, terrain, config),
+  );
+  const critRate = applyCombatHook(
+    hooks,
+    "critRate",
+    ctx,
+    calcCritRate(attacker, defender, attackerWeapon, config),
+  );
+  const damage = applyCombatHook(
+    hooks,
+    "damage",
+    ctx,
+    calcDamage(attackPower, defender, attackerWeapon, terrain, config),
+  );
   return { attackPower, hitRate, critRate, damage };
 }
 
@@ -112,11 +142,40 @@ export function resolveStrike(
   terrain: Terrain | undefined,
   config: BattleConfig,
   rng: Rng,
+  hooks?: CombatHooks,
 ): StrikeResult {
-  const attackPower = calcAttackPower(attacker, attackerWeapon, defenderWeapon, config);
-  const hitRate = calcHitRate(attacker, defender, attackerWeapon, defenderWeapon, terrain, config);
-  const critRate = calcCritRate(attacker, defender, attackerWeapon, config);
-  const baseDamage = calcDamage(attackPower, defender, attackerWeapon, terrain, config);
+  const ctx: CombatHookContext = {
+    attacker,
+    defender,
+    attackerWeapon,
+    defenderWeapon,
+    terrain,
+    config,
+  };
+  const attackPower = applyCombatHook(
+    hooks,
+    "attackPower",
+    ctx,
+    calcAttackPower(attacker, attackerWeapon, defenderWeapon, config),
+  );
+  const hitRate = applyCombatHook(
+    hooks,
+    "hitRate",
+    ctx,
+    calcHitRate(attacker, defender, attackerWeapon, defenderWeapon, terrain, config),
+  );
+  const critRate = applyCombatHook(
+    hooks,
+    "critRate",
+    ctx,
+    calcCritRate(attacker, defender, attackerWeapon, config),
+  );
+  const baseDamage = applyCombatHook(
+    hooks,
+    "damage",
+    ctx,
+    calcDamage(attackPower, defender, attackerWeapon, terrain, config),
+  );
 
   const hitCheck = rollChance(rng, hitRate, config);
   if (!hitCheck.success) {

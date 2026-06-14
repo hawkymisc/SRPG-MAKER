@@ -1,3 +1,4 @@
+import type { CombatHooks } from "@srpg/shared";
 import type { PlacementInput } from "@srpg/shared";
 import {
   createInitialBattleState,
@@ -47,11 +48,13 @@ export class BattleSession {
     chapter: ChapterData,
     seed = DEFAULT_BATTLE_SEED,
     placements?: PlacementInput[],
+    combatHooks?: CombatHooks,
   ): BattleSession {
     const state = createInitialBattleState({
       map: chapter.map,
       database: chapter.database,
       ...(placements !== undefined ? { placements } : {}),
+      ...(combatHooks !== undefined ? { combatHooks } : {}),
     });
     return new BattleSession(state, seed);
   }

@@ -146,6 +146,7 @@ function resolveAttack(
       terrain,
       config,
       rng,
+      state.context.combatHooks,
     );
     const strikeLog: BattleLogEntry = {
       kind: strike.hit ? (strike.crit ? "crit" : "damage") : "miss",

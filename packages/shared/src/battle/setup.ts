@@ -1,4 +1,5 @@
 import { DEFAULT_BATTLE_CONFIG, type BattleConfig } from "./config.js";
+import type { CombatHooks } from "./hooks.js";
 import type { BattleContext, BattleDatabase, BattleState, BattleUnit } from "./types.js";
 import type { MapData } from "../schemas/map.js";
 import type { MapPlacement, Reinforcement } from "../schemas/map.js";
@@ -101,6 +102,7 @@ export interface BattleSetupOptions {
   config?: BattleConfig;
   configOverride?: Partial<BattleConfig>;
   placements?: PlacementInput[];
+  combatHooks?: CombatHooks;
 }
 
 export function createInitialBattleState(options: BattleSetupOptions): BattleState {
@@ -119,6 +121,7 @@ export function createInitialBattleState(options: BattleSetupOptions): BattleSta
     config,
     map: options.map,
     database: options.database,
+    ...(options.combatHooks !== undefined ? { combatHooks: options.combatHooks } : {}),
   };
 
   return {

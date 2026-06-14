@@ -11,3 +11,4 @@ export * from "./chapter.js";
 export * from "./campaign.js";
 export * from "./event.js";
 export * from "./project.js";
+export * from "./plugin.js";

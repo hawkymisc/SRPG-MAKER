@@ -3,12 +3,14 @@ import {
   defaultStartChapterId,
   chapterLoadStem,
 } from "@srpg/shared";
+import { createPluginRegistryFromProject } from "@srpg/plugin-api";
 import {
   loadChapter,
   loadChapterFromEditorStorage,
   loadChaptersRecord,
   loadEventsRecord,
 } from "../data/loadChapter.js";
+import { loadProjectPluginMeta } from "../plugins/loadPlugins.js";
 import { BattleSession } from "../game/BattleSession.js";
 import { CampaignSession } from "../game/CampaignSession.js";
 import { REGISTRY_KEYS } from "../game/registry.js";
@@ -51,6 +53,15 @@ export class BootScene extends Phaser.Scene {
     this.registry.set(REGISTRY_KEYS.autoPlayAll, false);
     this.registry.set("bootDatabase", chapter.database);
 
+    const pluginMeta = editorPayload?.plugins
+      ? {
+          plugins: editorPayload.plugins,
+          enabledPlugins: editorPayload.enabledPlugins ?? Object.keys(editorPayload.plugins),
+        }
+      : await loadProjectPluginMeta(baseUrl);
+    const pluginRegistry = createPluginRegistryFromProject(pluginMeta);
+    this.registry.set(REGISTRY_KEYS.combatHooks, pluginRegistry.combatHooks);
+
     if (editorPayload?.debug?.invincible) {
       this.registry.set(REGISTRY_KEYS.debugInvincible, true);
     }
@@ -86,7 +97,12 @@ export class BootScene extends Phaser.Scene {
       return;
     }
 
-    const session = BattleSession.fromChapter(chapter, seed);
+    const session = BattleSession.fromChapter(
+      chapter,
+      seed,
+      undefined,
+      pluginRegistry.combatHooks,
+    );
     this.registry.set(REGISTRY_KEYS.chapter, chapter);
     this.registry.set(REGISTRY_KEYS.chapterId, chapter.chapterId);
     this.registry.set(REGISTRY_KEYS.session, session);

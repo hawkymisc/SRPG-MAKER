@@ -1,0 +1,12 @@
+{
+  "id": "plugin_sword_bonus",
+  "name": "剣ダメージ+1",
+  "version": "1.0.0",
+  "rules": [
+    {
+      "hook": "damage",
+      "when": { "attackerWeaponType": "sword" },
+      "add": 1
+    }
+  ]
+}

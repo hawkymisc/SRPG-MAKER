@@ -1,5 +1,12 @@
 import type { BattleDatabase } from "@srpg/shared";
-import type { CampaignState, EventDefinition, MapData, Project, Chapter } from "@srpg/shared";
+import type {
+  CampaignState,
+  EventDefinition,
+  MapData,
+  PluginManifest,
+  Project,
+  Chapter,
+} from "@srpg/shared";
 import { createInitialCampaign } from "@srpg/shared";
 
 export interface ChapterPayload {
@@ -15,6 +22,8 @@ export interface ChapterPayload {
   chapters: Record<string, Chapter>;
   startChapterId: string;
   campaign: CampaignState;
+  plugins: Record<string, PluginManifest>;
+  enabledPlugins: string[];
 }
 
 export const TESTPLAY_STORAGE_KEY = "srpg-editor-testplay";
@@ -57,6 +66,8 @@ export function buildChapterPayload(
     chapters,
     startChapterId: startChapterId as never,
     campaign,
+    plugins: project.plugins ?? {},
+    enabledPlugins: project.enabledPlugins ?? [],
   };
 }
 

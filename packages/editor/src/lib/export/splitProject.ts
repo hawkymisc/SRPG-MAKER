@@ -9,6 +9,7 @@ import {
   WeaponSchema,
   ChapterSchema,
   mapFileStem,
+  PluginManifestSchema,
   type Project,
 } from "@srpg/shared";
 
@@ -65,7 +66,12 @@ export function splitProject(project: Project): SplitProjectFiles {
     ...(validated.startChapterId !== undefined
       ? { startChapterId: validated.startChapterId }
       : {}),
+    enabledPlugins: validated.enabledPlugins ?? [],
   });
+
+  for (const [id, manifest] of Object.entries(validated.plugins ?? {})) {
+    files[`plugins/${id}/plugin.json`] = jsonFile(manifest);
+  }
 
   files["chapters/chapters.json"] = jsonFile(validated.chapters ?? {});
 
@@ -118,6 +124,8 @@ export function mergeSplitProject(files: SplitProjectFiles): Project {
   const maps: Project["maps"] = {};
   const events: Project["events"] = {};
   let chapters: Project["chapters"] = {};
+  const plugins: Project["plugins"] = {};
+  let enabledPlugins: Project["enabledPlugins"] = [];
   for (const [path, text] of Object.entries(files)) {
     if (path.startsWith("maps/") && path.endsWith(".json")) {
       const map = MapSchema.parse(JSON.parse(text));
@@ -141,11 +149,20 @@ export function mergeSplitProject(files: SplitProjectFiles): Project {
           ]),
         );
       }
+      continue;
+    }
+    if (path.startsWith("plugins/") && path.endsWith("/plugin.json")) {
+      const id = path.slice("plugins/".length, -"/plugin.json".length);
+      plugins[id] = PluginManifestSchema.parse(JSON.parse(text));
     }
   }
 
   if (typeof metaRaw !== "object" || metaRaw === null) {
     throw new Error("Invalid project.json");
+  }
+
+  if ("enabledPlugins" in metaRaw && Array.isArray(metaRaw.enabledPlugins)) {
+    enabledPlugins = metaRaw.enabledPlugins.filter((id): id is string => typeof id === "string");
   }
 
   return ProjectSchema.parse({
@@ -154,5 +171,7 @@ export function mergeSplitProject(files: SplitProjectFiles): Project {
     maps,
     events,
     chapters,
+    plugins,
+    enabledPlugins,
   });
 }

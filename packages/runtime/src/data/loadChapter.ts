@@ -12,6 +12,7 @@ import {
   type Chapter,
   type EventDefinition,
   type MapData,
+  type PluginManifest,
 } from "@srpg/shared";
 import type { BattleDatabase } from "@srpg/shared";
 
@@ -66,6 +67,8 @@ export interface EditorTestPlayPayload {
   chapters?: Record<string, Chapter>;
   startChapterId?: string;
   eventsById?: Record<string, EventDefinition>;
+  plugins?: Record<string, PluginManifest>;
+  enabledPlugins?: string[];
 }
 
 export function parseEventsRecord(raw: unknown): Record<string, EventDefinition> {
@@ -129,6 +132,8 @@ export function loadChapterFromEditorStorage(): EditorTestPlayPayload | null {
       ...(parsed.chapters ? { chapters: parsed.chapters } : {}),
       ...(parsed.startChapterId ? { startChapterId: parsed.startChapterId } : {}),
       ...(parsed.eventsById ? { eventsById: parsed.eventsById } : {}),
+      ...(parsed.plugins ? { plugins: parsed.plugins } : {}),
+      ...(parsed.enabledPlugins ? { enabledPlugins: parsed.enabledPlugins } : {}),
     };
   } catch {
     return null;

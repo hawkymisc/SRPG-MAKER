@@ -725,5 +725,7 @@ export function createEmptyProject(name: string): Project {
     maps: { [map.id]: map },
     events: {},
     chapters: {},
+    plugins: {},
+    enabledPlugins: [],
   };
 }

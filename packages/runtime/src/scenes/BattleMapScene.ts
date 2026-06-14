@@ -131,7 +131,12 @@ export class BattleMapScene extends Phaser.Scene {
   private async gotoChapter(chapterId: string): Promise<void> {
     const chapter = await loadChapter(import.meta.env.BASE_URL, chapterId);
     this.chapter = chapter;
-    this.session = BattleSession.fromChapter(chapter, this.session.seed);
+    this.session = BattleSession.fromChapter(
+      chapter,
+      this.session.seed,
+      undefined,
+      this.registry.get(REGISTRY_KEYS.combatHooks),
+    );
     this.registry.set(REGISTRY_KEYS.chapter, chapter);
     this.registry.set(REGISTRY_KEYS.chapterId, chapterId);
     this.registry.set(REGISTRY_KEYS.session, this.session);

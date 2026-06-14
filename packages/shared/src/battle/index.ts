@@ -1,4 +1,5 @@
 export * from "./config.js";
+export * from "./hooks.js";
 export * from "./types.js";
 export * from "./combat.js";
 export * from "./movement.js";

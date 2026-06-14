@@ -11,6 +11,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@srpg/plugin-api": "workspace:*",
     "@srpg/shared": "workspace:*",
     "phaser": "^3.90.0"
   },
