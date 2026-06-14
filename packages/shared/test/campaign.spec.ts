@@ -49,7 +49,7 @@ describe("campaign", () => {
       map: campaignMap,
       database: sampleDatabase,
     });
-    const placements = createBattlePlacementsFromCampaign(campaign, campaignMap, chapter);
+    const placements = createBattlePlacementsFromCampaign(campaign, campaignMap, sampleDatabase, chapter);
     expect(placements.filter((p) => p.faction === "player")).toHaveLength(1);
     expect(placements.some((p) => p.faction === "enemy")).toBe(true);
   });

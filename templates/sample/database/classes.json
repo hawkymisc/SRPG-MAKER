@@ -4,6 +4,14 @@
     "name": "ロード",
     "moveType": "infantry",
     "baseStats": { "hp": 20, "str": 7, "mag": 0, "skl": 6, "spd": 7, "lck": 5, "def": 5, "res": 2, "mov": 5 },
+    "weaponAffinity": ["sword"],
+    "promotionClassId": "class_general"
+  },
+  "class_general": {
+    "id": "class_general",
+    "name": "ジェネラル",
+    "moveType": "infantry",
+    "baseStats": { "hp": 24, "str": 10, "mag": 0, "skl": 8, "spd": 9, "lck": 6, "def": 7, "res": 3, "mov": 6 },
     "weaponAffinity": ["sword"]
   },
   "class_soldier": {
@@ -11,7 +19,15 @@
     "name": "兵士",
     "moveType": "infantry",
     "baseStats": { "hp": 22, "str": 8, "mag": 0, "skl": 5, "spd": 5, "lck": 3, "def": 6, "res": 1, "mov": 5 },
-    "weaponAffinity": ["lance"]
+    "weaponAffinity": ["lance"],
+    "promotionClassId": "class_knight"
+  },
+  "class_knight": {
+    "id": "class_knight",
+    "name": "ナイト",
+    "moveType": "cavalry",
+    "baseStats": { "hp": 26, "str": 10, "mag": 0, "skl": 7, "spd": 8, "lck": 4, "def": 8, "res": 2, "mov": 7 },
+    "weaponAffinity": ["lance", "sword"]
   },
   "class_brigand": {
     "id": "class_brigand",

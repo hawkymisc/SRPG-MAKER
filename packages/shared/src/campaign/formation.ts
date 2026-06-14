@@ -4,6 +4,7 @@ import type { ChapterId, UnitId } from "../schemas/ids.js";
 import type { MapData } from "../schemas/map.js";
 import { RosterMemberSchema, type CampaignState } from "../schemas/campaign.js";
 import type { Chapter } from "../schemas/chapter.js";
+import { effectiveClassId, effectiveStats } from "./promotion.js";
 
 export interface CreateInitialCampaignInput {
   chapterId: ChapterId;
@@ -97,6 +98,7 @@ export function validateFormation(campaign: CampaignState, maxDeploy: number): s
 export function createBattlePlacementsFromCampaign(
   campaign: CampaignState,
   map: MapData,
+  database: BattleDatabase,
   chapter?: Chapter,
 ): PlacementInput[] {
   const limit = maxDeployCount(chapter, map);
@@ -111,13 +113,23 @@ export function createBattlePlacementsFromCampaign(
     if (!member) {
       throw new Error(`Roster member not found: ${ref}`);
     }
+    const template = database.units[member.ref];
+    if (!template) {
+      throw new Error(`Unknown unit ref: ${member.ref}`);
+    }
     const slot = playerSlots[index] ?? playerSlots[0]!;
+    const stats = effectiveStats(member, template);
     return {
       ref: member.ref,
       x: slot.x,
       y: slot.y,
       faction: "player",
       isBoss: false,
+      level: member.level,
+      exp: member.exp,
+      classId: effectiveClassId(member, template),
+      statsOverride: stats,
+      maxHp: member.maxHp,
       ...(member.equip !== undefined ? { equip: member.equip } : {}),
       hp: member.hp,
     };

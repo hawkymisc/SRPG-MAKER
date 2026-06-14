@@ -14,7 +14,7 @@
 |----|--------|------------------|------|------|
 | M5-T1 | 章(シナリオ)スキーマ+管理UI | schema-architect + editor-dev | DONE | ChapterSchema + プロジェクトタブ |
 | M5-T2 | 拠点画面 | runtime-dev + editor-dev | DONE | BaseScene + 編成/ショップ/会話/出撃 |
-| M5-T3 | 成長率・クラスチェンジ | battle-logic-dev | BACKLOG | growth + promotion |
+| M5-T3 | 成長率・クラスチェンジ | battle-logic-dev | DONE | roster永続化 + 拠点転職 |
 | M5-T4 | ビジュアルイベントエディタ | editor-dev | BACKLOG | 会話演出 |
 | M5-T5 | プラグインAPI | schema-architect | BACKLOG | plugin-api パッケージ |
 | M5-T6 | Electron書き出し | editor-dev | BACKLOG | デスクトップ配布 |
@@ -75,3 +75,4 @@
 - 2026-06-13 M4 完了: イベント15種・HTML5書き出し・export E2E・MVPβ照合。詳細: `docs/reports/M4-mvp-acceptance.md`。
 - 2026-06-15 M5-T1 完了: ChapterSchema・章管理UI・split/merge export・typecheck修正。
 - 2026-06-15 M5-T2 完了: CampaignState・BaseScene(編成/ショップ/会話/出撃)・勝利→拠点ループ。
+- 2026-06-15 M5-T3 完了: ロスター level/stats/classId 永続化・拠点クラスチェンジ(Lv.10+)。

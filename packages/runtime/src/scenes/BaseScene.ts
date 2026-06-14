@@ -1,7 +1,9 @@
 import Phaser from "phaser";
 import {
   createBattlePlacementsFromCampaign,
+  listPromotableMembers,
   maxDeployCount,
+  promoteMember,
   purchaseFromShop,
   toggleDeployedRef,
   validateFormation,
@@ -17,7 +19,7 @@ import { REGISTRY_KEYS } from "../game/registry.js";
 import { CampaignSaveManager } from "../save/CampaignSaveManager.js";
 import { MessageWindow } from "../ui/MessageWindow.js";
 
-type BaseMode = "menu" | "formation" | "shop" | "talk";
+type BaseMode = "menu" | "formation" | "shop" | "talk" | "promotion";
 
 export class BaseScene extends Phaser.Scene {
   private campaignSession!: CampaignSession;
@@ -29,6 +31,7 @@ export class BaseScene extends Phaser.Scene {
   private bodyText!: Phaser.GameObjects.Text;
   private messageWindow!: MessageWindow;
   private seed = 42_001;
+  private promotableIndices: number[] = [];
 
   constructor() {
     super({ key: "Base" });
@@ -95,6 +98,7 @@ export class BaseScene extends Phaser.Scene {
         "2: ショップ",
         "3: 会話",
         "4: 出撃（戦闘開始）",
+        "5: クラスチェンジ",
         "",
         "Esc: メニューに戻る",
       ].join("\n"),
@@ -108,7 +112,7 @@ export class BaseScene extends Phaser.Scene {
     const limit = chapter?.maxDeploy ?? c.roster.length;
     const lines = c.roster.map((member, index) => {
       const deployed = c.deployedRefs.includes(member.ref) ? "[x]" : "[ ]";
-      return `${index + 1}: ${deployed} ${member.ref} HP ${member.hp}/${member.maxHp}`;
+      return `${index + 1}: ${deployed} ${member.ref} Lv.${member.level} HP ${member.hp}/${member.maxHp}`;
     });
     this.statusText.setText(`編成（上限 ${limit} 体）— 数字キーで切替`);
     this.bodyText.setText(lines.join("\n") || "ロスターが空です");
@@ -149,6 +153,42 @@ export class BaseScene extends Phaser.Scene {
     }
     this.messageWindow.close();
     this.renderMenu();
+  }
+
+  private renderPromotion(): void {
+    this.mode = "promotion";
+    const entries = listPromotableMembers(this.campaignSession.state, this.database);
+    this.promotableIndices = entries.map((entry) => entry.index);
+    const lines = entries.map((entry, listIndex) => {
+      const unit = this.database.units[entry.member.ref];
+      const fromClass = unit ? (entry.member.classId ?? unit.classId) : "?";
+      const toClass = this.database.classes[entry.targetClassId]?.name ?? entry.targetClassId;
+      return `${listIndex + 1}: ${entry.member.ref} (${fromClass} → ${toClass}) Lv.${entry.member.level}`;
+    });
+    this.statusText.setText("クラスチェンジ — 数字キーで転職");
+    this.bodyText.setText(
+      lines.length > 0
+        ? [...lines, "", "転職には Lv.10 以上が必要"].join("\n")
+        : "転職可能なユニットがいません",
+    );
+  }
+
+  private promoteAtListIndex(listIndex: number): void {
+    const rosterIndex = this.promotableIndices[listIndex];
+    if (rosterIndex === undefined) return;
+    const member = this.campaignSession.state.roster[rosterIndex];
+    const unit = member ? this.database.units[member.ref] : undefined;
+    if (!member || !unit) return;
+    const result = promoteMember(member, unit, this.database.classes);
+    if (result.error) {
+      this.bodyText.setText(result.error);
+      return;
+    }
+    const nextRoster = [...this.campaignSession.state.roster];
+    nextRoster[rosterIndex] = result.member;
+    this.campaignSession.state = { ...this.campaignSession.state, roster: nextRoster };
+    CampaignSaveManager.save(this.campaignSession);
+    this.renderPromotion();
   }
 
   private toggleFormationIndex(index: number): void {
@@ -198,6 +238,7 @@ export class BaseScene extends Phaser.Scene {
     const placements = createBattlePlacementsFromCampaign(
       this.campaignSession.state,
       chapter.map,
+      chapter.database,
       chapterDef,
     );
     const session = BattleSession.fromChapter(chapter, this.seed, placements);
@@ -222,10 +263,12 @@ export class BaseScene extends Phaser.Scene {
     kb.on("keydown-TWO", () => this.onDigit(1));
     kb.on("keydown-THREE", () => this.onDigit(2));
     kb.on("keydown-FOUR", () => this.onDigit(3));
+    kb.on("keydown-FIVE", () => this.onDigit(4));
     kb.on("keydown-NUMPAD_ONE", () => this.onDigit(0));
     kb.on("keydown-NUMPAD_TWO", () => this.onDigit(1));
     kb.on("keydown-NUMPAD_THREE", () => this.onDigit(2));
     kb.on("keydown-NUMPAD_FOUR", () => this.onDigit(3));
+    kb.on("keydown-NUMPAD_FIVE", () => this.onDigit(4));
 
     kb.on("keydown-ESC", () => {
       if (this.mode !== "menu") {
@@ -255,6 +298,9 @@ export class BaseScene extends Phaser.Scene {
         case 3:
           void this.startBattle();
           break;
+        case 4:
+          this.renderPromotion();
+          break;
       }
       return;
     }
@@ -264,6 +310,10 @@ export class BaseScene extends Phaser.Scene {
     }
     if (this.mode === "shop") {
       this.buyShopIndex(index);
+      return;
+    }
+    if (this.mode === "promotion") {
+      this.promoteAtListIndex(index);
     }
   }
 }

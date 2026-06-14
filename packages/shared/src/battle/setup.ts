@@ -29,16 +29,23 @@ export function createBattleUnitFromPlacement(
     ...("statsOverride" in placement ? placement.statsOverride : undefined),
   };
 
+  const level = "level" in placement && placement.level !== undefined ? placement.level : template.level;
+  const exp = "exp" in placement && placement.exp !== undefined ? placement.exp : 0;
+  const classId =
+    "classId" in placement && placement.classId !== undefined ? placement.classId : template.classId;
+  const maxHp =
+    "maxHp" in placement && placement.maxHp !== undefined ? placement.maxHp : stats.hp;
+
   const unit: BattleUnit = {
     instanceId: nextInstanceId(placement.ref),
     ref: placement.ref,
     name: template.name,
-    classId: template.classId,
-    level: template.level,
-    exp: 0,
+    classId,
+    level,
+    exp,
     stats,
-    maxHp: stats.hp,
-    hp: "hp" in placement && placement.hp !== undefined ? placement.hp : stats.hp,
+    maxHp,
+    hp: "hp" in placement && placement.hp !== undefined ? placement.hp : maxHp,
     x: placement.x,
     y: placement.y,
     faction: placement.faction,
@@ -81,6 +88,10 @@ export type PlacementInput = MapPlacement & {
   ref: string;
   equipDurability?: number;
   hp?: number;
+  maxHp?: number;
+  level?: number;
+  exp?: number;
+  classId?: string;
   statsOverride?: Partial<import("../schemas/stats.js").Stats>;
 };
 

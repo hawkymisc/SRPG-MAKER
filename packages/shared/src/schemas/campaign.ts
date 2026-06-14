@@ -1,6 +1,7 @@
 import { z } from "zod";
 import {
   ChapterIdSchema,
+  ClassIdSchema,
   ItemIdSchema,
   SkillIdSchema,
   SwitchIdSchema,
@@ -8,6 +9,7 @@ import {
   VariableIdSchema,
   WeaponIdSchema,
 } from "./ids.js";
+import { StatsSchema } from "./stats.js";
 
 export const RosterMemberSchema = z.object({
   ref: UnitIdSchema,
@@ -15,6 +17,10 @@ export const RosterMemberSchema = z.object({
   exp: z.number().int().nonnegative().default(0),
   hp: z.number().int().nonnegative(),
   maxHp: z.number().int().positive(),
+  /** Promoted class override; defaults to unit template classId when absent. */
+  classId: ClassIdSchema.optional(),
+  /** Current stats after level-ups; defaults to unit template stats when absent. */
+  stats: StatsSchema.optional(),
   equip: WeaponIdSchema.optional(),
   inventory: z.array(ItemIdSchema).default([]),
   skills: z.array(SkillIdSchema).default([]),

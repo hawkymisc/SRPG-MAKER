@@ -25,6 +25,8 @@ export function mergeBattleToCampaign(
       maxHp: live.maxHp,
       level: live.level,
       exp: live.exp,
+      classId: live.classId,
+      stats: live.stats,
       equip: live.equip?.weaponId as WeaponId | undefined,
       inventory: live.inventory as ItemId[],
       skills: live.skills as SkillId[],
