@@ -1,3 +1,4 @@
+import type { PlacementInput } from "@srpg/shared";
 import {
   createInitialBattleState,
   createRng,
@@ -42,10 +43,15 @@ export class BattleSession {
     this.rng = rngConsumed > 0 ? restoreRng(seed, rngConsumed) : createRng(seed);
   }
 
-  static fromChapter(chapter: ChapterData, seed = DEFAULT_BATTLE_SEED): BattleSession {
+  static fromChapter(
+    chapter: ChapterData,
+    seed = DEFAULT_BATTLE_SEED,
+    placements?: PlacementInput[],
+  ): BattleSession {
     const state = createInitialBattleState({
       map: chapter.map,
       database: chapter.database,
+      ...(placements !== undefined ? { placements } : {}),
     });
     return new BattleSession(state, seed);
   }

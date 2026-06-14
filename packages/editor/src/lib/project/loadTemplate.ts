@@ -78,6 +78,10 @@ export async function loadSampleTemplate(options: TemplateLoadOptions = {}): Pro
       name: map.name,
       mapId: map.id,
       sortOrder: 0,
+      shop: [{ itemId: "itm_vulnerary", price: 50 }],
+      baseEventIds: ["ev_chapter01_intro"],
+      nextChapterId: chapterId,
+      maxDeploy: 2,
     }),
   };
 

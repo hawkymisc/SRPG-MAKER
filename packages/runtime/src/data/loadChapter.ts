@@ -1,4 +1,5 @@
 import {
+  ChapterSchema,
   ClassSchema,
   EventDefinitionSchema,
   ItemSchema,
@@ -7,6 +8,8 @@ import {
   TerrainSchema,
   UnitSchema,
   WeaponSchema,
+  type CampaignState,
+  type Chapter,
   type EventDefinition,
   type MapData,
 } from "@srpg/shared";
@@ -59,8 +62,34 @@ export interface EditorTestPlayPayload {
   chapterId?: string;
   seed?: number;
   debug?: { invincible?: boolean };
+  campaign?: CampaignState;
+  chapters?: Record<string, Chapter>;
+  startChapterId?: string;
+  eventsById?: Record<string, EventDefinition>;
 }
 
+export function parseEventsRecord(raw: unknown): Record<string, EventDefinition> {
+  if (raw === undefined || raw === null || typeof raw !== "object") {
+    return {};
+  }
+  const out: Record<string, EventDefinition> = {};
+  for (const [key, value] of Object.entries(raw as Record<string, unknown>)) {
+    const parsed = EventDefinitionSchema.parse(value);
+    out[key] = parsed;
+  }
+  return out;
+}
+
+export function parseChaptersRecord(raw: unknown): Record<string, Chapter> {
+  if (raw === undefined || raw === null || typeof raw !== "object") {
+    return {};
+  }
+  const out: Record<string, Chapter> = {};
+  for (const [key, value] of Object.entries(raw as Record<string, unknown>)) {
+    out[key] = ChapterSchema.parse(value);
+  }
+  return out;
+}
 export function parseEvents(raw: unknown): EventDefinition[] {
   if (raw === undefined || raw === null) {
     return [];
@@ -96,6 +125,10 @@ export function loadChapterFromEditorStorage(): EditorTestPlayPayload | null {
       chapterId: parsed.chapterId ?? "chapter01",
       ...(parsed.seed !== undefined ? { seed: parsed.seed } : {}),
       ...(parsed.debug ? { debug: parsed.debug } : {}),
+      ...(parsed.campaign ? { campaign: parsed.campaign } : {}),
+      ...(parsed.chapters ? { chapters: parsed.chapters } : {}),
+      ...(parsed.startChapterId ? { startChapterId: parsed.startChapterId } : {}),
+      ...(parsed.eventsById ? { eventsById: parsed.eventsById } : {}),
     };
   } catch {
     return null;
@@ -119,24 +152,46 @@ async function fetchEvents(base: string, mapId: string): Promise<EventDefinition
   }
 }
 
+/** Load chapter registry from export bundle. */
+export async function loadChaptersRecord(baseUrl: string): Promise<Record<string, Chapter>> {
+  const base = baseUrl.replace(/\/$/, "");
+  try {
+    const raw = await fetchJson(`${base}/chapters/chapters.json`);
+    return parseChaptersRecord(raw);
+  } catch {
+    return {};
+  }
+}
+
+/** Load common event definitions keyed by id. */
+export async function loadEventsRecord(baseUrl: string): Promise<Record<string, EventDefinition>> {
+  const base = baseUrl.replace(/\/$/, "");
+  try {
+    const raw = await fetchJson(`${base}/events/common.json`);
+    return parseEventsRecord(raw);
+  } catch {
+    return {};
+  }
+}
+
 /** Load chapter map + database from HTTP (browser / Vite dev server). */
-export async function loadChapter(baseUrl: string, mapId = "chapter01"): Promise<ChapterData> {
+export async function loadChapter(baseUrl: string, mapStem = "chapter01"): Promise<ChapterData> {
   const base = baseUrl.replace(/\/$/, "");
   const [mapRaw, units, classes, weapons, items, skills, terrain, events] = await Promise.all([
-    fetchJson(`${base}/maps/${mapId}.json`),
+    fetchJson(`${base}/maps/${mapStem}.json`),
     fetchJson(`${base}/database/units.json`),
     fetchJson(`${base}/database/classes.json`),
     fetchJson(`${base}/database/weapons.json`),
     fetchJson(`${base}/database/items.json`),
     fetchJson(`${base}/database/skills.json`),
     fetchJson(`${base}/database/terrain.json`),
-    fetchEvents(base, mapId),
+    fetchEvents(base, mapStem),
   ]);
 
   return {
     map: MapSchema.parse(mapRaw),
     database: buildDatabase({ units, classes, weapons, items, skills, terrain }),
     events,
-    chapterId: mapId,
+    chapterId: mapStem,
   };
 }

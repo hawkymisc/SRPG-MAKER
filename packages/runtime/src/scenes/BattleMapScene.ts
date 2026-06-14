@@ -20,6 +20,8 @@ import { Cursor } from "../ui/Cursor.js";
 import { createStatusBar, Hud } from "../ui/Hud.js";
 import { MessageWindow } from "../ui/MessageWindow.js";
 import { TileHighlight } from "../ui/TileHighlight.js";
+import { applyVictoryToCampaign } from "../game/campaignBridge.js";
+import type { CampaignSession } from "../game/CampaignSession.js";
 import { installRuntimeTestHooks, type RuntimeTestApi } from "../testHooks.js";
 
 type UiMode =
@@ -325,7 +327,7 @@ export class BattleMapScene extends Phaser.Scene {
 
     kb.on("keydown-SPACE", (ev: KeyboardEvent) => {
       if (this.mode === "ended") {
-        this.scene.start("Title");
+        void this.exitBattle();
         ev.preventDefault();
       }
     });
@@ -378,7 +380,7 @@ export class BattleMapScene extends Phaser.Scene {
       return;
     }
     if (this.mode === "ended") {
-      this.scene.start("Title");
+      void this.exitBattle();
       return;
     }
 
@@ -722,6 +724,28 @@ export class BattleMapScene extends Phaser.Scene {
     if (this.recentLogs.length > 40) {
       this.recentLogs = this.recentLogs.slice(-40);
     }
+  }
+
+  private async exitBattle(): Promise<void> {
+    const useCampaign = this.registry.get(REGISTRY_KEYS.useCampaign) === true;
+    if (this.session.state.outcome === "win" && useCampaign) {
+      await this.runEvents({ type: "chapterEnd" });
+      const campaignSession = this.registry.get(REGISTRY_KEYS.campaignSession) as
+        | CampaignSession
+        | undefined;
+      const chapters = this.registry.get(REGISTRY_KEYS.chapters) ?? {};
+      if (campaignSession) {
+        applyVictoryToCampaign(
+          campaignSession,
+          chapters,
+          this.session.state,
+          this.chapter.chapterId,
+        );
+        this.scene.start("Base");
+        return;
+      }
+    }
+    this.scene.start("Title");
   }
 
   private refreshView(): void {

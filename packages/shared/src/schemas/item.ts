@@ -10,6 +10,7 @@ export const ItemSchema = z.object({
   name: z.string().min(1),
   uses: z.number().int().positive(),
   effect: ItemEffectSchema,
+  price: z.number().int().nonnegative().optional(),
 });
 
 export type Item = z.infer<typeof ItemSchema>;

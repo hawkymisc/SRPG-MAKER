@@ -1,0 +1,12 @@
+{
+  "chapter01": {
+    "id": "chapter01",
+    "name": "序章・試練の平原",
+    "mapId": "map_chapter01",
+    "sortOrder": 0,
+    "shop": [{ "itemId": "itm_vulnerary", "price": 50 }],
+    "baseEventIds": ["ev_chapter01_intro"],
+    "nextChapterId": "chapter01",
+    "maxDeploy": 2
+  }
+}

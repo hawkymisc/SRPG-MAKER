@@ -1,5 +1,7 @@
 import type { ChapterData } from "../data/loadChapter.js";
 import type { BattleSession } from "./BattleSession.js";
+import type { CampaignSession } from "./CampaignSession.js";
+import type { Chapter, EventDefinition } from "@srpg/shared";
 
 export const REGISTRY_KEYS = {
   chapter: "chapter",
@@ -8,6 +10,10 @@ export const REGISTRY_KEYS = {
   autoPlayAll: "autoPlayAll",
   debugInvincible: "debugInvincible",
   chapterId: "chapterId",
+  useCampaign: "useCampaign",
+  campaignSession: "campaignSession",
+  chapters: "chapters",
+  events: "events",
 } as const;
 
 export interface RuntimeRegistry {
@@ -17,4 +23,8 @@ export interface RuntimeRegistry {
   [REGISTRY_KEYS.autoPlayAll]: boolean;
   [REGISTRY_KEYS.chapterId]: string;
   [REGISTRY_KEYS.debugInvincible]?: boolean;
+  [REGISTRY_KEYS.useCampaign]?: boolean;
+  [REGISTRY_KEYS.campaignSession]?: CampaignSession;
+  [REGISTRY_KEYS.chapters]?: Record<string, Chapter>;
+  [REGISTRY_KEYS.events]?: Record<string, EventDefinition>;
 }

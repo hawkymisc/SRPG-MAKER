@@ -20,3 +20,4 @@ export const GAME_HEIGHT = MAP_PX + 48;
 export const DEFAULT_BATTLE_SEED = 42_001;
 
 export const SAVE_KEY = "srpg-runtime-save";
+export const CAMPAIGN_SAVE_KEY = "srpg-runtime-campaign-save";

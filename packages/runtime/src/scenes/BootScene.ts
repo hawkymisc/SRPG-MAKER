@@ -1,9 +1,20 @@
 import Phaser from "phaser";
-import { loadChapter, loadChapterFromEditorStorage } from "../data/loadChapter.js";
+import {
+  defaultStartChapterId,
+  chapterLoadStem,
+} from "@srpg/shared";
+import {
+  loadChapter,
+  loadChapterFromEditorStorage,
+  loadChaptersRecord,
+  loadEventsRecord,
+} from "../data/loadChapter.js";
 import { BattleSession } from "../game/BattleSession.js";
+import { CampaignSession } from "../game/CampaignSession.js";
 import { REGISTRY_KEYS } from "../game/registry.js";
 import { DEFAULT_BATTLE_SEED } from "../constants.js";
 import { generateTerrainTextures, generateUnitTextures } from "../render/MapGrid.js";
+import { bootstrapCampaignFromChapter } from "../game/campaignBridge.js";
 
 export class BootScene extends Phaser.Scene {
   constructor() {
@@ -19,6 +30,13 @@ export class BootScene extends Phaser.Scene {
     generateUnitTextures(this);
 
     const editorPayload = loadChapterFromEditorStorage();
+    const baseUrl = import.meta.env.BASE_URL;
+    const chapters =
+      editorPayload?.chapters ?? (await loadChaptersRecord(baseUrl));
+    const eventsById =
+      editorPayload?.eventsById ?? (await loadEventsRecord(baseUrl));
+    const useCampaign = Object.keys(chapters).length > 0;
+
     const chapter = editorPayload
       ? {
           map: editorPayload.map,
@@ -26,19 +44,53 @@ export class BootScene extends Phaser.Scene {
           events: editorPayload.events ?? [],
           chapterId: editorPayload.chapterId ?? "chapter01",
         }
-      : await loadChapter(import.meta.env.BASE_URL);
-    const seed = editorPayload?.seed ?? DEFAULT_BATTLE_SEED;
-    const session = BattleSession.fromChapter(chapter, seed);
+      : await loadChapter(baseUrl);
 
-    this.registry.set(REGISTRY_KEYS.chapter, chapter);
-    this.registry.set(REGISTRY_KEYS.chapterId, chapter.chapterId);
-    this.registry.set(REGISTRY_KEYS.session, session);
+    const seed = editorPayload?.seed ?? DEFAULT_BATTLE_SEED;
     this.registry.set(REGISTRY_KEYS.seed, seed);
     this.registry.set(REGISTRY_KEYS.autoPlayAll, false);
+    this.registry.set("bootDatabase", chapter.database);
+
     if (editorPayload?.debug?.invincible) {
       this.registry.set(REGISTRY_KEYS.debugInvincible, true);
     }
 
+    if (useCampaign) {
+      const startId =
+        editorPayload?.startChapterId ??
+        defaultStartChapterId(chapters) ??
+        chapter.chapterId;
+      const stem = chapterLoadStem(startId, chapters, { [chapter.map.id]: chapter.map });
+      const startChapter =
+        editorPayload && editorPayload.chapterId === startId
+          ? chapter
+          : await loadChapter(baseUrl, stem);
+
+      const existingCampaign = editorPayload?.campaign
+        ? new CampaignSession(editorPayload.campaign, seed)
+        : undefined;
+      const campaignSession = bootstrapCampaignFromChapter(
+        startChapter,
+        chapters,
+        startId,
+        seed,
+        existingCampaign,
+      );
+
+      this.registry.set(REGISTRY_KEYS.useCampaign, true);
+      this.registry.set(REGISTRY_KEYS.campaignSession, campaignSession);
+      this.registry.set(REGISTRY_KEYS.chapters, chapters);
+      this.registry.set(REGISTRY_KEYS.events, eventsById);
+      this.registry.set(REGISTRY_KEYS.chapter, startChapter);
+      this.scene.start("Title");
+      return;
+    }
+
+    const session = BattleSession.fromChapter(chapter, seed);
+    this.registry.set(REGISTRY_KEYS.chapter, chapter);
+    this.registry.set(REGISTRY_KEYS.chapterId, chapter.chapterId);
+    this.registry.set(REGISTRY_KEYS.session, session);
+    this.registry.set(REGISTRY_KEYS.useCampaign, false);
     this.scene.start("Title");
   }
 }
