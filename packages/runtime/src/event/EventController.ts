@@ -1,4 +1,5 @@
-import type { EventDefinition, EventTrigger } from "@srpg/shared";
+import type { EventDefinition, EventTrigger, Unit } from "@srpg/shared";
+import { resolveSpeakerLabel } from "@srpg/shared";
 import type Phaser from "phaser";
 import { TILE_SIZE } from "../constants.js";
 import type { BattleSession } from "../game/BattleSession.js";
@@ -15,6 +16,7 @@ export interface EventHost {
   unitSprites: UnitSprites;
   scene: Phaser.Scene;
   autoAdvanceEvents: boolean;
+  units: Record<string, Unit>;
   onStateChanged: () => void;
   onGotoChapter: (chapterId: string) => Promise<void>;
 }
@@ -84,7 +86,11 @@ export class EventController {
         if (host.autoAdvanceEvents) {
           return undefined;
         }
-        await host.messageWindow.show(yieldValue.text, yieldValue.speakerId);
+        await host.messageWindow.show(yieldValue.text, {
+          ...(yieldValue.speakerId !== undefined ? { speakerId: yieldValue.speakerId } : {}),
+          speakerName: resolveSpeakerLabel(yieldValue.speakerId, host.units),
+          ...(yieldValue.faceId !== undefined ? { faceId: yieldValue.faceId } : {}),
+        });
         return undefined;
 
       case "SHOW_CHOICES":

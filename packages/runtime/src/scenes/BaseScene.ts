@@ -5,6 +5,7 @@ import {
   maxDeployCount,
   promoteMember,
   purchaseFromShop,
+  resolveSpeakerLabel,
   toggleDeployedRef,
   validateFormation,
   type Chapter,
@@ -147,7 +148,11 @@ export class BaseScene extends Phaser.Scene {
       if (!def) continue;
       for (const cmd of def.commands) {
         if (cmd.cmd === "SHOW_MESSAGE") {
-          await this.messageWindow.show(cmd.text, cmd.speakerId);
+          await this.messageWindow.show(cmd.text, {
+            ...(cmd.speakerId !== undefined ? { speakerId: cmd.speakerId } : {}),
+            speakerName: resolveSpeakerLabel(cmd.speakerId, this.database.units),
+            ...(cmd.faceId !== undefined ? { faceId: cmd.faceId } : {}),
+          });
         }
       }
     }

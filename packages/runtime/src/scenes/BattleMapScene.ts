@@ -97,6 +97,7 @@ export class BattleMapScene extends Phaser.Scene {
       unitSprites: this.unitSprites,
       scene: this,
       autoAdvanceEvents: this.autoPlayAll,
+      units: this.chapter.database.units,
       onStateChanged: () => this.refreshView(),
       onGotoChapter: (chapterId) => this.gotoChapter(chapterId),
     });
@@ -140,6 +141,7 @@ export class BattleMapScene extends Phaser.Scene {
       unitSprites: this.unitSprites,
       scene: this,
       autoAdvanceEvents: this.autoPlayAll,
+      units: chapter.database.units,
       onStateChanged: () => this.refreshView(),
       onGotoChapter: (nextId) => this.gotoChapter(nextId),
     });

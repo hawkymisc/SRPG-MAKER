@@ -9,3 +9,9 @@ export {
 } from "./battle-commands.js";
 export { matchTrigger } from "./trigger.js";
 export { runPureCommand, toConditionContext } from "./run-pure.js";
+export {
+  collectDialogueSteps,
+  commandToDialogueStep,
+  resolveSpeakerLabel,
+  type DialogueStep,
+} from "./dialogue.js";
