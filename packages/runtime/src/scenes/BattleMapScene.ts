@@ -204,7 +204,8 @@ export class BattleMapScene extends Phaser.Scene {
 
   private async applyAction(action: Parameters<BattleSession["apply"]>[0]): Promise<BattleLogEntry[]> {
     const prevTurn = this.session.state.turn;
-    const logs = this.session.apply(action);
+    const playerInvincible = this.registry.get(REGISTRY_KEYS.debugInvincible) === true;
+    const logs = this.session.apply(action, { playerInvincible });
     this.pushLogs(logs);
     await this.processKillLogs(logs);
     if (action.type === "EndPhase") {

@@ -2,6 +2,7 @@ import {
   createInitialBattleState,
   createRng,
   decideAction,
+  evaluateOutcome,
   resolveAction,
   restoreRng,
   type BattleAction,
@@ -24,6 +25,10 @@ export interface AutoPlayResult {
   outcome: BattleOutcome;
   turns: number;
   steps: number;
+}
+
+export interface ApplyOptions {
+  playerInvincible?: boolean;
 }
 
 export class BattleSession {
@@ -53,9 +58,35 @@ export class BattleSession {
     return this.rng.consumed();
   }
 
-  apply(action: BattleAction): BattleLogEntry[] {
+  apply(action: BattleAction, options?: ApplyOptions): BattleLogEntry[] {
+    const playerHp =
+      options?.playerInvincible && action.type === "Attack"
+        ? new Map(
+            this.state.units
+              .filter((u) => u.faction === "player")
+              .map((u) => [u.instanceId, u.hp] as const),
+          )
+        : null;
+
     const result = resolveAction(this.state, action, this.rng);
-    this.state = result.state;
+    let nextState = result.state;
+
+    if (playerHp) {
+      nextState = {
+        ...nextState,
+        units: nextState.units.map((u) =>
+          u.faction === "player" && playerHp.has(u.instanceId)
+            ? { ...u, hp: playerHp.get(u.instanceId)! }
+            : u,
+        ),
+      };
+      if (nextState.outcome === "lose") {
+        const recheck = evaluateOutcome({ ...nextState, outcome: "ongoing" });
+        nextState = { ...nextState, outcome: recheck.outcome };
+      }
+    }
+
+    this.state = nextState;
     return result.log;
   }
 

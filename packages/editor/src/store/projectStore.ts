@@ -8,15 +8,25 @@ import {
   type MapData,
   type MapPlacement,
   type Project,
+  type Reinforcement,
+  type WinCondition,
 } from "@srpg/shared";
 import { loadSampleTemplate } from "../lib/project/loadTemplate.js";
+import {
+  fillIndices,
+  getLayerTiles,
+  paintIndices,
+  rectIndices,
+  setLayerTiles,
+  type MapLayerName,
+} from "../lib/map/mapLayerUtils.js";
 import { MemoryBackupStore, saveProjectAtomic } from "../lib/project/saveProject.js";
 import { MemoryWriteTarget } from "../lib/project/atomicWrite.js";
 import { createHistory, executeCommand, redo, undo, type Command, type HistoryState } from "./history.js";
 
 export type EditorTab = "project" | "database" | "map" | "testplay" | "events";
 export type DbTab = "units" | "classes" | "weapons" | "items" | "skills" | "terrain";
-export type MapTool = "pen" | "unit";
+export type MapTool = "pen" | "rect" | "fill" | "unit";
 
 export interface MapEditState {
   selectedTerrainId: string;
@@ -24,6 +34,8 @@ export interface MapEditState {
   selectedFaction: MapPlacement["faction"];
   selectedAiType: NonNullable<MapPlacement["aiType"]>;
   tool: MapTool;
+  layer: MapLayerName;
+  rectAnchor: { x: number; y: number } | null;
   history: HistoryState<MapData>;
 }
 
@@ -55,14 +67,24 @@ interface ProjectStore {
   selectMap: (mapId: string | null) => void;
   updateMap: (mapId: string, map: MapData) => void;
   setMapTool: (tool: MapTool) => void;
+  setMapLayer: (layer: MapLayerName) => void;
+  clearRectAnchor: () => void;
   setSelectedTerrain: (terrainId: string) => void;
   setSelectedUnit: (unitId: string) => void;
   setSelectedFaction: (faction: MapPlacement["faction"]) => void;
   setSelectedAiType: (ai: NonNullable<MapPlacement["aiType"]>) => void;
   paintTile: (mapId: string, x: number, y: number) => void;
+  paintRect: (mapId: string, x: number, y: number) => void;
+  fillTile: (mapId: string, x: number, y: number) => void;
   placeUnit: (mapId: string, x: number, y: number) => void;
   removePlacementAt: (mapId: string, x: number, y: number) => void;
-  setWinCondition: (mapId: string, type: "defeat_all_enemies") => void;
+  setWinCondition: (mapId: string, winCondition: WinCondition) => void;
+  setLoseCondition: (
+    mapId: string,
+    loseCondition: MapData["loseCondition"],
+  ) => void;
+  addReinforcement: (mapId: string, reinforcement: Reinforcement) => void;
+  removeReinforcement: (mapId: string, index: number) => void;
   mapUndo: (mapId: string) => void;
   mapRedo: (mapId: string) => void;
   selectEvent: (eventId: string | null) => void;
@@ -84,6 +106,8 @@ function defaultMapEdit(): MapEditState {
     selectedFaction: "enemy",
     selectedAiType: "charge",
     tool: "pen",
+    layer: "bottom",
+    rectAnchor: null,
     history: createHistory(),
   };
 }
@@ -222,7 +246,15 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
   },
 
   setMapTool(tool) {
-    set({ mapEdit: { ...get().mapEdit, tool } });
+    set({ mapEdit: { ...get().mapEdit, tool, rectAnchor: null } });
+  },
+
+  setMapLayer(layer) {
+    set({ mapEdit: { ...get().mapEdit, layer } });
+  },
+
+  clearRectAnchor() {
+    set({ mapEdit: { ...get().mapEdit, rectAnchor: null } });
   },
 
   setSelectedTerrain(terrainId) {
@@ -248,19 +280,68 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
     if (!map) return;
     const terrainId = TerrainIdSchema.parse(mapEdit.selectedTerrainId);
     const idx = y * map.width + x;
-    const previous = map.layers.bottom[idx] ?? TerrainIdSchema.parse("terrain_plain");
+    const layer = mapEdit.layer;
+    const tiles = getLayerTiles(map, layer);
+    const previous = tiles[idx] ?? TerrainIdSchema.parse("terrain_plain");
     if (previous === terrainId) return;
     applyMapCommand(get, set, mapId, {
       label: `paint ${x},${y}`,
       apply(m) {
-        const bottom = [...m.layers.bottom];
-        bottom[idx] = terrainId;
-        return { ...m, layers: { ...m.layers, bottom } };
+        const next = paintIndices(getLayerTiles(m, layer), m.width, [idx], terrainId);
+        return setLayerTiles(m, layer, next);
       },
       revert(m) {
-        const bottom = [...m.layers.bottom];
-        bottom[idx] = previous;
-        return { ...m, layers: { ...m.layers, bottom } };
+        const next = paintIndices(getLayerTiles(m, layer), m.width, [idx], previous);
+        return setLayerTiles(m, layer, next);
+      },
+    });
+  },
+
+  paintRect(mapId, x, y) {
+    const { mapEdit, project } = get();
+    if (!project) return;
+    const map = project.maps[mapId];
+    if (!map) return;
+    if (!mapEdit.rectAnchor) {
+      set({ mapEdit: { ...mapEdit, rectAnchor: { x, y } } });
+      return;
+    }
+    const anchor = mapEdit.rectAnchor;
+    const terrainId = TerrainIdSchema.parse(mapEdit.selectedTerrainId);
+    const layer = mapEdit.layer;
+    const indices = rectIndices(map.width, anchor.x, anchor.y, x, y);
+    const before = getLayerTiles(map, layer);
+    applyMapCommand(get, set, mapId, {
+      label: `rect ${anchor.x},${anchor.y}-${x},${y}`,
+      apply(m) {
+        const next = paintIndices(getLayerTiles(m, layer), m.width, indices, terrainId);
+        return setLayerTiles(m, layer, next);
+      },
+      revert(m) {
+        return setLayerTiles(m, layer, [...before]);
+      },
+    });
+    set({ mapEdit: { ...mapEdit, rectAnchor: null } });
+  },
+
+  fillTile(mapId, x, y) {
+    const { mapEdit, project } = get();
+    if (!project) return;
+    const map = project.maps[mapId];
+    if (!map) return;
+    const terrainId = TerrainIdSchema.parse(mapEdit.selectedTerrainId);
+    const layer = mapEdit.layer;
+    const before = getLayerTiles(map, layer);
+    const indices = fillIndices(before, map.width, map.height, x, y, terrainId);
+    if (indices.length === 0) return;
+    applyMapCommand(get, set, mapId, {
+      label: `fill ${x},${y}`,
+      apply(m) {
+        const next = paintIndices(getLayerTiles(m, layer), m.width, indices, terrainId);
+        return setLayerTiles(m, layer, next);
+      },
+      revert(m) {
+        return setLayerTiles(m, layer, [...before]);
       },
     });
   },
@@ -310,7 +391,7 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
     });
   },
 
-  setWinCondition(mapId, type) {
+  setWinCondition(mapId, winCondition) {
     const { project } = get();
     if (!project) return;
     const map = project.maps[mapId];
@@ -319,10 +400,67 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
     applyMapCommand(get, set, mapId, {
       label: "win condition",
       apply(m) {
-        return { ...m, winCondition: { type } };
+        return { ...m, winCondition };
       },
       revert(m) {
         return { ...m, winCondition: prev };
+      },
+    });
+  },
+
+  setLoseCondition(mapId, loseCondition) {
+    const { project } = get();
+    if (!project) return;
+    const map = project.maps[mapId];
+    if (!map) return;
+    const prev = map.loseCondition;
+    applyMapCommand(get, set, mapId, {
+      label: "lose condition",
+      apply(m) {
+        return { ...m, loseCondition };
+      },
+      revert(m) {
+        return { ...m, loseCondition: prev };
+      },
+    });
+  },
+
+  addReinforcement(mapId, reinforcement) {
+    const { project } = get();
+    if (!project) return;
+    applyMapCommand(get, set, mapId, {
+      label: "add reinforcement",
+      apply(m) {
+        return { ...m, reinforcements: [...m.reinforcements, reinforcement] };
+      },
+      revert(m) {
+        return {
+          ...m,
+          reinforcements: m.reinforcements.slice(0, -1),
+        };
+      },
+    });
+  },
+
+  removeReinforcement(mapId, index) {
+    const { project } = get();
+    if (!project) return;
+    const map = project.maps[mapId];
+    if (!map) return;
+    const removed = map.reinforcements[index];
+    if (!removed) return;
+    applyMapCommand(get, set, mapId, {
+      label: "remove reinforcement",
+      apply(m) {
+        return {
+          ...m,
+          reinforcements: m.reinforcements.filter((_, i) => i !== index),
+        };
+      },
+      revert(m) {
+        const next = [...m.reinforcements];
+        next.splice(index, 0, removed);
+        return { ...m, reinforcements: next };
       },
     });
   },

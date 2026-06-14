@@ -93,7 +93,12 @@ export function ProjectTab() {
       const result = exportHtml5({ project, runtimeFiles });
       downloadExportBlob(result.blob, result.fileName);
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      const message = err instanceof Error ? err.message : String(err);
+      setError(
+        message.includes("index.html") || message.includes("Failed to fetch")
+          ? `ランタイムの取得に失敗しました。先に \`pnpm dev:runtime\` を起動するか、packages/runtime をビルドしてください。(${message})`
+          : message,
+      );
     } finally {
       setExporting(false);
     }
