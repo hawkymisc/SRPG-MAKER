@@ -1,11 +1,12 @@
 import { describe, expect, it } from "vitest";
+import type { TerrainId } from "@srpg/shared";
 import { fillIndices, paintIndices, rectIndices } from "../src/lib/map/mapLayerUtils.js";
 
 describe("mapLayerUtils", () => {
   const width = 4;
   const height = 4;
-  const plain = "terrain_plain" as const;
-  const forest = "terrain_forest" as const;
+  const plain = "terrain_plain" as TerrainId;
+  const forest = "terrain_forest" as TerrainId;
   const tiles = Array.from({ length: 16 }, () => plain);
 
   it("rectIndices covers inclusive bounds", () => {

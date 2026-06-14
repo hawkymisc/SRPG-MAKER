@@ -8,6 +8,8 @@ import {
   TerrainSchema,
   UnitSchema,
   WeaponSchema,
+  ChapterSchema,
+  mapFileStem,
   type Project,
 } from "@srpg/shared";
 
@@ -69,6 +71,15 @@ export async function loadSampleTemplate(options: TemplateLoadOptions = {}): Pro
   };
 
   const map = MapSchema.parse(mapRaw);
+  const chapterId = mapFileStem(map.id);
+  const chapters = {
+    [chapterId]: ChapterSchema.parse({
+      id: chapterId,
+      name: map.name,
+      mapId: map.id,
+      sortOrder: 0,
+    }),
+  };
 
   return ProjectSchema.parse({
     schemaVersion: SCHEMA_VERSION,
@@ -76,5 +87,7 @@ export async function loadSampleTemplate(options: TemplateLoadOptions = {}): Pro
     tileSize: 32,
     database,
     maps: { [map.id]: map },
+    chapters,
+    startChapterId: chapterId,
   });
 }

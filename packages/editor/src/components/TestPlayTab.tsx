@@ -24,6 +24,7 @@ declare global {
 export function TestPlayTab() {
   const project = useProjectStore((s) => s.project);
   const selectedMapId = useProjectStore((s) => s.selectedMapId);
+  const selectedChapterId = useProjectStore((s) => s.selectedChapterId);
   const seed = useProjectStore((s) => s.testPlaySeed);
   const invincible = useProjectStore((s) => s.testPlayInvincible);
   const runtimeUrl = useProjectStore((s) => s.runtimeUrl);
@@ -96,7 +97,12 @@ export function TestPlayTab() {
     <section className="panel testplay-panel" data-testid="testplay-tab">
       <h2>テストプレイ</h2>
       <p>
-        マップ: <strong data-testid="testplay-map-id">{selectedMapId ?? "未選択"}</strong>
+        章:{" "}
+        <strong data-testid="testplay-chapter-id">
+          {selectedChapterId ?? "未選択"}
+        </strong>
+        {" / マップ: "}
+        <strong data-testid="testplay-map-id">{selectedMapId ?? "未選択"}</strong>
       </p>
       <div className="debug-panel" data-testid="debug-panel">
         <label>

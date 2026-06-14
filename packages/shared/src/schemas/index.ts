@@ -7,5 +7,6 @@ export * from "./item.js";
 export * from "./skill.js";
 export * from "./terrain.js";
 export * from "./map.js";
+export * from "./chapter.js";
 export * from "./event.js";
 export * from "./project.js";

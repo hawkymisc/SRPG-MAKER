@@ -3,7 +3,7 @@ import type Phaser from "phaser";
 import { TILE_SIZE } from "../constants.js";
 import type { BattleSession } from "../game/BattleSession.js";
 import { interpretEvent } from "./EventInterpreter.js";
-import { findMatchingEvents, type TriggerContext } from "./triggerMatch.js";
+import { findMatchingEvents } from "./triggerMatch.js";
 import type { EventInterpreterContext, EventResult, EventResume, EventYield } from "./types.js";
 import type { ChoiceDialog } from "../ui/ChoiceDialog.js";
 import type { MessageWindow } from "../ui/MessageWindow.js";
@@ -35,8 +35,8 @@ export class EventController {
     return this.running;
   }
 
-  async fireTrigger(trigger: EventTrigger, ctx: TriggerContext = {}): Promise<EventResult | null> {
-    const matched = findMatchingEvents(this.events, trigger, ctx);
+  async fireTrigger(trigger: EventTrigger): Promise<EventResult | null> {
+    const matched = findMatchingEvents(this.events, trigger);
     if (matched.length === 0) {
       return null;
     }

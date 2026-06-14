@@ -2,8 +2,12 @@ import { create } from "zustand";
 import {
   EventDefinitionSchema,
   MapSchema,
+  ChapterSchema,
   SCHEMA_VERSION,
   TerrainIdSchema,
+  defaultStartChapterId,
+  type Chapter,
+  type ChapterId,
   type EventDefinition,
   type MapData,
   type MapPlacement,
@@ -48,6 +52,7 @@ interface ProjectStore {
   dbTab: DbTab;
   selectedDbId: string | null;
   selectedMapId: string | null;
+  selectedChapterId: ChapterId | null;
   selectedEventId: string | null;
   fileName: string | null;
   runtimeDistUrl: string;
@@ -65,6 +70,11 @@ interface ProjectStore {
   addDbEntry: <K extends DbTab>(tab: K, id: string, value: Project["database"][K][string]) => void;
   deleteDbEntry: (tab: DbTab, id: string) => void;
   selectMap: (mapId: string | null) => void;
+  selectChapter: (chapterId: ChapterId | null) => void;
+  addChapter: (chapter: Chapter) => void;
+  updateChapter: (chapterId: ChapterId, chapter: Chapter) => void;
+  removeChapter: (chapterId: ChapterId) => void;
+  setStartChapterId: (chapterId: ChapterId | undefined) => void;
   updateMap: (mapId: string, map: MapData) => void;
   setMapTool: (tool: MapTool) => void;
   setMapLayer: (layer: MapLayerName) => void;
@@ -112,6 +122,25 @@ function defaultMapEdit(): MapEditState {
   };
 }
 
+function pickInitialChapterId(project: Project): ChapterId | null {
+  if (project.startChapterId && project.chapters?.[project.startChapterId]) {
+    return project.startChapterId;
+  }
+  const fallback = defaultStartChapterId(project.chapters ?? {});
+  return fallback ?? null;
+}
+
+function pickMapForChapter(project: Project, chapterId: ChapterId | null): string | null {
+  if (!chapterId) {
+    return Object.keys(project.maps)[0] ?? null;
+  }
+  const chapter = project.chapters?.[chapterId];
+  if (chapter && project.maps[chapter.mapId]) {
+    return chapter.mapId;
+  }
+  return Object.keys(project.maps)[0] ?? null;
+}
+
 function withMap(project: Project, mapId: string, map: MapData): Project {
   return {
     ...project,
@@ -146,6 +175,7 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
   dbTab: "units",
   selectedDbId: null,
   selectedMapId: null,
+  selectedChapterId: null,
   selectedEventId: null,
   fileName: null,
   mapEdit: defaultMapEdit(),
@@ -158,13 +188,14 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
     set({ loading: true, error: null });
     try {
       const project = await loadSampleTemplate();
-      const firstMapId = Object.keys(project.maps)[0] ?? null;
+      const chapterId = pickInitialChapterId(project);
       set({
         project,
         dirty: false,
         loading: false,
         fileName: "sample-project.json",
-        selectedMapId: firstMapId,
+        selectedChapterId: chapterId,
+        selectedMapId: pickMapForChapter(project, chapterId),
         selectedDbId: Object.keys(project.database.units)[0] ?? null,
         mapEdit: defaultMapEdit(),
       });
@@ -177,12 +208,13 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
   },
 
   openProjectData(fileName, project) {
-    const firstMapId = Object.keys(project.maps)[0] ?? null;
+    const chapterId = pickInitialChapterId(project);
     set({
       project,
       dirty: false,
       fileName,
-      selectedMapId: firstMapId,
+      selectedChapterId: chapterId,
+      selectedMapId: pickMapForChapter(project, chapterId),
       selectedDbId: Object.keys(project.database.units)[0] ?? null,
       mapEdit: defaultMapEdit(),
       error: null,
@@ -237,6 +269,78 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
 
   selectMap(mapId) {
     set({ selectedMapId: mapId, mapEdit: defaultMapEdit() });
+  },
+
+  selectChapter(chapterId) {
+    const { project } = get();
+    if (!project) return;
+    set({
+      selectedChapterId: chapterId,
+      selectedMapId: pickMapForChapter(project, chapterId),
+      mapEdit: defaultMapEdit(),
+    });
+  },
+
+  addChapter(chapter) {
+    const parsed = ChapterSchema.parse(chapter);
+    const { project } = get();
+    if (!project) return;
+    const chapters = { ...(project.chapters ?? {}), [parsed.id]: parsed };
+    set({
+      project: {
+        ...project,
+        chapters,
+        startChapterId: project.startChapterId ?? parsed.id,
+      },
+      dirty: true,
+      selectedChapterId: parsed.id,
+      selectedMapId: parsed.mapId,
+    });
+  },
+
+  updateChapter(chapterId, chapter) {
+    const parsed = ChapterSchema.parse(chapter);
+    const { project } = get();
+    if (!project || !project.chapters?.[chapterId]) return;
+    set({
+      project: {
+        ...project,
+        chapters: { ...project.chapters, [chapterId]: parsed },
+      },
+      dirty: true,
+    });
+  },
+
+  removeChapter(chapterId) {
+    const { project, selectedChapterId } = get();
+    if (!project?.chapters?.[chapterId]) return;
+    const rest = Object.fromEntries(
+      Object.entries(project.chapters).filter(([id]) => id !== chapterId),
+    ) as Project["chapters"];
+    const nextStart =
+      project.startChapterId === chapterId ? defaultStartChapterId(rest) : project.startChapterId;
+    const nextChapterId =
+      selectedChapterId === chapterId ? defaultStartChapterId(rest) ?? null : selectedChapterId;
+    set({
+      project: {
+        ...project,
+        chapters: rest,
+        startChapterId: nextStart,
+      },
+      dirty: true,
+      selectedChapterId: nextChapterId,
+      selectedMapId: pickMapForChapter({ ...project, chapters: rest }, nextChapterId),
+    });
+  },
+
+  setStartChapterId(chapterId) {
+    const { project } = get();
+    if (!project) return;
+    if (chapterId !== undefined && !project.chapters?.[chapterId]) return;
+    set({
+      project: { ...project, startChapterId: chapterId },
+      dirty: true,
+    });
   },
 
   updateMap(mapId, map) {
@@ -620,5 +724,6 @@ export function createEmptyProject(name: string): Project {
     },
     maps: { [map.id]: map },
     events: {},
+    chapters: {},
   };
 }

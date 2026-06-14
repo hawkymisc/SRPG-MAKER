@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { ChapterIdSchema } from "./ids.js";
+import { ChapterSchema } from "./chapter.js";
 import { ClassSchema } from "./class.js";
 import { EventDefinitionSchema } from "./event.js";
 import { ItemSchema } from "./item.js";
@@ -25,6 +27,8 @@ export const ProjectSchema = z.object({
   maps: z.record(MapSchema).default({}),
   // 後方互換のため optional + default。schemaVersion は据え置き。
   events: z.record(EventDefinitionSchema).default({}),
+  chapters: z.record(ChapterSchema).default({}),
+  startChapterId: ChapterIdSchema.optional(),
 });
 
 export type Project = z.infer<typeof ProjectSchema>;
@@ -44,5 +48,6 @@ export function createDefaultProject(name: string): Project {
     },
     maps: {},
     events: {},
+    chapters: {},
   });
 }

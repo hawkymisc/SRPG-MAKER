@@ -278,14 +278,15 @@ export function MapTab() {
                     type="number"
                     min={0}
                     value={map.winCondition.x}
-                    onChange={(e) =>
-                      selectedMapId &&
+                    onChange={(e) => {
+                      if (!selectedMapId || map.winCondition.type !== "defend_point") return;
                       setWinCondition(selectedMapId, {
-                        ...map.winCondition,
                         type: "defend_point",
                         x: Number(e.target.value),
-                      })
-                    }
+                        y: map.winCondition.y,
+                        turns: map.winCondition.turns,
+                      });
+                    }}
                     data-testid="map-win-defend-x"
                   />
                 </label>
@@ -295,14 +296,15 @@ export function MapTab() {
                     type="number"
                     min={0}
                     value={map.winCondition.y}
-                    onChange={(e) =>
-                      selectedMapId &&
+                    onChange={(e) => {
+                      if (!selectedMapId || map.winCondition.type !== "defend_point") return;
                       setWinCondition(selectedMapId, {
-                        ...map.winCondition,
                         type: "defend_point",
+                        x: map.winCondition.x,
                         y: Number(e.target.value),
-                      })
-                    }
+                        turns: map.winCondition.turns,
+                      });
+                    }}
                     data-testid="map-win-defend-y"
                   />
                 </label>
@@ -312,14 +314,15 @@ export function MapTab() {
                     type="number"
                     min={1}
                     value={map.winCondition.turns}
-                    onChange={(e) =>
-                      selectedMapId &&
+                    onChange={(e) => {
+                      if (!selectedMapId || map.winCondition.type !== "defend_point") return;
                       setWinCondition(selectedMapId, {
-                        ...map.winCondition,
                         type: "defend_point",
+                        x: map.winCondition.x,
+                        y: map.winCondition.y,
                         turns: Number(e.target.value),
-                      })
-                    }
+                      });
+                    }}
                     data-testid="map-win-defend-turns"
                   />
                 </label>

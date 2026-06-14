@@ -7,6 +7,8 @@ import {
   TerrainSchema,
   UnitSchema,
   WeaponSchema,
+  ChapterSchema,
+  mapFileStem,
   type Project,
 } from "@srpg/shared";
 
@@ -38,9 +40,7 @@ function jsonFile(value: unknown): string {
 }
 
 /** Runtime loads `maps/{stem}.json` (e.g. map_chapter01 → chapter01). */
-export function mapFileStem(mapId: string): string {
-  return mapId.startsWith("map_") ? mapId.slice(4) : mapId;
-}
+export { mapFileStem } from "@srpg/shared";
 
 function chapterEventsFile(
   map: Project["maps"][string],
@@ -62,7 +62,12 @@ export function splitProject(project: Project): SplitProjectFiles {
     schemaVersion: validated.schemaVersion,
     name: validated.name,
     tileSize: validated.tileSize,
+    ...(validated.startChapterId !== undefined
+      ? { startChapterId: validated.startChapterId }
+      : {}),
   });
+
+  files["chapters/chapters.json"] = jsonFile(validated.chapters ?? {});
 
   for (const table of DB_TABLES) {
     files[`database/${table}.json`] = jsonFile(validated.database[table]);
@@ -112,6 +117,7 @@ export function mergeSplitProject(files: SplitProjectFiles): Project {
 
   const maps: Project["maps"] = {};
   const events: Project["events"] = {};
+  let chapters: Project["chapters"] = {};
   for (const [path, text] of Object.entries(files)) {
     if (path.startsWith("maps/") && path.endsWith(".json")) {
       const map = MapSchema.parse(JSON.parse(text));
@@ -122,6 +128,18 @@ export function mergeSplitProject(files: SplitProjectFiles): Project {
       const raw: unknown = JSON.parse(text);
       if (typeof raw === "object" && raw !== null) {
         Object.assign(events, raw);
+      }
+      continue;
+    }
+    if (path === "chapters/chapters.json") {
+      const raw: unknown = JSON.parse(text);
+      if (typeof raw === "object" && raw !== null) {
+        chapters = Object.fromEntries(
+          Object.entries(raw as Record<string, unknown>).map(([key, value]) => [
+            key,
+            ChapterSchema.parse(value),
+          ]),
+        );
       }
     }
   }
@@ -134,6 +152,7 @@ export function mergeSplitProject(files: SplitProjectFiles): Project {
     ...metaRaw,
     database,
     maps,
-    events: events,
+    events,
+    chapters,
   });
 }

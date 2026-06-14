@@ -150,7 +150,6 @@ export class BattleMapScene extends Phaser.Scene {
 
   private async runEvents(
     trigger: Parameters<EventController["fireTrigger"]>[0],
-    ctx?: Parameters<EventController["fireTrigger"]>[1],
   ): Promise<void> {
     if (this.chapter.events.length === 0) {
       return;
@@ -159,7 +158,7 @@ export class BattleMapScene extends Phaser.Scene {
     this.mode = "event";
     this.inputLocked = true;
     try {
-      await this.eventController.fireTrigger(trigger, ctx);
+      await this.eventController.fireTrigger(trigger);
     } finally {
       this.inputLocked = false;
       if (this.session.state.outcome !== "ongoing") {
@@ -180,26 +179,18 @@ export class BattleMapScene extends Phaser.Scene {
       if (!defeated) {
         continue;
       }
-      await this.runEvents({ type: "unitDefeated", unitId: defeated.ref as UnitId }, {
-        defeatedUnitRef: defeated.ref,
-      });
+      await this.runEvents({ type: "unitDefeated", unitId: defeated.ref as UnitId });
     }
   }
 
   private async processTurnStart(prevTurn: number): Promise<void> {
     if (this.session.state.turn > prevTurn) {
-      await this.runEvents(
-        { type: "turnStart", turn: this.session.state.turn },
-        { turn: this.session.state.turn },
-      );
+      await this.runEvents({ type: "turnStart", turn: this.session.state.turn });
     }
   }
 
   private async processTileReached(unit: BattleUnit, x: number, y: number): Promise<void> {
-    await this.runEvents(
-      { type: "tileReached", x, y, unitId: unit.ref as UnitId },
-      { tileReached: { unitRef: unit.ref, x, y } },
-    );
+    await this.runEvents({ type: "tileReached", x, y, unitId: unit.ref as UnitId });
   }
 
   private async applyAction(action: Parameters<BattleSession["apply"]>[0]): Promise<BattleLogEntry[]> {

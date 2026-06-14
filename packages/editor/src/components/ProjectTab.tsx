@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { ChapterSchema, mapFileStem } from "@srpg/shared";
 import { useProjectStore } from "../store/projectStore.js";
 import { createBrowserFileSystem } from "../lib/project/fileSystem.js";
 import { loadSampleTemplate } from "../lib/project/loadTemplate.js";
@@ -25,6 +26,12 @@ export function ProjectTab() {
   const markClean = useProjectStore((s) => s.markClean);
   const setError = useProjectStore((s) => s.setError);
   const runtimeDistUrl = useProjectStore((s) => s.runtimeDistUrl);
+  const setStartChapterId = useProjectStore((s) => s.setStartChapterId);
+  const addChapter = useProjectStore((s) => s.addChapter);
+  const removeChapter = useProjectStore((s) => s.removeChapter);
+  const selectChapter = useProjectStore((s) => s.selectChapter);
+  const updateChapter = useProjectStore((s) => s.updateChapter);
+  const selectedChapterId = useProjectStore((s) => s.selectedChapterId);
   const [backupCount, setBackupCount] = useState(0);
   const [lastSaved, setLastSaved] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
@@ -141,12 +148,108 @@ export function ProjectTab() {
           <dd data-testid="project-dirty">{dirty ? "未保存" : "保存済み"}</dd>
           <dt>マップ数</dt>
           <dd>{Object.keys(project.maps).length}</dd>
+          <dt>章数</dt>
+          <dd data-testid="project-chapter-count">{Object.keys(project.chapters ?? {}).length}</dd>
           <dt>バックアップ</dt>
           <dd data-testid="backup-count">{backupCount} / 5</dd>
         </dl>
       ) : (
         <p>プロジェクトがありません。「新規（サンプル）」で開始してください。</p>
       )}
+      {project ? (
+        <section className="chapter-panel" data-testid="chapter-panel">
+          <h3>章（シナリオ）</h3>
+          <button
+            type="button"
+            data-testid="btn-add-chapter"
+            onClick={() => {
+              const mapIds = Object.keys(project.maps);
+              const mapId = mapIds[0];
+              if (!mapId) return;
+              const map = project.maps[mapId]!;
+              const chapterId = mapFileStem(mapId);
+              addChapter(
+                ChapterSchema.parse({
+                  id: chapterId,
+                  name: map.name,
+                  mapId,
+                  sortOrder: Object.keys(project.chapters ?? {}).length,
+                }),
+              );
+            }}
+            disabled={Object.keys(project.maps).length === 0}
+          >
+            章を追加
+          </button>
+          <ul className="chapter-list" data-testid="chapter-list">
+            {Object.values(project.chapters ?? {})
+              .sort((a, b) => a.sortOrder - b.sortOrder || a.id.localeCompare(b.id))
+              .map((chapter) => (
+                <li
+                  key={chapter.id}
+                  className={selectedChapterId === chapter.id ? "active" : ""}
+                  data-testid={`chapter-row-${chapter.id}`}
+                >
+                  <label>
+                    <input
+                      type="radio"
+                      name="start-chapter"
+                      checked={project.startChapterId === chapter.id}
+                      onChange={() => setStartChapterId(chapter.id)}
+                      data-testid={`chapter-start-${chapter.id}`}
+                    />
+                    開始章
+                  </label>
+                  <button type="button" onClick={() => selectChapter(chapter.id)}>
+                    {chapter.name}
+                  </button>
+                  <select
+                    value={chapter.mapId}
+                    onChange={(e) =>
+                      updateChapter(chapter.id, {
+                        ...chapter,
+                        mapId: e.target.value as typeof chapter.mapId,
+                      })
+                    }
+                    data-testid={`chapter-map-${chapter.id}`}
+                  >
+                    {Object.values(project.maps).map((map) => (
+                      <option key={map.id} value={map.id}>
+                        {map.name} ({map.id})
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    value={chapter.name}
+                    onChange={(e) =>
+                      updateChapter(chapter.id, { ...chapter, name: e.target.value })
+                    }
+                    data-testid={`chapter-name-${chapter.id}`}
+                  />
+                  <input
+                    type="number"
+                    min={0}
+                    value={chapter.sortOrder}
+                    onChange={(e) =>
+                      updateChapter(chapter.id, {
+                        ...chapter,
+                        sortOrder: Number(e.target.value),
+                      })
+                    }
+                    data-testid={`chapter-order-${chapter.id}`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeChapter(chapter.id)}
+                    data-testid={`chapter-remove-${chapter.id}`}
+                  >
+                    削除
+                  </button>
+                </li>
+              ))}
+          </ul>
+        </section>
+      ) : null}
       {lastSaved ? (
         <p className="hint">ブラウザ保存モード: {lastSaved}…</p>
       ) : null}
