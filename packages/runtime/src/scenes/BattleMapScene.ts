@@ -1,4 +1,4 @@
-import type { BattleLogEntry, BattleUnit } from "@srpg/shared";
+import type { BattleLogEntry, BattleUnit, UnitId } from "@srpg/shared";
 import {
   calcMovementRange,
   getAttackableTargets,
@@ -6,16 +6,19 @@ import {
 } from "@srpg/shared";
 import Phaser from "phaser";
 import { DEFAULT_BATTLE_SEED, MAP_PX } from "../constants.js";
-import type { ChapterData } from "../data/loadChapter.js";
+import { loadChapter, type ChapterData } from "../data/loadChapter.js";
+import { EventController } from "../event/EventController.js";
 import { BattleSession } from "../game/BattleSession.js";
 import { REGISTRY_KEYS } from "../game/registry.js";
 import { MapGrid } from "../render/MapGrid.js";
 import { UnitSprites } from "../render/UnitSprites.js";
 import { SaveManager } from "../save/SaveManager.js";
 import { ActionMenu, type ActionMenuChoice } from "../ui/ActionMenu.js";
+import { ChoiceDialog } from "../ui/ChoiceDialog.js";
 import { CombatPreviewPanel } from "../ui/CombatPreviewPanel.js";
 import { Cursor } from "../ui/Cursor.js";
 import { createStatusBar, Hud } from "../ui/Hud.js";
+import { MessageWindow } from "../ui/MessageWindow.js";
 import { TileHighlight } from "../ui/TileHighlight.js";
 import { installRuntimeTestHooks, type RuntimeTestApi } from "../testHooks.js";
 
@@ -27,7 +30,8 @@ type UiMode =
   | "attack"
   | "animating"
   | "enemy_phase"
-  | "ended";
+  | "ended"
+  | "event";
 
 export class BattleMapScene extends Phaser.Scene {
   private session!: BattleSession;
@@ -40,6 +44,9 @@ export class BattleMapScene extends Phaser.Scene {
   private hud!: Hud;
   private actionMenu!: ActionMenu;
   private combatPreview!: CombatPreviewPanel;
+  private messageWindow!: MessageWindow;
+  private choiceDialog!: ChoiceDialog;
+  private eventController!: EventController;
 
   private mode: UiMode = "idle";
   private selectedUnitId: string | null = null;
@@ -55,6 +62,10 @@ export class BattleMapScene extends Phaser.Scene {
   }
 
   create(): void {
+    void this.bootstrap();
+  }
+
+  private async bootstrap(): Promise<void> {
     this.chapter = this.registry.get(REGISTRY_KEYS.chapter) as ChapterData;
     this.session =
       (this.registry.get(REGISTRY_KEYS.session) as BattleSession | undefined) ??
@@ -76,6 +87,17 @@ export class BattleMapScene extends Phaser.Scene {
     createStatusBar(shell);
     this.actionMenu = new ActionMenu(shell, MAP_PX);
     this.combatPreview = new CombatPreviewPanel(shell, MAP_PX);
+    this.messageWindow = new MessageWindow(shell);
+    this.choiceDialog = new ChoiceDialog(shell, MAP_PX);
+    this.eventController = new EventController(this.chapter.events, this.session, {
+      messageWindow: this.messageWindow,
+      choiceDialog: this.choiceDialog,
+      unitSprites: this.unitSprites,
+      scene: this,
+      autoAdvanceEvents: this.autoPlayAll,
+      onStateChanged: () => this.refreshView(),
+      onGotoChapter: (chapterId) => this.gotoChapter(chapterId),
+    });
 
     this.refreshView();
     this.bindInput();
@@ -88,6 +110,8 @@ export class BattleMapScene extends Phaser.Scene {
       this.ctrlKey = kb.addKey("CTRL");
     }
 
+    await this.fireChapterStartEvents();
+
     if (this.autoPlayAll) {
       void this.runAutoPlayLoop();
     } else if (this.session.state.phase !== "player") {
@@ -95,6 +119,98 @@ export class BattleMapScene extends Phaser.Scene {
     } else {
       this.mode = "select_unit";
     }
+  }
+
+  private async fireChapterStartEvents(): Promise<void> {
+    await this.runEvents({ type: "chapterStart" });
+  }
+
+  private async gotoChapter(chapterId: string): Promise<void> {
+    const chapter = await loadChapter(import.meta.env.BASE_URL, chapterId);
+    this.chapter = chapter;
+    this.session = BattleSession.fromChapter(chapter, this.session.seed);
+    this.registry.set(REGISTRY_KEYS.chapter, chapter);
+    this.registry.set(REGISTRY_KEYS.chapterId, chapterId);
+    this.registry.set(REGISTRY_KEYS.session, this.session);
+    this.eventController = new EventController(chapter.events, this.session, {
+      messageWindow: this.messageWindow,
+      choiceDialog: this.choiceDialog,
+      unitSprites: this.unitSprites,
+      scene: this,
+      autoAdvanceEvents: this.autoPlayAll,
+      onStateChanged: () => this.refreshView(),
+      onGotoChapter: (nextId) => this.gotoChapter(nextId),
+    });
+    this.resetSelection();
+    this.recentLogs = [];
+    this.refreshView();
+    await this.fireChapterStartEvents();
+    this.mode = this.session.state.phase === "player" ? "select_unit" : "idle";
+  }
+
+  private async runEvents(
+    trigger: Parameters<EventController["fireTrigger"]>[0],
+    ctx?: Parameters<EventController["fireTrigger"]>[1],
+  ): Promise<void> {
+    if (this.chapter.events.length === 0) {
+      return;
+    }
+    const prevMode = this.mode;
+    this.mode = "event";
+    this.inputLocked = true;
+    try {
+      await this.eventController.fireTrigger(trigger, ctx);
+    } finally {
+      this.inputLocked = false;
+      if (this.session.state.outcome !== "ongoing") {
+        this.mode = "ended";
+      } else {
+        this.mode = prevMode === "event" ? "select_unit" : prevMode;
+      }
+      this.refreshView();
+    }
+  }
+
+  private async processKillLogs(logs: BattleLogEntry[]): Promise<void> {
+    for (const log of logs) {
+      if (log.kind !== "kill" || !log.target) {
+        continue;
+      }
+      const defeated = this.session.state.units.find((u) => u.instanceId === log.target);
+      if (!defeated) {
+        continue;
+      }
+      await this.runEvents({ type: "unitDefeated", unitId: defeated.ref as UnitId }, {
+        defeatedUnitRef: defeated.ref,
+      });
+    }
+  }
+
+  private async processTurnStart(prevTurn: number): Promise<void> {
+    if (this.session.state.turn > prevTurn) {
+      await this.runEvents(
+        { type: "turnStart", turn: this.session.state.turn },
+        { turn: this.session.state.turn },
+      );
+    }
+  }
+
+  private async processTileReached(unit: BattleUnit, x: number, y: number): Promise<void> {
+    await this.runEvents(
+      { type: "tileReached", x, y, unitId: unit.ref as UnitId },
+      { tileReached: { unitRef: unit.ref, x, y } },
+    );
+  }
+
+  private async applyAction(action: Parameters<BattleSession["apply"]>[0]): Promise<BattleLogEntry[]> {
+    const prevTurn = this.session.state.turn;
+    const logs = this.session.apply(action);
+    this.pushLogs(logs);
+    await this.processKillLogs(logs);
+    if (action.type === "EndPhase") {
+      await this.processTurnStart(prevTurn);
+    }
+    return logs;
   }
 
   getTestApi(): RuntimeTestApi {
@@ -126,6 +242,13 @@ export class BattleMapScene extends Phaser.Scene {
         }
         return loaded;
       },
+      fireEventTrigger: async (trigger) => {
+        await this.runEvents(trigger);
+      },
+      advanceMessage: () => {
+        this.messageWindow.advance();
+      },
+      isMessageOpen: () => this.messageWindow.isOpen(),
       prepareScreenshot: (view) => {
         this.inputLocked = false;
         let player = this.session.state.units.find(
@@ -226,7 +349,14 @@ export class BattleMapScene extends Phaser.Scene {
   }
 
   private onMoveCursor(dx: number, dy: number): void {
-    if (this.inputLocked) {
+    if (this.inputLocked || this.mode === "event") {
+      return;
+    }
+    if (this.messageWindow.isOpen()) {
+      return;
+    }
+    if (this.choiceDialog.isOpen()) {
+      this.choiceDialog.move(dy !== 0 ? dy : dx);
       return;
     }
     if (this.actionMenu.isOpen()) {
@@ -240,7 +370,15 @@ export class BattleMapScene extends Phaser.Scene {
   }
 
   private async onConfirm(): Promise<void> {
-    if (this.inputLocked || this.mode === "animating" || this.mode === "enemy_phase") {
+    if (this.inputLocked || this.mode === "animating" || this.mode === "enemy_phase" || this.mode === "event") {
+      return;
+    }
+    if (this.messageWindow.isOpen()) {
+      this.messageWindow.advance();
+      return;
+    }
+    if (this.choiceDialog.isOpen()) {
+      this.choiceDialog.confirm();
       return;
     }
     if (this.actionMenu.isOpen()) {
@@ -311,14 +449,14 @@ export class BattleMapScene extends Phaser.Scene {
     }
 
     this.inputLocked = true;
-    const logs = this.session.apply({
+    await this.applyAction({
       type: "Move",
       actor: this.selectedUnitId,
       x,
       y,
     });
     await this.unitSprites.animateMove(this.selectedUnitId, x, y);
-    this.pushLogs(logs);
+    await this.processTileReached(this.getUnit(this.selectedUnitId), x, y);
     this.refreshView();
     this.inputLocked = false;
     this.openActionMenu();
@@ -366,8 +504,7 @@ export class BattleMapScene extends Phaser.Scene {
       return;
     }
     if (choice === "wait") {
-      const logs = this.session.apply({ type: "Wait", actor: this.selectedUnitId });
-      this.pushLogs(logs);
+      await this.applyAction({ type: "Wait", actor: this.selectedUnitId });
       this.resetSelection();
       this.refreshView();
       await this.afterPlayerAction();
@@ -382,13 +519,12 @@ export class BattleMapScene extends Phaser.Scene {
       if (!healId) {
         return;
       }
-      const logs = this.session.apply({
+      await this.applyAction({
         type: "UseItem",
         actor: this.selectedUnitId,
         itemId: healId,
         target: this.selectedUnitId,
       });
-      this.pushLogs(logs);
       this.resetSelection();
       this.refreshView();
       await this.afterPlayerAction();
@@ -433,14 +569,13 @@ export class BattleMapScene extends Phaser.Scene {
     }
 
     this.inputLocked = true;
-    const logs = this.session.apply({
+    const logs = await this.applyAction({
       type: "Attack",
       actor: this.selectedUnitId,
       target: target.instanceId,
     });
     await this.playCombatLogs(logs, target.instanceId);
     this.combatPreview.hide();
-    this.pushLogs(logs);
     this.resetSelection();
     this.refreshView();
     this.inputLocked = false;
@@ -469,8 +604,7 @@ export class BattleMapScene extends Phaser.Scene {
       (u) => u.hp > 0 && u.faction === "player" && !u.hasActed,
     );
     if (!playerPending) {
-      const logs = this.session.apply({ type: "EndPhase" });
-      this.pushLogs(logs);
+      await this.applyAction({ type: "EndPhase" });
       this.refreshView();
       await this.runEnemyPhase();
       return;
@@ -498,8 +632,7 @@ export class BattleMapScene extends Phaser.Scene {
         (u) => u.hp > 0 && u.faction === this.session.state.phase && !u.hasActed,
       );
       if (pending.length === 0) {
-        const logs = this.session.apply({ type: "EndPhase" });
-        this.pushLogs(logs);
+        await this.applyAction({ type: "EndPhase" });
         this.refreshView();
         continue;
       }
@@ -508,14 +641,14 @@ export class BattleMapScene extends Phaser.Scene {
       const action = this.session.decideForUnit(unit.instanceId);
       this.inputLocked = true;
       const before = { x: unit.x, y: unit.y };
-      const logs = this.session.apply(action);
+      const logs = await this.applyAction(action);
       if (action.type === "Move") {
         await this.unitSprites.animateMove(unit.instanceId, action.x, action.y);
+        await this.processTileReached(this.getUnit(unit.instanceId), action.x, action.y);
       } else if (action.type === "Attack") {
         this.cursor.setGrid(before.x, before.y);
         await this.playCombatLogs(logs, action.target);
       }
-      this.pushLogs(logs);
       this.refreshView();
       this.inputLocked = false;
       await this.delay(80);
@@ -554,21 +687,20 @@ export class BattleMapScene extends Phaser.Scene {
       (u) => u.hp > 0 && u.faction === phase && !u.hasActed,
     );
     if (pending.length === 0) {
-      const logs = this.session.apply({ type: "EndPhase" });
-      this.pushLogs(logs);
+      await this.applyAction({ type: "EndPhase" });
       this.refreshView();
       return;
     }
     const unit = pending[0]!;
     const action = this.session.decideForUnit(unit.instanceId);
     this.inputLocked = true;
-    const logs = this.session.apply(action);
+    const logs = await this.applyAction(action);
     if (action.type === "Move") {
       await this.unitSprites.animateMove(unit.instanceId, action.x, action.y);
+      await this.processTileReached(this.getUnit(unit.instanceId), action.x, action.y);
     } else if (action.type === "Attack") {
       await this.playCombatLogs(logs, action.target);
     }
-    this.pushLogs(logs);
     this.refreshView();
     this.inputLocked = false;
   }

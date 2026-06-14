@@ -7,7 +7,10 @@ export {
   GAME_HEIGHT,
   DEFAULT_BATTLE_SEED,
 } from "./constants.js";
-export { loadChapter, type ChapterData } from "./data/loadChapter.js";
+export { interpretEvent } from "./event/EventInterpreter.js";
+export type { EventResult, EventResume, EventYield, EventInterpreterContext } from "./event/types.js";
+export { EventController } from "./event/EventController.js";
+export { parseEvents, loadChapter, type ChapterData, type EditorTestPlayPayload } from "./data/loadChapter.js";
 export { BattleSession, type BattleSaveData, type AutoPlayResult } from "./game/BattleSession.js";
 export { REGISTRY_KEYS, type RuntimeRegistry } from "./game/registry.js";
 export { createPhaserGame } from "./game/createGame.js";

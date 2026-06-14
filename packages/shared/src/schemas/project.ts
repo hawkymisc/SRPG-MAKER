@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { ClassSchema } from "./class.js";
+import { EventDefinitionSchema } from "./event.js";
 import { ItemSchema } from "./item.js";
 import { MapSchema } from "./map.js";
 import { SkillSchema } from "./skill.js";
@@ -22,6 +23,8 @@ export const ProjectSchema = z.object({
     terrain: z.record(TerrainSchema),
   }),
   maps: z.record(MapSchema).default({}),
+  // 後方互換のため optional + default。schemaVersion は据え置き。
+  events: z.record(EventDefinitionSchema).default({}),
 });
 
 export type Project = z.infer<typeof ProjectSchema>;
@@ -40,5 +43,6 @@ export function createDefaultProject(name: string): Project {
       terrain: {},
     },
     maps: {},
+    events: {},
   });
 }

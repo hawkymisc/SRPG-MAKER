@@ -15,6 +15,11 @@ export interface RuntimeTestApi {
   load: () => BattleSession | null;
   /** E2E用: 行動メニュー・戦闘予測の表示状態を固定 */
   prepareScreenshot: (view: "action_menu" | "combat_preview") => void;
+  /** E2E用: イベントトリガーを手動発火 */
+  fireEventTrigger: (trigger: import("@srpg/shared").EventTrigger) => Promise<void>;
+  /** E2E用: メッセージウィンドウを進める */
+  advanceMessage: () => void;
+  isMessageOpen: () => boolean;
 }
 
 declare global {

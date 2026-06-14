@@ -7,6 +7,7 @@ export const REGISTRY_KEYS = {
   seed: "seed",
   autoPlayAll: "autoPlayAll",
   debugInvincible: "debugInvincible",
+  chapterId: "chapterId",
 } as const;
 
 export interface RuntimeRegistry {
@@ -14,5 +15,6 @@ export interface RuntimeRegistry {
   [REGISTRY_KEYS.session]: BattleSession;
   [REGISTRY_KEYS.seed]: number;
   [REGISTRY_KEYS.autoPlayAll]: boolean;
+  [REGISTRY_KEYS.chapterId]: string;
   [REGISTRY_KEYS.debugInvincible]?: boolean;
 }

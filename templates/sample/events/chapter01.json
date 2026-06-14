@@ -1,0 +1,11 @@
+[
+  {
+    "id": "ev_chapter01_intro",
+    "name": "序章オープニング",
+    "trigger": { "type": "chapterStart" },
+    "commands": [
+      { "cmd": "SHOW_MESSAGE", "speakerId": "unit_alm", "text": "試練の平原へ向かうぞ。" },
+      { "cmd": "WAIT", "ms": 200 }
+    ]
+  }
+]

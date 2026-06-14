@@ -8,7 +8,7 @@ const SAMPLE_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../../t
 
 function cloneSessionSteps(source: BattleSession, steps: number): BattleSession {
   const session = BattleSession.fromChapter(
-    { map: source.state.context.map, database: source.state.context.database },
+    { map: source.state.context.map, database: source.state.context.database, events: [], chapterId: "chapter01" },
     source.seed,
   );
   for (let i = 0; i < steps; i += 1) {

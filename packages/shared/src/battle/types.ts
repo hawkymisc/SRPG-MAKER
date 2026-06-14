@@ -6,6 +6,7 @@ import type { Terrain } from "../schemas/terrain.js";
 import type { Unit } from "../schemas/unit.js";
 import type { Weapon } from "../schemas/weapon.js";
 import type { Stats } from "../schemas/stats.js";
+import type { VariableId, SwitchId } from "../schemas/ids.js";
 import type { BattleConfig } from "./config.js";
 
 export interface WeaponInstance {
@@ -60,8 +61,8 @@ export interface BattleState {
   turn: number;
   phase: Faction;
   units: BattleUnit[];
-  variables: Record<string, number>;
-  switches: Record<string, boolean>;
+  variables: Record<VariableId, number>;
+  switches: Record<SwitchId, boolean>;
   outcome: BattleOutcome;
   log: BattleLogEntry[];
   context: BattleContext;

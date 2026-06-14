@@ -24,6 +24,7 @@
     { "ref": "unit_brigand", "x": 7, "y": 5, "faction": "enemy", "equip": "wpn_iron_axe", "aiType": "charge" }
   ],
   "reinforcements": [],
+  "eventIds": ["ev_chapter01_intro"],
   "winCondition": { "type": "defeat_all_enemies" },
   "loseCondition": { "allPlayerDefeated": true }
 }

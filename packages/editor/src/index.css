@@ -224,3 +224,92 @@ select {
   margin-top: 1rem;
   background: #000;
 }
+
+.events-layout {
+  display: grid;
+  grid-template-columns: 12rem 1fr;
+  gap: 1rem;
+  min-height: 24rem;
+}
+
+.events-list ul {
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+}
+
+.events-list li button {
+  width: 100%;
+  text-align: left;
+  margin-bottom: 0.2rem;
+}
+
+.events-detail {
+  border: 1px solid #2a2a3d;
+  padding: 0.75rem;
+  overflow: auto;
+}
+
+.events-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: flex-end;
+  margin-bottom: 0.75rem;
+}
+
+.command-list {
+  list-style: none;
+  margin: 0.5rem 0;
+  padding: 0;
+}
+
+.command-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 0.25rem;
+}
+
+.command-list li.active .cmd-select {
+  outline: 1px solid #3d5afe;
+}
+
+.cmd-select {
+  flex: 1;
+  text-align: left;
+  background: #252538;
+  color: inherit;
+  border: 1px solid #3a3a55;
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+}
+
+.cmd-actions button {
+  background: #1e1e2e;
+  color: inherit;
+  border: 1px solid #33334d;
+  padding: 0.15rem 0.35rem;
+  cursor: pointer;
+}
+
+.command-add-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.map-event-list {
+  list-style: none;
+  margin: 0.35rem 0 0;
+  padding: 0;
+}
+
+.map-event-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+}

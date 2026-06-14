@@ -1,7 +1,7 @@
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-  { ignores: ["**/dist/**", "**/node_modules/**", "**/coverage/**", "packages/runtime/dist/**"] },
+  { ignores: ["**/dist/**", "**/node_modules/**", "**/coverage/**", "e2e/fixtures/**", "packages/runtime/dist/**"] },
   ...tseslint.configs.recommended,
   {
     // 絶対規約1: 決定論 — 非決定的APIの直接使用を全パッケージで禁止

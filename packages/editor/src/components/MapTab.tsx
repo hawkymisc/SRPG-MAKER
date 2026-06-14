@@ -30,6 +30,7 @@ export function MapTab() {
   const setWinCondition = useProjectStore((s) => s.setWinCondition);
   const mapUndo = useProjectStore((s) => s.mapUndo);
   const mapRedo = useProjectStore((s) => s.mapRedo);
+  const setMapEventIds = useProjectStore((s) => s.setMapEventIds);
 
   if (!project) {
     return <p data-testid="map-tab">プロジェクトを読み込んでください。</p>;
@@ -38,6 +39,8 @@ export function MapTab() {
   const mapIds = Object.keys(project.maps);
   const map = selectedMapId ? project.maps[selectedMapId] : null;
   const terrains = Object.values(project.database.terrain);
+  const eventList = Object.values(project.events ?? {});
+  const attachedIds = map?.eventIds ?? [];
 
   const handleCellClick = (x: number, y: number, shift: boolean) => {
     if (!selectedMapId) return;
@@ -164,6 +167,50 @@ export function MapTab() {
             >
               <option value="defeat_all_enemies">defeat_all_enemies</option>
             </select>
+            <h3>イベント</h3>
+            <select
+              value=""
+              onChange={(e) => {
+                const id = e.target.value;
+                if (!id || !selectedMapId || attachedIds.includes(id as never)) return;
+                setMapEventIds(selectedMapId, [...attachedIds, id]);
+              }}
+              data-testid="map-event-attach"
+              aria-label="イベントをマップに追加"
+            >
+              <option value="">— 追加 —</option>
+              {eventList
+                .filter((ev) => !attachedIds.includes(ev.id))
+                .map((ev) => (
+                  <option key={ev.id} value={ev.id}>
+                    {ev.name ?? ev.id}
+                  </option>
+                ))}
+            </select>
+            <ul className="map-event-list" data-testid="map-event-list">
+              {attachedIds.map((id) => {
+                const ev = project.events?.[id];
+                return (
+                  <li key={id}>
+                    <span data-testid={`map-event-${id}`}>{ev?.name ?? id}</span>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        selectedMapId &&
+                        setMapEventIds(
+                          selectedMapId,
+                          attachedIds.filter((eid) => eid !== id),
+                        )
+                      }
+                      data-testid={`map-event-detach-${id}`}
+                      aria-label={`${id} を外す`}
+                    >
+                      ×
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
           </aside>
           <div
             className="map-grid"

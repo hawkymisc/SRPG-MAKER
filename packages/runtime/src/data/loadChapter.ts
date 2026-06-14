@@ -1,11 +1,13 @@
 import {
   ClassSchema,
+  EventDefinitionSchema,
   ItemSchema,
   MapSchema,
   SkillSchema,
   TerrainSchema,
   UnitSchema,
   WeaponSchema,
+  type EventDefinition,
   type MapData,
 } from "@srpg/shared";
 import type { BattleDatabase } from "@srpg/shared";
@@ -13,6 +15,8 @@ import type { BattleDatabase } from "@srpg/shared";
 export interface ChapterData {
   map: MapData;
   database: BattleDatabase;
+  events: EventDefinition[];
+  chapterId: string;
 }
 
 export const EDITOR_TESTPLAY_KEY = "srpg-editor-testplay";
@@ -51,8 +55,25 @@ export function buildDatabase(rawParts: Record<DbKey, unknown>): BattleDatabase 
 export interface EditorTestPlayPayload {
   map: MapData;
   database: BattleDatabase;
+  events?: EventDefinition[];
+  chapterId?: string;
   seed?: number;
   debug?: { invincible?: boolean };
+}
+
+export function parseEvents(raw: unknown): EventDefinition[] {
+  if (raw === undefined || raw === null) {
+    return [];
+  }
+  if (Array.isArray(raw)) {
+    return raw.map((entry) => EventDefinitionSchema.parse(entry));
+  }
+  if (typeof raw === "object") {
+    return Object.values(raw as Record<string, unknown>).map((entry) =>
+      EventDefinitionSchema.parse(entry),
+    );
+  }
+  throw new Error("Invalid events JSON");
 }
 
 export function loadChapterFromEditorStorage(): EditorTestPlayPayload | null {
@@ -71,6 +92,8 @@ export function loadChapterFromEditorStorage(): EditorTestPlayPayload | null {
         skills: parsed.database.skills,
         terrain: parsed.database.terrain,
       }),
+      events: parseEvents(parsed.events),
+      chapterId: parsed.chapterId ?? "chapter01",
       ...(parsed.seed !== undefined ? { seed: parsed.seed } : {}),
       ...(parsed.debug ? { debug: parsed.debug } : {}),
     };
@@ -87,10 +110,19 @@ async function fetchJson(url: string): Promise<unknown> {
   return res.json() as Promise<unknown>;
 }
 
+async function fetchEvents(base: string, mapId: string): Promise<EventDefinition[]> {
+  try {
+    const raw = await fetchJson(`${base}/events/${mapId}.json`);
+    return parseEvents(raw);
+  } catch {
+    return [];
+  }
+}
+
 /** Load chapter map + database from HTTP (browser / Vite dev server). */
 export async function loadChapter(baseUrl: string, mapId = "chapter01"): Promise<ChapterData> {
   const base = baseUrl.replace(/\/$/, "");
-  const [mapRaw, units, classes, weapons, items, skills, terrain] = await Promise.all([
+  const [mapRaw, units, classes, weapons, items, skills, terrain, events] = await Promise.all([
     fetchJson(`${base}/maps/${mapId}.json`),
     fetchJson(`${base}/database/units.json`),
     fetchJson(`${base}/database/classes.json`),
@@ -98,10 +130,13 @@ export async function loadChapter(baseUrl: string, mapId = "chapter01"): Promise
     fetchJson(`${base}/database/items.json`),
     fetchJson(`${base}/database/skills.json`),
     fetchJson(`${base}/database/terrain.json`),
+    fetchEvents(base, mapId),
   ]);
 
   return {
     map: MapSchema.parse(mapRaw),
     database: buildDatabase({ units, classes, weapons, items, skills, terrain }),
+    events,
+    chapterId: mapId,
   };
 }

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { MapIdSchema, UnitIdSchema, WeaponIdSchema } from "./ids.js";
+import { EventIdSchema, MapIdSchema, UnitIdSchema, WeaponIdSchema } from "./ids.js";
 import { TerrainIdSchema } from "./ids.js";
 
 export const FactionSchema = z.enum(["player", "enemy", "third"]);
@@ -60,6 +60,8 @@ export const MapSchema = z.object({
   reinforcements: z.array(ReinforcementSchema).default([]),
   winCondition: WinConditionSchema,
   loseCondition: LoseConditionSchema.default({ allPlayerDefeated: true }),
+  // このマップで有効化する project.events のイベント id 参照(後方互換のため既定 []）。
+  eventIds: z.array(EventIdSchema).default([]),
 });
 
 export type Faction = z.infer<typeof FactionSchema>;

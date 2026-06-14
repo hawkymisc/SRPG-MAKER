@@ -20,12 +20,18 @@ export class BootScene extends Phaser.Scene {
 
     const editorPayload = loadChapterFromEditorStorage();
     const chapter = editorPayload
-      ? { map: editorPayload.map, database: editorPayload.database }
+      ? {
+          map: editorPayload.map,
+          database: editorPayload.database,
+          events: editorPayload.events ?? [],
+          chapterId: editorPayload.chapterId ?? "chapter01",
+        }
       : await loadChapter(import.meta.env.BASE_URL);
     const seed = editorPayload?.seed ?? DEFAULT_BATTLE_SEED;
     const session = BattleSession.fromChapter(chapter, seed);
 
     this.registry.set(REGISTRY_KEYS.chapter, chapter);
+    this.registry.set(REGISTRY_KEYS.chapterId, chapter.chapterId);
     this.registry.set(REGISTRY_KEYS.session, session);
     this.registry.set(REGISTRY_KEYS.seed, seed);
     this.registry.set(REGISTRY_KEYS.autoPlayAll, false);

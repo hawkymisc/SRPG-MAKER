@@ -1,8 +1,10 @@
 import { create } from "zustand";
 import {
+  EventDefinitionSchema,
   MapSchema,
   SCHEMA_VERSION,
   TerrainIdSchema,
+  type EventDefinition,
   type MapData,
   type MapPlacement,
   type Project,
@@ -12,7 +14,7 @@ import { MemoryBackupStore, saveProjectAtomic } from "../lib/project/saveProject
 import { MemoryWriteTarget } from "../lib/project/atomicWrite.js";
 import { createHistory, executeCommand, redo, undo, type Command, type HistoryState } from "./history.js";
 
-export type EditorTab = "project" | "database" | "map" | "testplay";
+export type EditorTab = "project" | "database" | "map" | "testplay" | "events";
 export type DbTab = "units" | "classes" | "weapons" | "items" | "skills" | "terrain";
 export type MapTool = "pen" | "unit";
 
@@ -34,7 +36,9 @@ interface ProjectStore {
   dbTab: DbTab;
   selectedDbId: string | null;
   selectedMapId: string | null;
+  selectedEventId: string | null;
   fileName: string | null;
+  runtimeDistUrl: string;
   mapEdit: MapEditState;
   testPlaySeed: number;
   testPlayInvincible: boolean;
@@ -61,6 +65,11 @@ interface ProjectStore {
   setWinCondition: (mapId: string, type: "defeat_all_enemies") => void;
   mapUndo: (mapId: string) => void;
   mapRedo: (mapId: string) => void;
+  selectEvent: (eventId: string | null) => void;
+  addEvent: (id: string, event: EventDefinition) => void;
+  updateEvent: (id: string, event: EventDefinition) => void;
+  deleteEvent: (id: string) => void;
+  setMapEventIds: (mapId: string, eventIds: string[]) => void;
   markClean: () => void;
   setError: (error: string | null) => void;
   setTestPlaySeed: (seed: number) => void;
@@ -113,11 +122,13 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
   dbTab: "units",
   selectedDbId: null,
   selectedMapId: null,
+  selectedEventId: null,
   fileName: null,
   mapEdit: defaultMapEdit(),
   testPlaySeed: 42_001,
   testPlayInvincible: false,
   runtimeUrl: "http://localhost:5174",
+  runtimeDistUrl: "http://localhost:5174",
 
   async initNewProject() {
     set({ loading: true, error: null });
@@ -344,6 +355,69 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
     });
   },
 
+  selectEvent(eventId) {
+    set({ selectedEventId: eventId });
+  },
+
+  addEvent(id, event) {
+    const { project } = get();
+    if (!project || project.events?.[id]) return;
+    const parsed = EventDefinitionSchema.parse(event);
+    set({
+      project: {
+        ...project,
+        events: { ...(project.events ?? {}), [id]: parsed },
+      },
+      dirty: true,
+      selectedEventId: id,
+    });
+  },
+
+  updateEvent(id, event) {
+    const { project } = get();
+    if (!project) return;
+    const parsed = EventDefinitionSchema.parse(event);
+    set({
+      project: {
+        ...project,
+        events: { ...(project.events ?? {}), [id]: parsed },
+      },
+      dirty: true,
+    });
+  },
+
+  deleteEvent(id) {
+    const { project, selectedEventId } = get();
+    if (!project) return;
+    const next = { ...(project.events ?? {}) };
+    delete next[id];
+    const nextMaps = { ...project.maps };
+    for (const [mapId, map] of Object.entries(nextMaps)) {
+      if (map.eventIds?.includes(id as never)) {
+        nextMaps[mapId] = {
+          ...map,
+          eventIds: map.eventIds.filter((eid) => eid !== id),
+        };
+      }
+    }
+    set({
+      project: { ...project, events: next, maps: nextMaps },
+      dirty: true,
+      selectedEventId: selectedEventId === id ? null : selectedEventId,
+    });
+  },
+
+  setMapEventIds(mapId, eventIds) {
+    const { project } = get();
+    if (!project) return;
+    const map = project.maps[mapId];
+    if (!map) return;
+    set({
+      project: withMap(project, mapId, { ...map, eventIds: eventIds as never[] }),
+      dirty: true,
+    });
+  },
+
   markClean() {
     set({ dirty: false });
   },
@@ -407,5 +481,6 @@ export function createEmptyProject(name: string): Project {
       terrain: {},
     },
     maps: { [map.id]: map },
+    events: {},
   };
 }

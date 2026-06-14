@@ -34,6 +34,12 @@ export default defineConfig({
       reuseExistingServer: true,
       timeout: 120_000,
     },
+    {
+      command: `tsx scripts/export-e2e-fixture.mts && tsx scripts/serve-static.mts e2e/fixtures/exported-game/game 5175 ${previewHost}`,
+      url: `http://${previewHost}:5175`,
+      reuseExistingServer: true,
+      timeout: 180_000,
+    },
   ],
   projects: [
     {
@@ -52,6 +58,15 @@ export default defineConfig({
         ...devices["Desktop Chrome"],
         baseURL: `http://${previewHost}:5173`,
         viewport: { width: 1100, height: 820 },
+      },
+    },
+    {
+      name: "export",
+      testMatch: /export-play\.spec\.ts/,
+      use: {
+        ...devices["Desktop Chrome"],
+        baseURL: `http://${previewHost}:5175`,
+        viewport: { width: 520, height: 420 },
       },
     },
   ],

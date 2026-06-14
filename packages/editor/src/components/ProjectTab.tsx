@@ -6,6 +6,11 @@ import { saveProjectAtomic } from "../lib/project/saveProject.js";
 import { MemoryWriteTarget } from "../lib/project/atomicWrite.js";
 import { BACKUP_PREFIX, loadBackupList } from "../lib/project/backup.js";
 import { createLocalStorageBackupStore } from "../lib/project/storageAdapter.js";
+import {
+  downloadExportBlob,
+  exportHtml5,
+  fetchRuntimeDist,
+} from "../lib/export/exportHtml5.js";
 
 const browserFs = createBrowserFileSystem();
 
@@ -19,8 +24,10 @@ export function ProjectTab() {
   const openProjectData = useProjectStore((s) => s.openProjectData);
   const markClean = useProjectStore((s) => s.markClean);
   const setError = useProjectStore((s) => s.setError);
+  const runtimeDistUrl = useProjectStore((s) => s.runtimeDistUrl);
   const [backupCount, setBackupCount] = useState(0);
   const [lastSaved, setLastSaved] = useState<string | null>(null);
+  const [exporting, setExporting] = useState(false);
 
   const refreshBackups = useCallback(() => {
     if (!project) return;
@@ -77,6 +84,21 @@ export function ProjectTab() {
     }
   };
 
+  const handleExportHtml5 = async () => {
+    if (!project) return;
+    setExporting(true);
+    setError(null);
+    try {
+      const runtimeFiles = await fetchRuntimeDist({ baseUrl: runtimeDistUrl });
+      const result = exportHtml5({ project, runtimeFiles });
+      downloadExportBlob(result.blob, result.fileName);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setExporting(false);
+    }
+  };
+
   return (
     <section className="panel" data-testid="project-tab">
       <h2>プロジェクト</h2>
@@ -93,6 +115,14 @@ export function ProjectTab() {
         </button>
         <button type="button" onClick={() => void handleLoadTemplateOnly()} data-testid="btn-reload-template">
           テンプレート再読込
+        </button>
+        <button
+          type="button"
+          onClick={() => void handleExportHtml5()}
+          disabled={!project || exporting}
+          data-testid="btn-export-html5"
+        >
+          {exporting ? "書き出し中…" : "HTML5書き出し"}
         </button>
       </div>
       {loading ? <p>読み込み中…</p> : null}

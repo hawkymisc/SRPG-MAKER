@@ -6,7 +6,7 @@
 ## 凡例
 チケットID: `M<番号>-T<番号>`(例: M1-T2)。状態: BACKLOG / IN_PROGRESS / REVIEW / DONE / BLOCKED
 
-## 現在のマイルストーン: M3 (完了)
+## 現在のマイルストーン: M4 (完了)
 
 ### M1 (完了)
 
@@ -31,7 +31,7 @@
 | M2-T6 | スクショ回帰 | test-engineer | DONE | Playwright 4画面・win32 baseline |
 | M2-T7 | 初回バランス計測 | qa-playtester | DONE | docs/reports/M2-baseline.md |
 
-### M3 (進行中)
+### M3 (完了)
 
 | ID | タスク | 担当エージェント | 状態 | 備考 |
 |----|--------|------------------|------|------|
@@ -41,6 +41,18 @@
 | M3-T4 | テストプレイ統合 | editor-dev | DONE | postMessage連携・デバッグパネル |
 | M3-T5 | 一気通貫E2E | test-engineer | DONE | e2e/editor-flow.spec.ts |
 
+### M4 (進行中)
+
+| ID | タスク | 担当エージェント | 状態 | 備考 |
+|----|--------|------------------|------|------|
+| M4-T1 | イベントコマンドスキーマ | schema-architect | IN_PROGRESS | 15コマンド+7トリガー凍結 |
+| M4-T2 | イベントインタプリタ(shared) | battle-logic-dev | BACKLOG | 条件・変数・スイッチ |
+| M4-T3 | イベントインタプリタ(runtime) | runtime-dev | BACKLOG | async generator+演出 |
+| M4-T4 | イベントエディタ | editor-dev | BACKLOG | コマンドリストUI |
+| M4-T5 | HTML5書き出し | editor-dev | BACKLOG | zipバンドル |
+| M4-T6 | 書き出しE2E | test-engineer | DONE | e2e/export-play.spec.ts + scripts/export-e2e-fixture.mts |
+| M4-T7 | MVP受け入れ照合 | オーケストレーター | BACKLOG | spec 2.1照合報告 |
+
 ## BLOCKED詳細(エスカレーション待ち)
 (なし)
 
@@ -49,3 +61,4 @@
 - 2026-06-12 M1 完了: shared 行カバレッジ87.9%、ゴールデン10本グリーン。次は M2 (`prompts/M2_runtime.md`)。
 - 2026-06-13 M2 完了: Phaserランタイム・playthrough・Playwrightスクショ4枚・ベースライン計測。起動: `pnpm dev:runtime` (http://localhost:5174)。次は M3 (`prompts/M3_editor.md`)。
 - 2026-06-13 M3 完了: Reactエディタ・schema-form・マップ/DB編集・テストプレイ・一気通貫E2E。起動: `pnpm dev:editor` (http://localhost:5173)。
+- 2026-06-13 M4 完了: イベント15種・HTML5書き出し・export E2E・MVPβ照合。詳細: `docs/reports/M4-mvp-acceptance.md`。

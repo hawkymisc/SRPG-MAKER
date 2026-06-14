@@ -13,6 +13,7 @@ packages/*/coverage/
 .claude/tools/jq.exe
 
 # Playwright
+e2e/fixtures/exported-game/
 test-results/
 playwright-report/
 blob-report/
