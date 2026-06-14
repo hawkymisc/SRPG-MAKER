@@ -45,13 +45,13 @@
 
 | ID | タスク | 担当エージェント | 状態 | 備考 |
 |----|--------|------------------|------|------|
-| M4-T1 | イベントコマンドスキーマ | schema-architect | IN_PROGRESS | 15コマンド+7トリガー凍結 |
-| M4-T2 | イベントインタプリタ(shared) | battle-logic-dev | BACKLOG | 条件・変数・スイッチ |
-| M4-T3 | イベントインタプリタ(runtime) | runtime-dev | BACKLOG | async generator+演出 |
-| M4-T4 | イベントエディタ | editor-dev | BACKLOG | コマンドリストUI |
-| M4-T5 | HTML5書き出し | editor-dev | BACKLOG | zipバンドル |
-| M4-T6 | 書き出しE2E | test-engineer | DONE | e2e/export-play.spec.ts + scripts/export-e2e-fixture.mts |
-| M4-T7 | MVP受け入れ照合 | オーケストレーター | BACKLOG | spec 2.1照合報告 |
+| M4-T1 | イベントコマンドスキーマ | schema-architect | DONE | 15コマンド+7トリガー凍結 |
+| M4-T2 | イベントインタプリタ(shared) | battle-logic-dev | DONE | 条件・変数・スイッチ・純粋コマンド |
+| M4-T3 | イベントインタプリタ(runtime) | runtime-dev | DONE | async generator+MessageWindow |
+| M4-T4 | イベントエディタ | editor-dev | DONE | Ctrl+5 コマンドリストUI |
+| M4-T5 | HTML5書き出し | editor-dev | DONE | game/配下zip・fflate |
+| M4-T6 | 書き出しE2E | test-engineer | DONE | e2e/export-play.spec.ts |
+| M4-T7 | MVP受け入れ照合 | オーケストレーター | DONE | docs/reports/M4-mvp-acceptance.md |
 
 ## BLOCKED詳細(エスカレーション待ち)
 (なし)
