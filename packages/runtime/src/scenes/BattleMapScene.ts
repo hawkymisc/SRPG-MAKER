@@ -11,6 +11,7 @@ import { EventController } from "../event/EventController.js";
 import { BattleSession } from "../game/BattleSession.js";
 import { REGISTRY_KEYS } from "../game/registry.js";
 import { MapGrid } from "../render/MapGrid.js";
+import { CombatFx } from "../render/CombatFx.js";
 import { UnitSprites } from "../render/UnitSprites.js";
 import { SaveManager } from "../save/SaveManager.js";
 import { ActionMenu, type ActionMenuChoice } from "../ui/ActionMenu.js";
@@ -43,6 +44,7 @@ export class BattleMapScene extends Phaser.Scene {
   private cursor!: Cursor;
   private highlight!: TileHighlight;
   private unitSprites!: UnitSprites;
+  private combatFx!: CombatFx;
   private hud!: Hud;
   private actionMenu!: ActionMenu;
   private combatPreview!: CombatPreviewPanel;
@@ -77,6 +79,7 @@ export class BattleMapScene extends Phaser.Scene {
     this.add.rectangle(MAP_PX / 2, MAP_PX / 2, MAP_PX, MAP_PX, 0x263238);
     new MapGrid(this, this.chapter.map, this.chapter.database);
     this.unitSprites = new UnitSprites(this);
+    this.combatFx = new CombatFx(this);
     this.cursor = new Cursor(this);
     this.cursor.setMapSize(this.chapter.map.width, this.chapter.map.height);
     this.highlight = new TileHighlight(this);
@@ -584,14 +587,25 @@ export class BattleMapScene extends Phaser.Scene {
   }
 
   private async playCombatLogs(logs: BattleLogEntry[], primaryTargetId: string): Promise<void> {
-    const damageKinds = new Set(["damage", "crit", "miss"]);
+    const strikeKinds = new Set(["damage", "crit", "miss"]);
+    this.mode = "animating";
+
     for (const log of logs) {
-      if (damageKinds.has(log.kind) && log.target) {
-        await this.unitSprites.flashDamage(log.target);
+      if (!strikeKinds.has(log.kind) || !log.target || !log.actor) {
+        continue;
       }
+      const kind = log.kind as "damage" | "crit" | "miss";
+      await this.combatFx.playStrike(
+        this.unitSprites,
+        log.actor,
+        log.target,
+        kind,
+        log.strike?.damage,
+      );
     }
+
     if (logs.some((l) => l.kind === "kill" && l.target === primaryTargetId)) {
-      await this.delay(120);
+      await this.delay(160);
     }
   }
 

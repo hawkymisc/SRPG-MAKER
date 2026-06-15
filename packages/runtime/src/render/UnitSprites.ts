@@ -108,19 +108,72 @@ export class UnitSprites {
     });
   }
 
-  flashDamage(unitId: string): Promise<void> {
+  getUnitCenter(unitId: string): { x: number; y: number } | null {
+    const entry = this.entries.get(unitId);
+    if (!entry) {
+      return null;
+    }
+    return { x: entry.sprite.x, y: entry.sprite.y };
+  }
+
+  async animateLunge(
+    attackerId: string,
+    targetId: string,
+    durationMs = 100,
+  ): Promise<void> {
+    const attacker = this.entries.get(attackerId);
+    const target = this.entries.get(targetId);
+    if (!attacker || !target) {
+      return;
+    }
+
+    const originX = attacker.sprite.x;
+    const originY = attacker.sprite.y;
+    const midX = originX + (target.sprite.x - originX) * 0.35;
+    const midY = originY + (target.sprite.y - originY) * 0.35;
+
+    await new Promise<void>((resolve) => {
+      this.scene.tweens.add({
+        targets: [attacker.sprite, attacker.hpBar, attacker.hpBg],
+        x: midX,
+        y: midY,
+        duration: durationMs,
+        yoyo: true,
+        ease: "Quad.easeOut",
+        onUpdate: () => {
+          attacker.hpBar.x = attacker.sprite.x - (TILE_SIZE - 6) / 2;
+          attacker.hpBg.x = attacker.sprite.x;
+        },
+        onComplete: () => {
+          attacker.sprite.setPosition(originX, originY);
+          attacker.hpBar.setPosition(originX - (TILE_SIZE - 6) / 2, originY - TILE_SIZE / 2 + 4);
+          attacker.hpBg.setPosition(originX, originY - TILE_SIZE / 2 + 4);
+          resolve();
+        },
+      });
+    });
+  }
+
+  flashDamage(unitId: string, crit = false): Promise<void> {
     const entry = this.entries.get(unitId);
     if (!entry) {
       return Promise.resolve();
     }
     return new Promise((resolve) => {
+      if (crit) {
+        entry.sprite.setTint(0xffd54f);
+      }
       this.scene.tweens.add({
         targets: entry.sprite,
         alpha: 0.2,
         yoyo: true,
-        repeat: 2,
-        duration: 80,
-        onComplete: () => resolve(),
+        repeat: crit ? 3 : 2,
+        duration: crit ? 60 : 80,
+        onComplete: () => {
+          entry.sprite.clearTint();
+          entry.sprite.setAlpha(1);
+          resolve();
+        },
       });
     });
   }
