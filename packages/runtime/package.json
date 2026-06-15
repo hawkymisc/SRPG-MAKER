@@ -13,9 +13,11 @@
   "dependencies": {
     "@srpg/plugin-api": "workspace:*",
     "@srpg/shared": "workspace:*",
+    "howler": "^2.2.4",
     "phaser": "^3.90.0"
   },
   "devDependencies": {
+    "@types/howler": "^2.2.12",
     "@types/node": "^22.15.32",
     "typescript": "^5.9.3",
     "vite": "^6.3.5",

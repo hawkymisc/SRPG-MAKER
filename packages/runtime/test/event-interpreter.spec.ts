@@ -114,6 +114,22 @@ describe("interpretEvent generator", () => {
     expect(result).toEqual({ status: "goto_chapter", chapterId: "chapter02" });
   });
 
+  it("yields PLAY_BGM and PLAY_SE", async () => {
+    const chapter = loadChapterFromDir(SAMPLE_ROOT, "chapter01");
+    const ctx: EventInterpreterContext = {
+      state: createInitialBattleState({ map: chapter.map, database: chapter.database }),
+    };
+    const { yields } = await driveInterpreter(
+      [
+        { cmd: "PLAY_BGM", bgmId: "bgm_intro" as import("@srpg/shared").BgmId, fadeInMs: 300 },
+        { cmd: "PLAY_SE", seId: "se_hit" as import("@srpg/shared").SeId },
+      ],
+      ctx,
+    );
+    expect(yields[0]).toEqual({ type: "PLAY_BGM", bgmId: "bgm_intro", fadeInMs: 300 });
+    expect(yields[1]).toEqual({ type: "PLAY_SE", seId: "se_hit" });
+  });
+
   it("SET_VARIABLE updates battle state variables", async () => {
     const chapter = loadChapterFromDir(SAMPLE_ROOT, "chapter01");
     const ctx: EventInterpreterContext = {

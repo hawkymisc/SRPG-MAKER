@@ -6,16 +6,16 @@
 ## 凡例
 チケットID: `M<番号>-T<番号>`(例: M1-T2)。状態: BACKLOG / IN_PROGRESS / REVIEW / DONE / BLOCKED
 
-## 現在のマイルストーン: M7 (進行中)
+## 現在のマイルストーン: M7 (完了)
 
-### M7 (進行中) — フェーズ3
+### M7 (完了) — フェーズ3
 
 | ID | タスク | 担当エージェント | 状態 | 備考 |
 |----|--------|------------------|------|------|
 | M7-T1 | フェーズ2最終受け入れ照合 | オーケストレーター | DONE | docs/reports/M6-phase2-final-acceptance.md |
 | M7-T2 | マップ戦闘演出強化 | runtime-dev | DONE | 突進・ダメージ数字・クリティカル演出 |
 | M7-T3 | 専用バトル画面 | runtime-dev | DONE | BattleScene overlay + ADR 0006 |
-| M7-T4 | イベントBGM/SE再生 | runtime-dev | BACKLOG | Howler.js — 依存追加要人間判断 |
+| M7-T4 | イベントBGM/SE再生 | runtime-dev | DONE | Howler.js GameAudio + assets/audio |
 | M7-T5 | Capacitorモバイル書き出し | editor-dev | DONE | www/ + capacitor shell zip |
 
 ### M6 (完了)
@@ -106,3 +106,5 @@
 - 2026-06-16 M7 着手: フェーズ3へ移行。M7-T1 最終受け入れ、M7-T2 マップ戦闘演出強化。
 - 2026-06-16 M7-T3 完了: BattleScene 専用バトル画面（並列オーバーレイ・マップCombatFxフォールバック）。
 - 2026-06-16 M7-T5 完了: Capacitor モバイル書き出し zip（www/ + shell）。
+- 2026-06-16 M7-T4 完了: Howler.js による PLAY_BGM/PLAY_SE 再生。
+- 2026-06-16 M7 完了: フェーズ3スコープ（戦闘演出・モバイル書き出し・イベント音声）達成。

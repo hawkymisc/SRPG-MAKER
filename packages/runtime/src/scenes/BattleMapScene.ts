@@ -16,6 +16,7 @@ import {
 } from "../battle/battleStrikePlayback.js";
 import { BATTLE_PLAYBACK_COMPLETE, BATTLE_SCENE_KEY } from "./BattleScene.js";
 import { CombatFx } from "../render/CombatFx.js";
+import { GameAudio } from "../audio/GameAudio.js";
 import { UnitSprites } from "../render/UnitSprites.js";
 import { SaveManager } from "../save/SaveManager.js";
 import { ActionMenu, type ActionMenuChoice } from "../ui/ActionMenu.js";
@@ -55,6 +56,7 @@ export class BattleMapScene extends Phaser.Scene {
   private messageWindow!: MessageWindow;
   private choiceDialog!: ChoiceDialog;
   private eventController!: EventController;
+  private gameAudio!: GameAudio;
 
   private mode: UiMode = "idle";
   private selectedUnitId: string | null = null;
@@ -73,6 +75,10 @@ export class BattleMapScene extends Phaser.Scene {
     void this.bootstrap();
   }
 
+  shutdown(): void {
+    this.gameAudio?.destroy();
+  }
+
   private async bootstrap(): Promise<void> {
     this.chapter = this.registry.get(REGISTRY_KEYS.chapter) as ChapterData;
     this.session =
@@ -84,6 +90,7 @@ export class BattleMapScene extends Phaser.Scene {
     new MapGrid(this, this.chapter.map, this.chapter.database);
     this.unitSprites = new UnitSprites(this);
     this.combatFx = new CombatFx(this);
+    this.gameAudio = new GameAudio(import.meta.env.BASE_URL, { muted: this.autoPlayAll });
     this.cursor = new Cursor(this);
     this.cursor.setMapSize(this.chapter.map.width, this.chapter.map.height);
     this.highlight = new TileHighlight(this);
@@ -103,6 +110,7 @@ export class BattleMapScene extends Phaser.Scene {
       choiceDialog: this.choiceDialog,
       unitSprites: this.unitSprites,
       scene: this,
+      gameAudio: this.gameAudio,
       autoAdvanceEvents: this.autoPlayAll,
       units: this.chapter.database.units,
       onStateChanged: () => this.refreshView(),
@@ -152,6 +160,7 @@ export class BattleMapScene extends Phaser.Scene {
       choiceDialog: this.choiceDialog,
       unitSprites: this.unitSprites,
       scene: this,
+      gameAudio: this.gameAudio,
       autoAdvanceEvents: this.autoPlayAll,
       units: chapter.database.units,
       onStateChanged: () => this.refreshView(),

@@ -9,12 +9,14 @@ import type { EventInterpreterContext, EventResult, EventResume, EventYield } fr
 import type { ChoiceDialog } from "../ui/ChoiceDialog.js";
 import type { MessageWindow } from "../ui/MessageWindow.js";
 import type { UnitSprites } from "../render/UnitSprites.js";
+import type { GameAudio } from "../audio/GameAudio.js";
 
 export interface EventHost {
   messageWindow: MessageWindow;
   choiceDialog: ChoiceDialog;
   unitSprites: UnitSprites;
   scene: Phaser.Scene;
+  gameAudio: GameAudio;
   autoAdvanceEvents: boolean;
   units: Record<string, Unit>;
   onStateChanged: () => void;
@@ -112,7 +114,11 @@ export class EventController {
         return undefined;
 
       case "PLAY_BGM":
+        await host.gameAudio.playBgm(yieldValue.bgmId, yieldValue.fadeInMs);
+        return undefined;
+
       case "PLAY_SE":
+        host.gameAudio.playSe(yieldValue.seId);
         return undefined;
 
       case "MOVE_UNIT": {
