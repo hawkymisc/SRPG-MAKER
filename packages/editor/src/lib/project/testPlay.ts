@@ -6,6 +6,7 @@ import type {
   PluginManifest,
   Project,
   Chapter,
+  SupportConversation,
 } from "@srpg/shared";
 import { createInitialCampaign } from "@srpg/shared";
 
@@ -24,6 +25,7 @@ export interface ChapterPayload {
   campaign: CampaignState;
   plugins: Record<string, PluginManifest>;
   enabledPlugins: string[];
+  supports: Record<string, SupportConversation>;
 }
 
 export const TESTPLAY_STORAGE_KEY = "srpg-editor-testplay";
@@ -68,6 +70,7 @@ export function buildChapterPayload(
     campaign,
     plugins: project.plugins ?? {},
     enabledPlugins: project.enabledPlugins ?? [],
+    supports: project.supports ?? {},
   };
 }
 

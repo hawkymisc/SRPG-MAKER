@@ -45,6 +45,8 @@ export function createInitialCampaign(input: CreateInitialCampaignInput): Campai
     clearedChapterIds: [],
     variables: {},
     switches: {},
+    supportPoints: {},
+    viewedSupportIds: [],
   };
 }
 

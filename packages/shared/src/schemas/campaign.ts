@@ -34,6 +34,9 @@ export const CampaignStateSchema = z.object({
   clearedChapterIds: z.array(ChapterIdSchema).default([]),
   variables: z.record(VariableIdSchema, z.number()).default({}),
   switches: z.record(SwitchIdSchema, z.boolean()).default({}),
+  /** Pair key (see supportPairKey) → accumulated support points. */
+  supportPoints: z.record(z.string(), z.number().int().nonnegative()).default({}),
+  viewedSupportIds: z.array(z.string()).default([]),
 });
 
 export type RosterMember = z.infer<typeof RosterMemberSchema>;

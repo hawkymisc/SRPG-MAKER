@@ -6,7 +6,16 @@
 ## 凡例
 チケットID: `M<番号>-T<番号>`(例: M1-T2)。状態: BACKLOG / IN_PROGRESS / REVIEW / DONE / BLOCKED
 
-## 現在のマイルストーン: M5 (完了)
+## 現在のマイルストーン: M6 (完了)
+
+### M6 (完了)
+
+| ID | タスク | 担当エージェント | 状態 | 備考 |
+|----|--------|------------------|------|------|
+| M6-T1 | フェーズ2受け入れ照合 | オーケストレーター | DONE | docs/reports/M5-phase2-acceptance.md |
+| M6-T2 | プラグイン有効/無効UI | editor-dev | DONE | プロジェクトタブ |
+| M6-T3 | 支援会話システム | battle-logic-dev + runtime-dev | DONE | 支援ポイント+拠点メニュー6 |
+| M6-T4 | Electronエディタラッパー | editor-dev | DONE | packages/editor-electron + ネイティブFS |
 
 ### M5 (完了)
 
@@ -79,3 +88,8 @@
 - 2026-06-15 M5-T4 完了: 会話プレビューパネル・MessageWindow 顔/話者名演出。
 - 2026-06-15 M5-T5 完了: plugin-api パッケージ・CombatHooks・宣言的プラグインルール。
 - 2026-06-15 M5-T6 完了: Electron シェル付き zip 書き出し・electron-builder 配布手順。
+- 2026-06-15 M5 完了: フェーズ2照合 docs/reports/M5-phase2-acceptance.md
+- 2026-06-15 M6-T1 完了: フェーズ2受け入れレポート。
+- 2026-06-15 M6-T3 完了: 支援会話（支援ポイント・拠点メニュー6・splitProject supports）。
+- 2026-06-15 M6-T4 完了: Electron エディタラッパー（packages/editor-electron・ネイティブFS）。
+- 2026-06-15 M6 完了: フェーズ2残タスクすべて DONE。

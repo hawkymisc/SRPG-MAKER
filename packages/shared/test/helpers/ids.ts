@@ -1,4 +1,5 @@
 import {
+  ChapterIdSchema,
   ClassIdSchema,
   ItemIdSchema,
   SwitchIdSchema,
@@ -9,6 +10,7 @@ import {
 } from "../../src/schemas/ids.js";
 
 export const U = (id: string) => UnitIdSchema.parse(id);
+export const CH = (id: string) => ChapterIdSchema.parse(id);
 export const W = (id: string) => WeaponIdSchema.parse(id);
 export const C = (id: string) => ClassIdSchema.parse(id);
 export const I = (id: string) => ItemIdSchema.parse(id);

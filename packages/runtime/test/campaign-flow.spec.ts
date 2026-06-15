@@ -76,6 +76,8 @@ describe("campaign flow helpers", () => {
         clearedChapterIds: [],
         variables: {},
         switches: {},
+        supportPoints: {},
+        viewedSupportIds: [],
       },
       42,
     );

@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { ChapterSchema, mapFileStem } from "@srpg/shared";
 import { useProjectStore } from "../store/projectStore.js";
-import { createBrowserFileSystem } from "../lib/project/fileSystem.js";
+import { createProjectFileSystem } from "../lib/project/createFileSystem.js";
+import { getElectronBridge } from "../lib/project/electronBridge.js";
 import { loadSampleTemplate } from "../lib/project/loadTemplate.js";
 import { saveProjectAtomic } from "../lib/project/saveProject.js";
 import { MemoryWriteTarget } from "../lib/project/atomicWrite.js";
@@ -14,12 +15,15 @@ import {
 } from "../lib/export/exportHtml5.js";
 import { exportElectron } from "../lib/export/exportElectron.js";
 
-const browserFs = createBrowserFileSystem();
-
 export function ProjectTab() {
+  const projectFs = useMemo(() => createProjectFileSystem(), []);
+  const isDesktopEditor = useMemo(() => getElectronBridge() !== undefined, []);
   const project = useProjectStore((s) => s.project);
   const dirty = useProjectStore((s) => s.dirty);
   const fileName = useProjectStore((s) => s.fileName);
+  const storageKind = useProjectStore((s) => s.storageKind);
+  const projectLocation = useProjectStore((s) => s.projectLocation);
+  const applySaveTarget = useProjectStore((s) => s.applySaveTarget);
   const loading = useProjectStore((s) => s.loading);
   const error = useProjectStore((s) => s.error);
   const initNewProject = useProjectStore((s) => s.initNewProject);
@@ -32,6 +36,7 @@ export function ProjectTab() {
   const removeChapter = useProjectStore((s) => s.removeChapter);
   const selectChapter = useProjectStore((s) => s.selectChapter);
   const updateChapter = useProjectStore((s) => s.updateChapter);
+  const togglePluginEnabled = useProjectStore((s) => s.togglePluginEnabled);
   const selectedChapterId = useProjectStore((s) => s.selectedChapterId);
   const [backupCount, setBackupCount] = useState(0);
   const [lastSaved, setLastSaved] = useState<string | null>(null);
@@ -53,9 +58,12 @@ export function ProjectTab() {
   };
 
   const handleOpen = async () => {
-    const opened = await browserFs.openProject();
+    const opened = await projectFs.openProject();
     if (opened) {
-      openProjectData(opened.name, opened.project);
+      openProjectData(opened.name, opened.project, {
+        storageKind: opened.storageKind,
+        projectLocation: opened.projectLocation,
+      });
     }
   };
 
@@ -64,8 +72,13 @@ export function ProjectTab() {
     setError(null);
     try {
       const key = fileName ?? `${project.name}.json`;
-      if ("showSaveFilePicker" in window) {
-        await browserFs.saveProject(project, key);
+      if (projectFs.nativeFolder || "showSaveFilePicker" in window) {
+        const next = await projectFs.saveProject(project, {
+          fileName: key,
+          storageKind,
+          projectLocation,
+        });
+        applySaveTarget(next);
       } else {
         const target = new MemoryWriteTarget();
         await saveProjectAtomic({
@@ -75,8 +88,8 @@ export function ProjectTab() {
           projectKey: key,
         });
         setLastSaved(target.content.slice(0, 80));
+        markClean();
       }
-      markClean();
       refreshBackups();
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
@@ -135,6 +148,11 @@ export function ProjectTab() {
   return (
     <section className="panel" data-testid="project-tab">
       <h2>プロジェクト</h2>
+      {isDesktopEditor ? (
+        <p className="hint" data-testid="desktop-editor-badge">
+          デスクトップ版 — フォルダ形式のネイティブ保存に対応
+        </p>
+      ) : null}
       {error ? <p className="error" role="alert">{error}</p> : null}
       <div className="toolbar">
         <button type="button" onClick={() => void handleNewSample()} data-testid="btn-new-project">
@@ -173,6 +191,14 @@ export function ProjectTab() {
           <dd data-testid="project-name">{project.name}</dd>
           <dt>ファイル</dt>
           <dd>{fileName ?? "—"}</dd>
+          {projectLocation ? (
+            <>
+              <dt>保存先</dt>
+              <dd data-testid="project-location">{projectLocation}</dd>
+            </>
+          ) : null}
+          <dt>形式</dt>
+          <dd data-testid="project-storage-kind">{storageKind === "folder" ? "フォルダ" : "JSON"}</dd>
           <dt>状態</dt>
           <dd data-testid="project-dirty">{dirty ? "未保存" : "保存済み"}</dd>
           <dt>マップ数</dt>
@@ -276,6 +302,42 @@ export function ProjectTab() {
                   </button>
                 </li>
               ))}
+          </ul>
+        </section>
+      ) : null}
+      {project && Object.keys(project.plugins ?? {}).length > 0 ? (
+        <section className="plugin-panel" data-testid="plugin-panel">
+          <h3>プラグイン</h3>
+          <ul className="plugin-list">
+            {Object.values(project.plugins ?? {}).map((plugin) => {
+              const enabled = (project.enabledPlugins ?? []).includes(plugin.id);
+              return (
+                <li key={plugin.id} data-testid={`plugin-row-${plugin.id}`}>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={enabled}
+                      onChange={(e) => togglePluginEnabled(plugin.id, e.target.checked)}
+                      data-testid={`plugin-enabled-${plugin.id}`}
+                    />
+                    {plugin.name} (v{plugin.version}) — {plugin.rules.length} rules
+                  </label>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      ) : null}
+      {project && Object.keys(project.supports ?? {}).length > 0 ? (
+        <section className="plugin-panel" data-testid="support-panel">
+          <h3>支援会話</h3>
+          <ul className="plugin-list">
+            {Object.values(project.supports ?? {}).map((support) => (
+              <li key={support.id} data-testid={`support-row-${support.id}`}>
+                [{support.rank}] {support.unitA} × {support.unitB} — {support.name} (必要Pt:{" "}
+                {support.requiredPoints})
+              </li>
+            ))}
           </ul>
         </section>
       ) : null}

@@ -11,6 +11,8 @@ import {
   ChapterSchema,
   mapFileStem,
   PluginManifestSchema,
+  parseEventsRecord,
+  parseSupportsRecord,
   type Project,
 } from "@srpg/shared";
 
@@ -52,7 +54,8 @@ export interface TemplateLoadOptions {
 export async function loadSampleTemplate(options: TemplateLoadOptions = {}): Promise<Project> {
   const base = (options.baseUrl ?? "/").replace(/\/$/, "");
   const mapId = options.mapId ?? "chapter01";
-  const [units, classes, weapons, items, skills, terrain, mapRaw, pluginRaw] = await Promise.all([
+  const [units, classes, weapons, items, skills, terrain, mapRaw, pluginRaw, eventsRaw, supportsRaw] =
+    await Promise.all([
     fetchJson(`${base}/database/units.json`),
     fetchJson(`${base}/database/classes.json`),
     fetchJson(`${base}/database/weapons.json`),
@@ -61,6 +64,8 @@ export async function loadSampleTemplate(options: TemplateLoadOptions = {}): Pro
     fetchJson(`${base}/database/terrain.json`),
     fetchJson(`${base}/maps/${mapId}.json`),
     fetchJson(`${base}/plugins/plugin_sword_bonus/plugin.json`).catch(() => null),
+    fetchJson(`${base}/events/common.json`).catch(() => ({})),
+    fetchJson(`${base}/supports/supports.json`).catch(() => ({})),
   ]);
 
   const database: Record<DbKey, Record<string, unknown>> = {
@@ -98,6 +103,8 @@ export async function loadSampleTemplate(options: TemplateLoadOptions = {}): Pro
     maps: { [map.id]: map },
     chapters,
     startChapterId: chapterId,
+    events: parseEventsRecord(eventsRaw),
+    supports: parseSupportsRecord(supportsRaw),
     ...(pluginManifest
       ? {
           plugins: { [pluginManifest.id]: pluginManifest },

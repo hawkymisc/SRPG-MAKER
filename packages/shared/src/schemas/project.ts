@@ -6,6 +6,7 @@ import { EventDefinitionSchema } from "./event.js";
 import { ItemSchema } from "./item.js";
 import { MapSchema } from "./map.js";
 import { PluginManifestSchema } from "./plugin.js";
+import { SupportConversationSchema } from "./support.js";
 import { SkillSchema } from "./skill.js";
 import { TerrainSchema } from "./terrain.js";
 import { UnitSchema } from "./unit.js";
@@ -32,6 +33,7 @@ export const ProjectSchema = z.object({
   startChapterId: ChapterIdSchema.optional(),
   plugins: z.record(PluginManifestSchema).default({}),
   enabledPlugins: z.array(z.string()).default([]),
+  supports: z.record(SupportConversationSchema).default({}),
 });
 
 export type Project = z.infer<typeof ProjectSchema>;
@@ -54,5 +56,6 @@ export function createDefaultProject(name: string): Project {
     chapters: {},
     plugins: {},
     enabledPlugins: [],
+    supports: {},
   });
 }

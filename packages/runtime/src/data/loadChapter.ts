@@ -13,6 +13,8 @@ import {
   type EventDefinition,
   type MapData,
   type PluginManifest,
+  type SupportConversation,
+  parseSupportsRecord,
 } from "@srpg/shared";
 import type { BattleDatabase } from "@srpg/shared";
 
@@ -69,6 +71,7 @@ export interface EditorTestPlayPayload {
   eventsById?: Record<string, EventDefinition>;
   plugins?: Record<string, PluginManifest>;
   enabledPlugins?: string[];
+  supports?: Record<string, SupportConversation>;
 }
 
 export function parseEventsRecord(raw: unknown): Record<string, EventDefinition> {
@@ -134,6 +137,7 @@ export function loadChapterFromEditorStorage(): EditorTestPlayPayload | null {
       ...(parsed.eventsById ? { eventsById: parsed.eventsById } : {}),
       ...(parsed.plugins ? { plugins: parsed.plugins } : {}),
       ...(parsed.enabledPlugins ? { enabledPlugins: parsed.enabledPlugins } : {}),
+      ...(parsed.supports ? { supports: parsed.supports } : {}),
     };
   } catch {
     return null;
@@ -174,6 +178,19 @@ export async function loadEventsRecord(baseUrl: string): Promise<Record<string, 
   try {
     const raw = await fetchJson(`${base}/events/common.json`);
     return parseEventsRecord(raw);
+  } catch {
+    return {};
+  }
+}
+
+/** Load support conversation definitions keyed by id. */
+export async function loadSupportsRecord(
+  baseUrl: string,
+): Promise<Record<string, SupportConversation>> {
+  const base = baseUrl.replace(/\/$/, "");
+  try {
+    const raw = await fetchJson(`${base}/supports/supports.json`);
+    return parseSupportsRecord(raw);
   } catch {
     return {};
   }

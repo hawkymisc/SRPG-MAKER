@@ -124,6 +124,8 @@ describe("promotion", () => {
       clearedChapterIds: [],
       variables: {},
       switches: {},
+      supportPoints: {},
+      viewedSupportIds: [],
     };
     const placements = createBattlePlacementsFromCampaign(campaign, campaignMap, database, chapter);
     const player = placements.find((p) => p.faction === "player");
@@ -162,6 +164,8 @@ describe("promotion", () => {
       clearedChapterIds: [],
       variables: {},
       switches: {},
+      supportPoints: {},
+      viewedSupportIds: [],
     };
     const entries = listPromotableMembers(campaign, database);
     expect(entries).toHaveLength(1);

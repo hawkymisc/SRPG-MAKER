@@ -1,7 +1,10 @@
 import Phaser from "phaser";
 import {
   createBattlePlacementsFromCampaign,
+  getSupportPoints,
   listPromotableMembers,
+  listViewableSupports,
+  markSupportViewed,
   maxDeployCount,
   promoteMember,
   purchaseFromShop,
@@ -10,6 +13,7 @@ import {
   validateFormation,
   type Chapter,
   type EventDefinition,
+  type SupportConversation,
   type UnitId,
 } from "@srpg/shared";
 import { GAME_HEIGHT, GAME_WIDTH } from "../constants.js";
@@ -20,12 +24,13 @@ import { REGISTRY_KEYS } from "../game/registry.js";
 import { CampaignSaveManager } from "../save/CampaignSaveManager.js";
 import { MessageWindow } from "../ui/MessageWindow.js";
 
-type BaseMode = "menu" | "formation" | "shop" | "talk" | "promotion";
+type BaseMode = "menu" | "formation" | "shop" | "talk" | "promotion" | "support";
 
 export class BaseScene extends Phaser.Scene {
   private campaignSession!: CampaignSession;
   private chapters!: Record<string, Chapter>;
   private eventsById!: Record<string, EventDefinition>;
+  private supports!: Record<string, SupportConversation>;
   private database!: ChapterData["database"];
   private mode: BaseMode = "menu";
   private statusText!: Phaser.GameObjects.Text;
@@ -33,6 +38,7 @@ export class BaseScene extends Phaser.Scene {
   private messageWindow!: MessageWindow;
   private seed = 42_001;
   private promotableIndices: number[] = [];
+  private viewableSupports: SupportConversation[] = [];
 
   constructor() {
     super({ key: "Base" });
@@ -43,6 +49,8 @@ export class BaseScene extends Phaser.Scene {
     this.chapters = (this.registry.get(REGISTRY_KEYS.chapters) as Record<string, Chapter>) ?? {};
     this.eventsById =
       (this.registry.get(REGISTRY_KEYS.events) as Record<string, EventDefinition>) ?? {};
+    this.supports =
+      (this.registry.get(REGISTRY_KEYS.supports) as Record<string, SupportConversation>) ?? {};
     this.database =
       (this.registry.get(REGISTRY_KEYS.chapter) as ChapterData | undefined)?.database ??
       this.registry.get("bootDatabase") as ChapterData["database"];
@@ -100,6 +108,7 @@ export class BaseScene extends Phaser.Scene {
         "3: 会話",
         "4: 出撃（戦闘開始）",
         "5: クラスチェンジ",
+        "6: 支援会話",
         "",
         "Esc: メニューに戻る",
       ].join("\n"),
@@ -196,6 +205,46 @@ export class BaseScene extends Phaser.Scene {
     this.renderPromotion();
   }
 
+  private renderSupport(): void {
+    this.mode = "support";
+    this.viewableSupports = listViewableSupports(this.campaignSession.state, this.supports);
+    const lines = this.viewableSupports.map((support, index) => {
+      const unitA = this.database.units[support.unitA]?.name ?? support.unitA;
+      const unitB = this.database.units[support.unitB]?.name ?? support.unitB;
+      const points = getSupportPoints(this.campaignSession.state, support.unitA, support.unitB);
+      return `${index + 1}: [${support.rank}] ${unitA}×${unitB} — ${support.name} (${points}/${support.requiredPoints})`;
+    });
+    this.statusText.setText("支援会話 — 数字キーで視聴");
+    this.bodyText.setText(
+      lines.length > 0
+        ? [...lines, "", "視聴済みの会話は表示されません"].join("\n")
+        : "視聴可能な支援会話はありません（同時出撃して戦闘を終えると支援ポイントが貯まります）",
+    );
+  }
+
+  private async playSupportAtListIndex(listIndex: number): Promise<void> {
+    const support = this.viewableSupports[listIndex];
+    if (!support) return;
+    const def = this.eventsById[support.eventId];
+    if (!def) {
+      this.bodyText.setText(`イベント ${support.eventId} が見つかりません`);
+      return;
+    }
+    for (const cmd of def.commands) {
+      if (cmd.cmd === "SHOW_MESSAGE") {
+        await this.messageWindow.show(cmd.text, {
+          ...(cmd.speakerId !== undefined ? { speakerId: cmd.speakerId } : {}),
+          speakerName: resolveSpeakerLabel(cmd.speakerId, this.database.units),
+          ...(cmd.faceId !== undefined ? { faceId: cmd.faceId } : {}),
+        });
+      }
+    }
+    this.messageWindow.close();
+    this.campaignSession.state = markSupportViewed(this.campaignSession.state, support.id);
+    CampaignSaveManager.save(this.campaignSession);
+    this.renderSupport();
+  }
+
   private toggleFormationIndex(index: number): void {
     const member = this.campaignSession.state.roster[index];
     if (!member) return;
@@ -272,11 +321,13 @@ export class BaseScene extends Phaser.Scene {
     kb.on("keydown-THREE", () => this.onDigit(2));
     kb.on("keydown-FOUR", () => this.onDigit(3));
     kb.on("keydown-FIVE", () => this.onDigit(4));
+    kb.on("keydown-SIX", () => this.onDigit(5));
     kb.on("keydown-NUMPAD_ONE", () => this.onDigit(0));
     kb.on("keydown-NUMPAD_TWO", () => this.onDigit(1));
     kb.on("keydown-NUMPAD_THREE", () => this.onDigit(2));
     kb.on("keydown-NUMPAD_FOUR", () => this.onDigit(3));
     kb.on("keydown-NUMPAD_FIVE", () => this.onDigit(4));
+    kb.on("keydown-NUMPAD_SIX", () => this.onDigit(5));
 
     kb.on("keydown-ESC", () => {
       if (this.mode !== "menu") {
@@ -309,6 +360,9 @@ export class BaseScene extends Phaser.Scene {
         case 4:
           this.renderPromotion();
           break;
+        case 5:
+          this.renderSupport();
+          break;
       }
       return;
     }
@@ -322,6 +376,10 @@ export class BaseScene extends Phaser.Scene {
     }
     if (this.mode === "promotion") {
       this.promoteAtListIndex(index);
+      return;
+    }
+    if (this.mode === "support") {
+      void this.playSupportAtListIndex(index);
     }
   }
 }

@@ -8,6 +8,15 @@ export {
 export { purchaseFromShop } from "./shop.js";
 export { mergeBattleToCampaign, advanceAfterVictory } from "./merge.js";
 export {
+  addSupportPoints,
+  awardSupportBattlePoints,
+  canViewSupport,
+  getSupportPoints,
+  listViewableSupports,
+  markSupportViewed,
+  supportPairKey,
+} from "./support.js";
+export {
   DEFAULT_PROMOTION_MIN_LEVEL,
   applyPromotionStats,
   canPromote,

@@ -9,6 +9,7 @@ import {
   loadChapterFromEditorStorage,
   loadChaptersRecord,
   loadEventsRecord,
+  loadSupportsRecord,
 } from "../data/loadChapter.js";
 import { loadProjectPluginMeta } from "../plugins/loadPlugins.js";
 import { BattleSession } from "../game/BattleSession.js";
@@ -37,6 +38,8 @@ export class BootScene extends Phaser.Scene {
       editorPayload?.chapters ?? (await loadChaptersRecord(baseUrl));
     const eventsById =
       editorPayload?.eventsById ?? (await loadEventsRecord(baseUrl));
+    const supports =
+      editorPayload?.supports ?? (await loadSupportsRecord(baseUrl));
     const useCampaign = Object.keys(chapters).length > 0;
 
     const chapter = editorPayload
@@ -92,6 +95,7 @@ export class BootScene extends Phaser.Scene {
       this.registry.set(REGISTRY_KEYS.campaignSession, campaignSession);
       this.registry.set(REGISTRY_KEYS.chapters, chapters);
       this.registry.set(REGISTRY_KEYS.events, eventsById);
+      this.registry.set(REGISTRY_KEYS.supports, supports);
       this.registry.set(REGISTRY_KEYS.chapter, startChapter);
       this.scene.start("Title");
       return;

@@ -1,8 +1,9 @@
-import type { ItemId, SkillId, WeaponId } from "../schemas/ids.js";
+import type { ItemId, SkillId, WeaponId, UnitId } from "../schemas/ids.js";
 import type { BattleState } from "../battle/types.js";
 import type { ChapterId } from "../schemas/ids.js";
 import { RosterMemberSchema, type CampaignState } from "../schemas/campaign.js";
 import type { Chapter } from "../schemas/chapter.js";
+import { awardSupportBattlePoints } from "./support.js";
 
 const VICTORY_GOLD_BONUS = 100;
 
@@ -13,8 +14,12 @@ export function mergeBattleToCampaign(
 ): CampaignState {
   const survivors = battleState.units.filter((u) => u.faction === "player" && u.hp > 0);
   const survivorRefs = new Set(survivors.map((u) => u.ref));
+  const withSupport = awardSupportBattlePoints(
+    campaign,
+    survivors.map((u) => u.ref as UnitId),
+  );
 
-  const roster = campaign.roster.map((member) => {
+  const roster = withSupport.roster.map((member) => {
     const live = survivors.find((u) => u.ref === member.ref);
     if (!live) {
       return { ...member, hp: 0 };
@@ -33,15 +38,15 @@ export function mergeBattleToCampaign(
     });
   });
 
-  const deployedRefs = campaign.deployedRefs.filter((ref) => survivorRefs.has(ref));
+  const deployedRefs = withSupport.deployedRefs.filter((ref) => survivorRefs.has(ref));
 
   return {
-    ...campaign,
+    ...withSupport,
     roster,
     deployedRefs,
-    gold: campaign.gold + VICTORY_GOLD_BONUS,
-    variables: { ...campaign.variables, ...battleState.variables },
-    switches: { ...campaign.switches, ...battleState.switches },
+    gold: withSupport.gold + VICTORY_GOLD_BONUS,
+    variables: { ...withSupport.variables, ...battleState.variables },
+    switches: { ...withSupport.switches, ...battleState.switches },
   };
 }
 

@@ -260,3 +260,18 @@ export type EventDefinition = z.infer<typeof EventDefinitionSchema>;
 export const EventsCollectionSchema = z.record(EventDefinitionSchema);
 
 export type EventsCollection = z.infer<typeof EventsCollectionSchema>;
+
+export function parseEventsRecord(raw: unknown): Record<string, EventDefinition> {
+  if (raw === undefined || raw === null || typeof raw !== "object") {
+    return {};
+  }
+  const out: Record<string, EventDefinition> = {};
+  for (const [key, value] of Object.entries(raw as Record<string, unknown>)) {
+    const parsed = EventDefinitionSchema.parse(value);
+    if (parsed.id !== key) {
+      throw new Error(`Event key mismatch: ${key} vs ${parsed.id}`);
+    }
+    out[key] = parsed;
+  }
+  return out;
+}

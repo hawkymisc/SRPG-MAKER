@@ -1,0 +1,11 @@
+{
+  "sup_alm_lukas_c": {
+    "id": "sup_alm_lukas_c",
+    "name": "二人の誓い",
+    "unitA": "unit_alm",
+    "unitB": "unit_lukas",
+    "rank": "C",
+    "requiredPoints": 1,
+    "eventId": "ev_support_alm_lukas_c"
+  }
+}

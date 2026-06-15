@@ -10,6 +10,7 @@ import {
   ChapterSchema,
   mapFileStem,
   PluginManifestSchema,
+  parseSupportsRecord,
   type Project,
 } from "@srpg/shared";
 
@@ -87,6 +88,8 @@ export function splitProject(project: Project): SplitProjectFiles {
 
   files["events/common.json"] = jsonFile(validated.events ?? {});
 
+  files["supports/supports.json"] = jsonFile(validated.supports ?? {});
+
   return files;
 }
 
@@ -126,6 +129,7 @@ export function mergeSplitProject(files: SplitProjectFiles): Project {
   let chapters: Project["chapters"] = {};
   const plugins: Project["plugins"] = {};
   let enabledPlugins: Project["enabledPlugins"] = [];
+  let supports: Project["supports"] = {};
   for (const [path, text] of Object.entries(files)) {
     if (path.startsWith("maps/") && path.endsWith(".json")) {
       const map = MapSchema.parse(JSON.parse(text));
@@ -154,6 +158,10 @@ export function mergeSplitProject(files: SplitProjectFiles): Project {
     if (path.startsWith("plugins/") && path.endsWith("/plugin.json")) {
       const id = path.slice("plugins/".length, -"/plugin.json".length);
       plugins[id] = PluginManifestSchema.parse(JSON.parse(text));
+      continue;
+    }
+    if (path === "supports/supports.json") {
+      supports = parseSupportsRecord(JSON.parse(text));
     }
   }
 
@@ -173,5 +181,6 @@ export function mergeSplitProject(files: SplitProjectFiles): Project {
     chapters,
     plugins,
     enabledPlugins,
+    supports,
   });
 }

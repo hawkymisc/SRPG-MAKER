@@ -72,6 +72,7 @@ describe("splitProject", () => {
     expect(files["maps/chapter01.json"]).toContain("map_chapter01");
     expect(files["events/chapter01.json"]).toContain("event_1");
     expect(files["events/common.json"]).toContain("event_1");
+    expect(files["supports/supports.json"]).toContain("{}");
   });
 
   it("round-trips through mergeSplitProject", () => {
@@ -93,6 +94,7 @@ describe("exportHtml5", () => {
     const paths = listExportFilePaths(sampleProject, Object.keys(runtimeFiles));
     expect(paths).toContain("game/project.json");
     expect(paths).toContain("game/events/common.json");
+    expect(paths).toContain("game/supports/supports.json");
     expect(paths).toContain("game/maps/chapter01.json");
     expect(paths).toContain("game/index.html");
     expect(paths).toContain("game/assets/index.js");

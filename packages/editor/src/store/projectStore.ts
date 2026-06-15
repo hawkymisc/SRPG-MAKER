@@ -27,6 +27,8 @@ import {
 import { MemoryBackupStore, saveProjectAtomic } from "../lib/project/saveProject.js";
 import { MemoryWriteTarget } from "../lib/project/atomicWrite.js";
 import { createHistory, executeCommand, redo, undo, type Command, type HistoryState } from "./history.js";
+import { toggleEnabledPlugin } from "../lib/project/plugins.js";
+import type { ProjectSaveTarget, ProjectStorageKind } from "../lib/project/fileSystem.js";
 
 export type EditorTab = "project" | "database" | "map" | "testplay" | "events";
 export type DbTab = "units" | "classes" | "weapons" | "items" | "skills" | "terrain";
@@ -55,6 +57,8 @@ interface ProjectStore {
   selectedChapterId: ChapterId | null;
   selectedEventId: string | null;
   fileName: string | null;
+  storageKind: ProjectStorageKind;
+  projectLocation: string | null;
   runtimeDistUrl: string;
   mapEdit: MapEditState;
   testPlaySeed: number;
@@ -62,7 +66,12 @@ interface ProjectStore {
   runtimeUrl: string;
 
   initNewProject: () => Promise<void>;
-  openProjectData: (fileName: string, project: Project) => void;
+  openProjectData: (
+    fileName: string,
+    project: Project,
+    meta?: { storageKind?: ProjectStorageKind; projectLocation?: string | null },
+  ) => void;
+  applySaveTarget: (target: ProjectSaveTarget) => void;
   setActiveTab: (tab: EditorTab) => void;
   setDbTab: (tab: DbTab) => void;
   selectDbEntry: (id: string | null) => void;
@@ -75,6 +84,7 @@ interface ProjectStore {
   updateChapter: (chapterId: ChapterId, chapter: Chapter) => void;
   removeChapter: (chapterId: ChapterId) => void;
   setStartChapterId: (chapterId: ChapterId | undefined) => void;
+  togglePluginEnabled: (pluginId: string, enabled: boolean) => void;
   updateMap: (mapId: string, map: MapData) => void;
   setMapTool: (tool: MapTool) => void;
   setMapLayer: (layer: MapLayerName) => void;
@@ -178,6 +188,8 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
   selectedChapterId: null,
   selectedEventId: null,
   fileName: null,
+  storageKind: "json",
+  projectLocation: null,
   mapEdit: defaultMapEdit(),
   testPlaySeed: 42_001,
   testPlayInvincible: false,
@@ -194,6 +206,8 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
         dirty: false,
         loading: false,
         fileName: "sample-project.json",
+        storageKind: "json",
+        projectLocation: null,
         selectedChapterId: chapterId,
         selectedMapId: pickMapForChapter(project, chapterId),
         selectedDbId: Object.keys(project.database.units)[0] ?? null,
@@ -207,17 +221,28 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
     }
   },
 
-  openProjectData(fileName, project) {
+  openProjectData(fileName, project, meta) {
     const chapterId = pickInitialChapterId(project);
     set({
       project,
       dirty: false,
       fileName,
+      storageKind: meta?.storageKind ?? "json",
+      projectLocation: meta?.projectLocation ?? null,
       selectedChapterId: chapterId,
       selectedMapId: pickMapForChapter(project, chapterId),
       selectedDbId: Object.keys(project.database.units)[0] ?? null,
       mapEdit: defaultMapEdit(),
       error: null,
+    });
+  },
+
+  applySaveTarget(target) {
+    set({
+      fileName: target.fileName,
+      storageKind: target.storageKind,
+      projectLocation: target.projectLocation,
+      dirty: false,
     });
   },
 
@@ -339,6 +364,18 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
     if (chapterId !== undefined && !project.chapters?.[chapterId]) return;
     set({
       project: { ...project, startChapterId: chapterId },
+      dirty: true,
+    });
+  },
+
+  togglePluginEnabled(pluginId, enabled) {
+    const { project } = get();
+    if (!project?.plugins?.[pluginId]) return;
+    set({
+      project: {
+        ...project,
+        enabledPlugins: toggleEnabledPlugin(project.enabledPlugins ?? [], pluginId, enabled),
+      },
       dirty: true,
     });
   },
@@ -727,5 +764,6 @@ export function createEmptyProject(name: string): Project {
     chapters: {},
     plugins: {},
     enabledPlugins: [],
+    supports: {},
   };
 }

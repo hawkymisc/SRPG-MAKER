@@ -2,7 +2,7 @@ import type { CombatHooks } from "@srpg/shared";
 import type { ChapterData } from "../data/loadChapter.js";
 import type { BattleSession } from "./BattleSession.js";
 import type { CampaignSession } from "./CampaignSession.js";
-import type { Chapter, EventDefinition } from "@srpg/shared";
+import type { Chapter, EventDefinition, SupportConversation } from "@srpg/shared";
 
 export const REGISTRY_KEYS = {
   chapter: "chapter",
@@ -15,6 +15,7 @@ export const REGISTRY_KEYS = {
   campaignSession: "campaignSession",
   chapters: "chapters",
   events: "events",
+  supports: "supports",
   combatHooks: "combatHooks",
 } as const;
 
@@ -29,5 +30,6 @@ export interface RuntimeRegistry {
   [REGISTRY_KEYS.campaignSession]?: CampaignSession;
   [REGISTRY_KEYS.chapters]?: Record<string, Chapter>;
   [REGISTRY_KEYS.events]?: Record<string, EventDefinition>;
+  [REGISTRY_KEYS.supports]?: Record<string, SupportConversation>;
   [REGISTRY_KEYS.combatHooks]?: CombatHooks;
 }
