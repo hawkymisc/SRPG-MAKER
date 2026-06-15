@@ -5,31 +5,39 @@ import { splitProject, type SplitProjectFiles } from "./splitProject.js";
 export type ExportBinaryFiles = Record<string, Uint8Array>;
 
 const GAME_PREFIX = "game/";
+const WWW_PREFIX = "www/";
 
-/** Merge split project JSON + runtime dist bytes into a portable zip (all under game/). */
+export { GAME_PREFIX, WWW_PREFIX };
+
+/** Merge split project JSON + runtime dist bytes into a portable zip (under assetPrefix). */
 export function buildExportFileEntries(
   project: Project,
   runtimeFiles: ExportBinaryFiles,
+  assetPrefix: string = GAME_PREFIX,
 ): ExportBinaryFiles {
   const split = splitProject(project);
   const entries: ExportBinaryFiles = {};
 
   for (const [path, text] of Object.entries(split)) {
-    entries[`${GAME_PREFIX}${path}`] = new TextEncoder().encode(text);
+    entries[`${assetPrefix}${path}`] = new TextEncoder().encode(text);
   }
 
   for (const [path, data] of Object.entries(runtimeFiles)) {
     const normalized = path.replace(/^\/+/, "");
-    entries[`${GAME_PREFIX}${normalized}`] = data;
+    entries[`${assetPrefix}${normalized}`] = data;
   }
 
   return entries;
 }
 
 /** List paths that will appear in the export zip (for tests / UI preview). */
-export function listExportFilePaths(project: Project, runtimeFilePaths: string[]): string[] {
-  const splitPaths = Object.keys(splitProject(project)).map((p) => `${GAME_PREFIX}${p}`);
-  const runtimePaths = runtimeFilePaths.map((p) => `${GAME_PREFIX}${p.replace(/^\/+/, "")}`);
+export function listExportFilePaths(
+  project: Project,
+  runtimeFilePaths: string[],
+  assetPrefix: string = GAME_PREFIX,
+): string[] {
+  const splitPaths = Object.keys(splitProject(project)).map((p) => `${assetPrefix}${p}`);
+  const runtimePaths = runtimeFilePaths.map((p) => `${assetPrefix}${p.replace(/^\/+/, "")}`);
   return [...splitPaths, ...runtimePaths].sort();
 }
 
