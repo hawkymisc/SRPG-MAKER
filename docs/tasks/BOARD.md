@@ -14,7 +14,7 @@
 |----|--------|------------------|------|------|
 | M7-T1 | フェーズ2最終受け入れ照合 | オーケストレーター | DONE | docs/reports/M6-phase2-final-acceptance.md |
 | M7-T2 | マップ戦闘演出強化 | runtime-dev | DONE | 突進・ダメージ数字・クリティカル演出 |
-| M7-T3 | 専用バトル画面 | runtime-dev | BACKLOG | spec 2.3 — ADR要 |
+| M7-T3 | 専用バトル画面 | runtime-dev | DONE | BattleScene overlay + ADR 0006 |
 | M7-T4 | イベントBGM/SE再生 | runtime-dev | BACKLOG | Howler.js — 依存追加要人間判断 |
 | M7-T5 | Capacitorモバイル書き出し | editor-dev | BACKLOG | spec 2.3 |
 
@@ -104,3 +104,4 @@
 - 2026-06-15 M6-T4 完了: Electron エディタラッパー（packages/editor-electron・ネイティブFS）。
 - 2026-06-15 M6 完了: フェーズ2残タスクすべて DONE。
 - 2026-06-16 M7 着手: フェーズ3へ移行。M7-T1 最終受け入れ、M7-T2 マップ戦闘演出強化。
+- 2026-06-16 M7-T3 完了: BattleScene 専用バトル画面（並列オーバーレイ・マップCombatFxフォールバック）。
