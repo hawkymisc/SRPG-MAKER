@@ -12,6 +12,7 @@ import {
   exportHtml5,
   fetchRuntimeDist,
 } from "../lib/export/exportHtml5.js";
+import { exportElectron } from "../lib/export/exportElectron.js";
 
 const browserFs = createBrowserFileSystem();
 
@@ -111,6 +112,26 @@ export function ProjectTab() {
     }
   };
 
+  const handleExportElectron = async () => {
+    if (!project) return;
+    setExporting(true);
+    setError(null);
+    try {
+      const runtimeFiles = await fetchRuntimeDist({ baseUrl: runtimeDistUrl });
+      const result = exportElectron({ project, runtimeFiles });
+      downloadExportBlob(result.blob, result.fileName);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      setError(
+        message.includes("index.html") || message.includes("Failed to fetch")
+          ? `ランタイムの取得に失敗しました。先に \`pnpm dev:runtime\` を起動するか、packages/runtime をビルドしてください。(${message})`
+          : message,
+      );
+    } finally {
+      setExporting(false);
+    }
+  };
+
   return (
     <section className="panel" data-testid="project-tab">
       <h2>プロジェクト</h2>
@@ -135,6 +156,14 @@ export function ProjectTab() {
           data-testid="btn-export-html5"
         >
           {exporting ? "書き出し中…" : "HTML5書き出し"}
+        </button>
+        <button
+          type="button"
+          onClick={() => void handleExportElectron()}
+          disabled={!project || exporting}
+          data-testid="btn-export-electron"
+        >
+          {exporting ? "書き出し中…" : "Electron書き出し"}
         </button>
       </div>
       {loading ? <p>読み込み中…</p> : null}

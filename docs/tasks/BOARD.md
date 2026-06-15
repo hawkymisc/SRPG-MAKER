@@ -6,9 +6,9 @@
 ## 凡例
 チケットID: `M<番号>-T<番号>`(例: M1-T2)。状態: BACKLOG / IN_PROGRESS / REVIEW / DONE / BLOCKED
 
-## 現在のマイルストーン: M5 (進行中)
+## 現在のマイルストーン: M5 (完了)
 
-### M5 (進行中)
+### M5 (完了)
 
 | ID | タスク | 担当エージェント | 状態 | 備考 |
 |----|--------|------------------|------|------|
@@ -17,7 +17,7 @@
 | M5-T3 | 成長率・クラスチェンジ | battle-logic-dev | DONE | roster永続化 + 拠点転職 |
 | M5-T4 | ビジュアルイベントエディタ | editor-dev | DONE | 会話プレビュー + 顔付きメッセージ |
 | M5-T5 | プラグインAPI | schema-architect | DONE | plugin-api + CombatHooks |
-| M5-T6 | Electron書き出し | editor-dev | BACKLOG | デスクトップ配布 |
+| M5-T6 | Electron書き出し | editor-dev | DONE | game/+Electron shell zip |
 
 ### M1 (完了)
 
@@ -78,3 +78,4 @@
 - 2026-06-15 M5-T3 完了: ロスター level/stats/classId 永続化・拠点クラスチェンジ(Lv.10+)。
 - 2026-06-15 M5-T4 完了: 会話プレビューパネル・MessageWindow 顔/話者名演出。
 - 2026-06-15 M5-T5 完了: plugin-api パッケージ・CombatHooks・宣言的プラグインルール。
+- 2026-06-15 M5-T6 完了: Electron シェル付き zip 書き出し・electron-builder 配布手順。
