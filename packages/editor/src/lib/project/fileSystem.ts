@@ -1,6 +1,7 @@
 import type { Project } from "@srpg/shared";
 import { parseProjectJson, serializeProject } from "./serialize.js";
 import { assertValidProject } from "./validate.js";
+import type { ProjectAssetFiles } from "./projectAssets.js";
 
 export type ProjectStorageKind = "json" | "folder";
 
@@ -13,6 +14,7 @@ export interface ProjectSaveTarget {
 export interface OpenedProject {
   name: string;
   project: Project;
+  assets: ProjectAssetFiles;
   storageKind: ProjectStorageKind;
   projectLocation: string | null;
 }
@@ -20,7 +22,11 @@ export interface OpenedProject {
 export interface ProjectFileSystem {
   readonly nativeFolder: boolean;
   openProject(): Promise<OpenedProject | null>;
-  saveProject(project: Project, target: ProjectSaveTarget): Promise<ProjectSaveTarget>;
+  saveProject(
+    project: Project,
+    target: ProjectSaveTarget,
+    assets?: ProjectAssetFiles,
+  ): Promise<ProjectSaveTarget>;
 }
 
 export interface BrowserFileHandle {
@@ -50,6 +56,7 @@ export function createBrowserFileSystem(): ProjectFileSystem {
         return {
           name: handle.name,
           project: parseProjectJson(text),
+          assets: {},
           storageKind: "json",
           projectLocation: null,
         };
@@ -85,6 +92,7 @@ export class MemoryFileSystem implements ProjectFileSystem {
   readonly nativeFolder: boolean;
   public files = new Map<string, string>();
   public folders = new Map<string, Record<string, string>>();
+  public folderAssets = new Map<string, ProjectAssetFiles>();
 
   constructor(options: { nativeFolder?: boolean } = {}) {
     this.nativeFolder = options.nativeFolder ?? false;
@@ -98,6 +106,7 @@ export class MemoryFileSystem implements ProjectFileSystem {
       return {
         name: folderDisplayName(location),
         project: loadProjectFromSplitFiles(files),
+        assets: this.folderAssets.get(location) ?? {},
         storageKind: "folder",
         projectLocation: location,
       };
@@ -108,12 +117,17 @@ export class MemoryFileSystem implements ProjectFileSystem {
     return {
       name,
       project: parseProjectJson(content),
+      assets: {},
       storageKind: "json",
       projectLocation: name,
     };
   }
 
-  async saveProject(project: Project, target: ProjectSaveTarget): Promise<ProjectSaveTarget> {
+  async saveProject(
+    project: Project,
+    target: ProjectSaveTarget,
+    assets: ProjectAssetFiles = {},
+  ): Promise<ProjectSaveTarget> {
     if (target.storageKind === "folder") {
       const location = target.projectLocation;
       if (!location) {
@@ -121,6 +135,7 @@ export class MemoryFileSystem implements ProjectFileSystem {
       }
       const { splitProject } = await import("../export/splitProject.js");
       this.folders.set(location, splitProject(assertValidProject(project)));
+      this.folderAssets.set(location, assets);
       return { ...target, fileName: target.fileName };
     }
     const fileName = target.fileName;

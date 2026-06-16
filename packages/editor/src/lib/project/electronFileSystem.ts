@@ -1,6 +1,8 @@
 import { splitProject } from "../export/splitProject.js";
 import type { SrpgElectronBridge } from "./electronBridge.js";
 import { folderDisplayName, loadProjectFromSplitFiles } from "./folderProject.js";
+import { assetsFromBase64, assetsToBase64 } from "./projectAssets.js";
+import type { ProjectAssetFiles } from "./projectAssets.js";
 import type { ProjectFileSystem } from "./fileSystem.js";
 import { assertValidProject } from "./validate.js";
 import { parseProjectJson, serializeProject } from "./serialize.js";
@@ -19,10 +21,11 @@ export function createElectronFileSystem(bridge: SrpgElectronBridge): ProjectFil
     async openProject(): Promise<OpenedProject | null> {
       const folderPath = await bridge.pickOpenFolder();
       if (folderPath) {
-        const files = await bridge.readFolderFiles(folderPath);
+        const payload = await bridge.readFolderFiles(folderPath);
         return {
           name: folderDisplayName(folderPath),
-          project: loadProjectFromSplitFiles(files),
+          project: loadProjectFromSplitFiles(payload.json),
+          assets: assetsFromBase64(payload.assetsBase64),
           storageKind: "folder",
           projectLocation: folderPath,
         };
@@ -36,12 +39,13 @@ export function createElectronFileSystem(bridge: SrpgElectronBridge): ProjectFil
       return {
         name: jsonFileNameFromPath(filePath),
         project: parseProjectJson(text),
+        assets: {},
         storageKind: "json",
         projectLocation: filePath,
       };
     },
 
-    async saveProject(project, target) {
+    async saveProject(project, target, assets: ProjectAssetFiles = {}) {
       const validated = assertValidProject(project);
       const useFolder = target.storageKind === "folder" || target.projectLocation === null;
 
@@ -53,7 +57,10 @@ export function createElectronFileSystem(bridge: SrpgElectronBridge): ProjectFil
             throw new Error("保存先フォルダが選択されませんでした");
           }
         }
-        await bridge.writeFolderFiles(folderPath, splitProject(validated));
+        await bridge.writeFolderFiles(folderPath, {
+          json: splitProject(validated),
+          assetsBase64: assetsToBase64(assets),
+        });
         return {
           fileName: folderDisplayName(folderPath),
           storageKind: "folder",

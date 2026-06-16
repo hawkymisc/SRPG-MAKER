@@ -1,6 +1,8 @@
 import { zipSync } from "fflate";
 import type { Project } from "@srpg/shared";
 import { splitProject, type SplitProjectFiles } from "./splitProject.js";
+import type { ProjectAssetFiles } from "../project/projectAssets.js";
+import { listProjectAssetPaths, normalizeAssetPath } from "../project/projectAssets.js";
 
 export type ExportBinaryFiles = Record<string, Uint8Array>;
 
@@ -14,6 +16,7 @@ export function buildExportFileEntries(
   project: Project,
   runtimeFiles: ExportBinaryFiles,
   assetPrefix: string = GAME_PREFIX,
+  projectAssets: ProjectAssetFiles = {},
 ): ExportBinaryFiles {
   const split = splitProject(project);
   const entries: ExportBinaryFiles = {};
@@ -27,6 +30,10 @@ export function buildExportFileEntries(
     entries[`${assetPrefix}${normalized}`] = data;
   }
 
+  for (const [path, data] of Object.entries(projectAssets)) {
+    entries[`${assetPrefix}${normalizeAssetPath(path)}`] = data;
+  }
+
   return entries;
 }
 
@@ -35,10 +42,12 @@ export function listExportFilePaths(
   project: Project,
   runtimeFilePaths: string[],
   assetPrefix: string = GAME_PREFIX,
+  projectAssets: ProjectAssetFiles = {},
 ): string[] {
   const splitPaths = Object.keys(splitProject(project)).map((p) => `${assetPrefix}${p}`);
   const runtimePaths = runtimeFilePaths.map((p) => `${assetPrefix}${p.replace(/^\/+/, "")}`);
-  return [...splitPaths, ...runtimePaths].sort();
+  const assetPaths = listProjectAssetPaths(projectAssets).map((p) => `${assetPrefix}${p}`);
+  return [...splitPaths, ...runtimePaths, ...assetPaths].sort();
 }
 
 /** Create a zip blob from path → bytes map. */
@@ -101,6 +110,7 @@ export async function fetchRuntimeDist(
 export interface ExportHtml5Options {
   project: Project;
   runtimeFiles: ExportBinaryFiles;
+  projectAssets?: ProjectAssetFiles;
   zipName?: string;
 }
 
@@ -114,7 +124,12 @@ export interface ExportHtml5Result {
 /** Build zip blob and metadata for HTML5 export. */
 export function exportHtml5(options: ExportHtml5Options): ExportHtml5Result {
   const splitFiles = splitProject(options.project);
-  const entries = buildExportFileEntries(options.project, options.runtimeFiles);
+  const entries = buildExportFileEntries(
+    options.project,
+    options.runtimeFiles,
+    GAME_PREFIX,
+    options.projectAssets ?? {},
+  );
   const blob = createExportZip(entries);
   const fileName = options.zipName ?? `${options.project.name.replace(/\s+/g, "_")}_html5.zip`;
   return {

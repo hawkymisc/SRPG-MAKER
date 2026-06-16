@@ -3,6 +3,7 @@ import { ProjectSchema, SCHEMA_VERSION } from "@srpg/shared";
 import { createElectronFileSystem } from "../src/lib/project/electronFileSystem.js";
 import { folderDisplayName, loadProjectFromSplitFiles } from "../src/lib/project/folderProject.js";
 import { splitProject } from "../src/lib/export/splitProject.js";
+import { assetsToBase64 } from "../src/lib/project/projectAssets.js";
 import type { SrpgElectronBridge } from "../src/lib/project/electronBridge.js";
 
 const sampleProject = ProjectSchema.parse({
@@ -20,6 +21,10 @@ const sampleProject = ProjectSchema.parse({
   maps: {},
 });
 
+const sampleAssets = {
+  "assets/audio/se/se_select.ogg": new Uint8Array([9, 8, 7]),
+};
+
 function mockBridge(overrides: Partial<SrpgElectronBridge> = {}): SrpgElectronBridge {
   return {
     isElectron: true,
@@ -27,7 +32,7 @@ function mockBridge(overrides: Partial<SrpgElectronBridge> = {}): SrpgElectronBr
     pickOpenFile: vi.fn(async () => null),
     pickSaveFolder: vi.fn(async () => null),
     pickSaveFile: vi.fn(async () => null),
-    readFolderFiles: vi.fn(async () => ({})),
+    readFolderFiles: vi.fn(async () => ({ json: {}, assetsBase64: {} })),
     writeFolderFiles: vi.fn(async () => undefined),
     readTextFile: vi.fn(async () => "{}"),
     writeTextFile: vi.fn(async () => undefined),
@@ -56,30 +61,40 @@ describe("createElectronFileSystem", () => {
     const files = splitProject(sampleProject);
     const bridge = mockBridge({
       pickOpenFolder: vi.fn(async () => "C:/Projects/MyGame"),
-      readFolderFiles: vi.fn(async () => files),
+      readFolderFiles: vi.fn(async () => ({
+        json: files,
+        assetsBase64: assetsToBase64(sampleAssets),
+      })),
     });
     const fs = createElectronFileSystem(bridge);
     const opened = await fs.openProject();
     expect(opened?.storageKind).toBe("folder");
     expect(opened?.project.name).toBe("FolderTest");
     expect(opened?.projectLocation).toBe("C:/Projects/MyGame");
+    expect(opened?.assets["assets/audio/se/se_select.ogg"]).toEqual(sampleAssets["assets/audio/se/se_select.ogg"]);
   });
 
-  it("saves new projects as folder layout", async () => {
+  it("saves new projects as folder layout with assets", async () => {
     const bridge = mockBridge({
       pickSaveFolder: vi.fn(async () => "C:/Projects/Export"),
       writeFolderFiles: vi.fn(async () => undefined),
     });
     const fs = createElectronFileSystem(bridge);
-    const next = await fs.saveProject(sampleProject, {
-      fileName: "demo.json",
-      storageKind: "json",
-      projectLocation: null,
-    });
-    expect(next.storageKind).toBe("folder");
-    expect(bridge.writeFolderFiles).toHaveBeenCalledWith(
-      "C:/Projects/Export",
-      expect.objectContaining({ "project.json": expect.stringContaining("FolderTest") }),
+    const next = await fs.saveProject(
+      sampleProject,
+      {
+        fileName: "demo.json",
+        storageKind: "json",
+        projectLocation: null,
+      },
+      sampleAssets,
     );
+    expect(next.storageKind).toBe("folder");
+    expect(bridge.writeFolderFiles).toHaveBeenCalledWith("C:/Projects/Export", {
+      json: expect.objectContaining({
+        "project.json": expect.stringContaining("FolderTest"),
+      }),
+      assetsBase64: assetsToBase64(sampleAssets),
+    });
   });
 });

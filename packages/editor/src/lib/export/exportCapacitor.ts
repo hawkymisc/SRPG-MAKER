@@ -8,13 +8,18 @@ import {
   type ExportHtml5Options,
 } from "./exportHtml5.js";
 import { buildCapacitorShellFiles } from "./capacitorShell.js";
+import type { ProjectAssetFiles } from "../project/projectAssets.js";
 import type { SplitProjectFiles } from "./splitProject.js";
 import { splitProject } from "./splitProject.js";
 
 /** List paths in the Capacitor export zip (www/ + shell files). */
-export function listCapacitorExportPaths(project: Project, runtimeFilePaths: string[]): string[] {
+export function listCapacitorExportPaths(
+  project: Project,
+  runtimeFilePaths: string[],
+  projectAssets: ProjectAssetFiles = {},
+): string[] {
   return [
-    ...listExportFilePaths(project, runtimeFilePaths, WWW_PREFIX),
+    ...listExportFilePaths(project, runtimeFilePaths, WWW_PREFIX, projectAssets),
     "capacitor.config.json",
     "package.json",
     "README.txt",
@@ -31,7 +36,12 @@ export interface ExportCapacitorResult {
 /** Build zip with HTML5 game bundle under www/ plus Capacitor shell. */
 export function exportCapacitor(options: ExportHtml5Options): ExportCapacitorResult {
   const splitFiles = splitProject(options.project);
-  const gameEntries = buildExportFileEntries(options.project, options.runtimeFiles, WWW_PREFIX);
+  const gameEntries = buildExportFileEntries(
+    options.project,
+    options.runtimeFiles,
+    WWW_PREFIX,
+    options.projectAssets ?? {},
+  );
   const shell = buildCapacitorShellFiles(options.project.name);
 
   const entries: ExportBinaryFiles = { ...gameEntries };

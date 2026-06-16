@@ -12,11 +12,11 @@
 
 | ID | タスク | 担当エージェント | 状態 | 備考 |
 |----|--------|------------------|------|------|
-| M8-T1 | クラウド保存 方式選定 | オーケストレーター | IN_PROGRESS | 仕様・実装方針のADR作成 |
-| M8-T2 | プロジェクトのインポート/エクスポート改善 | editor-dev | BACKLOG | assets/ を含むフォルダ形式の取り回し |
+| M8-T1 | クラウド保存 方式選定 | オーケストレーター | DONE | ADR 0009 |
+| M8-T2 | プロジェクトのインポート/エクスポート改善 | editor-dev | DONE | assets/ フォルダ読み書き |
 | M8-T3 | 素材(画像/音声)管理UI | editor-dev | BACKLOG | assets/images, assets/audio |
 | M8-T4 | ストレージ実装（ローカル/クラウド抽象化） | editor-dev | BACKLOG | 保存先切替、同期の単位 |
-| M8-T5 | 書き出しへ assets 同梱 | editor-dev + runtime-dev | BACKLOG | HTML5/Electron/Capacitor 共通 |
+| M8-T5 | 書き出しへ assets 同梱 | editor-dev + runtime-dev | DONE | HTML5/Electron/Capacitor |
 
 ### M7 (完了) — フェーズ3（戦闘演出・モバイル・イベント音声）
 
@@ -119,3 +119,4 @@
 - 2026-06-16 M7-T4 完了: Howler.js による PLAY_BGM/PLAY_SE 再生。
 - 2026-06-16 M7 完了: フェーズ3スコープ（戦闘演出・モバイル書き出し・イベント音声）達成。
 - 2026-06-16 M8 着手: フェーズ3の残項目（クラウド保存・素材ストア）に向けた方針策定。
+- 2026-06-16 M8-T2/T5 完了: assets/ フォルダ読み書き + 書き出し zip 同梱。

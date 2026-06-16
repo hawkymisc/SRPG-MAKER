@@ -24,6 +24,7 @@ export function ProjectTab() {
   const fileName = useProjectStore((s) => s.fileName);
   const storageKind = useProjectStore((s) => s.storageKind);
   const projectLocation = useProjectStore((s) => s.projectLocation);
+  const projectAssets = useProjectStore((s) => s.projectAssets);
   const applySaveTarget = useProjectStore((s) => s.applySaveTarget);
   const loading = useProjectStore((s) => s.loading);
   const error = useProjectStore((s) => s.error);
@@ -64,6 +65,7 @@ export function ProjectTab() {
       openProjectData(opened.name, opened.project, {
         storageKind: opened.storageKind,
         projectLocation: opened.projectLocation,
+        assets: opened.assets,
       });
     }
   };
@@ -74,11 +76,15 @@ export function ProjectTab() {
     try {
       const key = fileName ?? `${project.name}.json`;
       if (projectFs.nativeFolder || "showSaveFilePicker" in window) {
-        const next = await projectFs.saveProject(project, {
-          fileName: key,
-          storageKind,
-          projectLocation,
-        });
+        const next = await projectFs.saveProject(
+          project,
+          {
+            fileName: key,
+            storageKind,
+            projectLocation,
+          },
+          projectAssets,
+        );
         applySaveTarget(next);
       } else {
         const target = new MemoryWriteTarget();
@@ -112,7 +118,7 @@ export function ProjectTab() {
     setError(null);
     try {
       const runtimeFiles = await fetchRuntimeDist({ baseUrl: runtimeDistUrl });
-      const result = exportHtml5({ project, runtimeFiles });
+      const result = exportHtml5({ project, runtimeFiles, projectAssets });
       downloadExportBlob(result.blob, result.fileName);
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
@@ -132,7 +138,7 @@ export function ProjectTab() {
     setError(null);
     try {
       const runtimeFiles = await fetchRuntimeDist({ baseUrl: runtimeDistUrl });
-      const result = exportElectron({ project, runtimeFiles });
+      const result = exportElectron({ project, runtimeFiles, projectAssets });
       downloadExportBlob(result.blob, result.fileName);
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
@@ -152,7 +158,7 @@ export function ProjectTab() {
     setError(null);
     try {
       const runtimeFiles = await fetchRuntimeDist({ baseUrl: runtimeDistUrl });
-      const result = exportCapacitor({ project, runtimeFiles });
+      const result = exportCapacitor({ project, runtimeFiles, projectAssets });
       downloadExportBlob(result.blob, result.fileName);
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
@@ -228,6 +234,8 @@ export function ProjectTab() {
           ) : null}
           <dt>形式</dt>
           <dd data-testid="project-storage-kind">{storageKind === "folder" ? "フォルダ" : "JSON"}</dd>
+          <dt>素材ファイル</dt>
+          <dd data-testid="project-asset-count">{Object.keys(projectAssets).length} 件</dd>
           <dt>状態</dt>
           <dd data-testid="project-dirty">{dirty ? "未保存" : "保存済み"}</dd>
           <dt>マップ数</dt>

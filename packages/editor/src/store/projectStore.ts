@@ -29,6 +29,7 @@ import { MemoryWriteTarget } from "../lib/project/atomicWrite.js";
 import { createHistory, executeCommand, redo, undo, type Command, type HistoryState } from "./history.js";
 import { toggleEnabledPlugin } from "../lib/project/plugins.js";
 import type { ProjectSaveTarget, ProjectStorageKind } from "../lib/project/fileSystem.js";
+import type { ProjectAssetFiles } from "../lib/project/projectAssets.js";
 
 export type EditorTab = "project" | "database" | "map" | "testplay" | "events";
 export type DbTab = "units" | "classes" | "weapons" | "items" | "skills" | "terrain";
@@ -47,6 +48,7 @@ export interface MapEditState {
 
 interface ProjectStore {
   project: Project | null;
+  projectAssets: ProjectAssetFiles;
   dirty: boolean;
   loading: boolean;
   error: string | null;
@@ -69,7 +71,11 @@ interface ProjectStore {
   openProjectData: (
     fileName: string,
     project: Project,
-    meta?: { storageKind?: ProjectStorageKind; projectLocation?: string | null },
+    meta?: {
+      storageKind?: ProjectStorageKind;
+      projectLocation?: string | null;
+      assets?: ProjectAssetFiles;
+    },
   ) => void;
   applySaveTarget: (target: ProjectSaveTarget) => void;
   setActiveTab: (tab: EditorTab) => void;
@@ -178,6 +184,7 @@ function applyMapCommand(
 
 export const useProjectStore = create<ProjectStore>((set, get) => ({
   project: null,
+  projectAssets: {},
   dirty: false,
   loading: false,
   error: null,
@@ -203,6 +210,7 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
       const chapterId = pickInitialChapterId(project);
       set({
         project,
+        projectAssets: {},
         dirty: false,
         loading: false,
         fileName: "sample-project.json",
@@ -225,6 +233,7 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
     const chapterId = pickInitialChapterId(project);
     set({
       project,
+      projectAssets: meta?.assets ?? {},
       dirty: false,
       fileName,
       storageKind: meta?.storageKind ?? "json",

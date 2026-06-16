@@ -2,7 +2,7 @@ import { app, BrowserWindow, dialog, ipcMain } from "electron";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { readFolderFiles, writeFolderFiles } from "./projectFs.mjs";
+import { readFolderFiles, readFolderPayload, writeFolderFiles, writeFolderPayload } from "./projectFs.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const EDITOR_WIDTH = 1280;
@@ -88,17 +88,17 @@ app.whenReady().then(() => {
     if (typeof dirPath !== "string" || dirPath.length === 0) {
       throw new Error("Invalid folder path");
     }
-    return readFolderFiles(dirPath);
+    return readFolderPayload(dirPath);
   });
 
-  ipcMain.handle("write-folder-files", async (_event, dirPath, files) => {
+  ipcMain.handle("write-folder-files", async (_event, dirPath, payload) => {
     if (typeof dirPath !== "string" || dirPath.length === 0) {
       throw new Error("Invalid folder path");
     }
-    if (typeof files !== "object" || files === null) {
+    if (typeof payload !== "object" || payload === null) {
       throw new Error("Invalid folder payload");
     }
-    await writeFolderFiles(dirPath, files);
+    await writeFolderPayload(dirPath, payload);
   });
 
   ipcMain.handle("read-text-file", async (_event, filePath) => {
