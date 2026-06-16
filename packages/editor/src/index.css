@@ -437,3 +437,32 @@ select {
 .plugin-panel h3 {
   margin-top: 1.25rem;
 }
+
+.asset-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.asset-table th,
+.asset-table td {
+  border-bottom: 1px solid #2a2a3d;
+  padding: 0.45rem 0.5rem;
+  vertical-align: middle;
+}
+
+.asset-preview {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  background: #1a1a28;
+  border: 1px solid #3a3a55;
+}
+
+.asset-preview--none {
+  display: inline-block;
+  width: 40px;
+  text-align: center;
+  color: #6b7280;
+}

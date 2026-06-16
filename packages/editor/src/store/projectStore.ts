@@ -30,8 +30,9 @@ import { createHistory, executeCommand, redo, undo, type Command, type HistorySt
 import { toggleEnabledPlugin } from "../lib/project/plugins.js";
 import type { ProjectSaveTarget, ProjectStorageKind } from "../lib/project/fileSystem.js";
 import type { ProjectAssetFiles } from "../lib/project/projectAssets.js";
+import { normalizeAssetPath } from "../lib/project/projectAssets.js";
 
-export type EditorTab = "project" | "database" | "map" | "testplay" | "events";
+export type EditorTab = "project" | "database" | "map" | "testplay" | "events" | "assets";
 export type DbTab = "units" | "classes" | "weapons" | "items" | "skills" | "terrain";
 export type MapTool = "pen" | "rect" | "fill" | "unit";
 
@@ -78,6 +79,8 @@ interface ProjectStore {
     },
   ) => void;
   applySaveTarget: (target: ProjectSaveTarget) => void;
+  addProjectAsset: (path: string, data: Uint8Array) => void;
+  removeProjectAsset: (path: string) => void;
   setActiveTab: (tab: EditorTab) => void;
   setDbTab: (tab: DbTab) => void;
   selectDbEntry: (id: string | null) => void;
@@ -252,6 +255,23 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
       storageKind: target.storageKind,
       projectLocation: target.projectLocation,
       dirty: false,
+    });
+  },
+
+  addProjectAsset(path, data) {
+    const normalized = normalizeAssetPath(path);
+    set((state) => ({
+      projectAssets: { ...state.projectAssets, [normalized]: data },
+      dirty: true,
+    }));
+  },
+
+  removeProjectAsset(path) {
+    const normalized = normalizeAssetPath(path);
+    set((state) => {
+      const next = { ...state.projectAssets };
+      delete next[normalized];
+      return { projectAssets: next, dirty: true };
     });
   },
 

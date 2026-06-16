@@ -2,7 +2,10 @@ import { describe, expect, it } from "vitest";
 import {
   assetsFromBase64,
   assetsToBase64,
+  assetPathForUpload,
   base64ToUint8Array,
+  categorizeAssetPath,
+  formatAssetSize,
   isProjectAssetPath,
   listProjectAssetPaths,
   uint8ArrayToBase64,
@@ -30,5 +33,17 @@ describe("projectAssets", () => {
     const restored = assetsFromBase64(encoded);
     expect(listProjectAssetPaths(restored)).toEqual(["assets/audio/se/se_hit.ogg"]);
     expect(restored["assets/audio/se/se_hit.ogg"]).toEqual(assets["assets/audio/se/se_hit.ogg"]);
+  });
+
+  it("builds upload paths per category", () => {
+    expect(assetPathForUpload("images", "face.png")).toBe("assets/images/face.png");
+    expect(assetPathForUpload("bgm", "bgm_intro.ogg")).toBe("assets/audio/bgm/bgm_intro.ogg");
+    expect(assetPathForUpload("se", "se_hit.mp3")).toBe("assets/audio/se/se_hit.mp3");
+  });
+
+  it("categorizes and formats asset metadata", () => {
+    expect(categorizeAssetPath("assets/images/a.png")).toBe("images");
+    expect(categorizeAssetPath("assets/audio/bgm/x.ogg")).toBe("bgm");
+    expect(formatAssetSize(1536)).toBe("1.5 KB");
   });
 });

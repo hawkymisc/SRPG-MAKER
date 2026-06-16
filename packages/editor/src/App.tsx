@@ -5,6 +5,7 @@ import { DatabaseTab } from "./components/DatabaseTab.js";
 import { MapTab } from "./components/MapTab.js";
 import { TestPlayTab } from "./components/TestPlayTab.js";
 import { EventEditorTab } from "./components/EventEditorTab.js";
+import { AssetsTab } from "./components/AssetsTab.js";
 
 const TABS = [
   { id: "project" as const, label: "プロジェクト" },
@@ -12,6 +13,7 @@ const TABS = [
   { id: "map" as const, label: "マップ" },
   { id: "testplay" as const, label: "テストプレイ" },
   { id: "events" as const, label: "イベント" },
+  { id: "assets" as const, label: "素材" },
 ];
 
 export function App() {
@@ -34,6 +36,7 @@ export function App() {
       if (e.ctrlKey && e.key === "3") setActiveTab("map");
       if (e.ctrlKey && e.key === "4") setActiveTab("testplay");
       if (e.ctrlKey && e.key === "5") setActiveTab("events");
+      if (e.ctrlKey && e.key === "6") setActiveTab("assets");
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -69,6 +72,7 @@ export function App() {
         {activeTab === "map" ? <MapTab /> : null}
         {activeTab === "testplay" ? <TestPlayTab /> : null}
         {activeTab === "events" ? <EventEditorTab /> : null}
+        {activeTab === "assets" ? <AssetsTab /> : null}
       </main>
     </div>
   );

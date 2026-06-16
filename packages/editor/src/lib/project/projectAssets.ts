@@ -45,6 +45,48 @@ export function assetsFromBase64(encoded: Record<string, string>): ProjectAssetF
   return out;
 }
 
+export type AssetCategory = "images" | "bgm" | "se";
+
+export function assetPathForUpload(category: AssetCategory, fileName: string): string {
+  const safeName = fileName.replace(/\\/g, "/").split("/").pop() ?? "asset.bin";
+  switch (category) {
+    case "images":
+      return `assets/images/${safeName}`;
+    case "bgm":
+      return `assets/audio/bgm/${safeName}`;
+    case "se":
+      return `assets/audio/se/${safeName}`;
+  }
+}
+
+export function categorizeAssetPath(path: string): AssetCategory | "other" {
+  const normalized = normalizeAssetPath(path);
+  if (normalized.startsWith("assets/images/")) {
+    return "images";
+  }
+  if (normalized.startsWith("assets/audio/bgm/")) {
+    return "bgm";
+  }
+  if (normalized.startsWith("assets/audio/se/")) {
+    return "se";
+  }
+  return "other";
+}
+
+export function isImageAssetPath(path: string): boolean {
+  return /\.(png|jpe?g|webp|gif)$/i.test(path);
+}
+
+export function formatAssetSize(bytes: number): string {
+  if (bytes < 1024) {
+    return `${bytes} B`;
+  }
+  if (bytes < 1024 * 1024) {
+    return `${(bytes / 1024).toFixed(1)} KB`;
+  }
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
 export function listProjectAssetPaths(assets: ProjectAssetFiles): string[] {
   return Object.keys(assets).map(normalizeAssetPath).sort();
 }
