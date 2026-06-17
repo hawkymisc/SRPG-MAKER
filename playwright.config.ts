@@ -8,9 +8,11 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   workers: 1,
-  reporter: "list",
+  outputDir: "test-results/playwright",
+  reporter: process.env.CI ? [["list"], ["html", { open: "never" }]] : "list",
   use: {
-    trace: "on-first-retry",
+    trace: "retain-on-failure",
+    screenshot: "only-on-failure",
     deviceScaleFactor: 1,
   },
   expect: {
@@ -44,7 +46,7 @@ export default defineConfig({
   projects: [
     {
       name: "chromium",
-      testMatch: /runtime-screenshots\.spec\.ts/,
+      testMatch: /runtime-(screenshots|phase2)\.spec\.ts/,
       use: {
         ...devices["Desktop Chrome"],
         baseURL: `http://${previewHost}:5174`,
@@ -53,7 +55,7 @@ export default defineConfig({
     },
     {
       name: "editor",
-      testMatch: /editor-flow\.spec\.ts/,
+      testMatch: /editor-(flow|tabs|export-loop)\.spec\.ts/,
       use: {
         ...devices["Desktop Chrome"],
         baseURL: `http://${previewHost}:5173`,
@@ -62,7 +64,7 @@ export default defineConfig({
     },
     {
       name: "export",
-      testMatch: /export-play\.spec\.ts/,
+      testMatch: /export-(play|variants)\.spec\.ts/,
       use: {
         ...devices["Desktop Chrome"],
         baseURL: `http://${previewHost}:5175`,

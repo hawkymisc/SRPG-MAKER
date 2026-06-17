@@ -6,10 +6,19 @@ const BGM_CROSSFADE_MS = 400;
 export interface GameAudioOptions {
   /** Skip playback (headless auto-play / tests). */
   muted?: boolean;
+  /** Record playBgm/playSe ids for E2E assertions. */
+  recordCalls?: boolean;
+}
+
+export interface GameAudioCallLog {
+  bgm: string[];
+  se: string[];
 }
 
 export class GameAudio {
   private readonly muted: boolean;
+  private readonly recordCalls: boolean;
+  private readonly callLog: GameAudioCallLog = { bgm: [], se: [] };
   private currentBgm: Howl | null = null;
   private currentBgmId: string | null = null;
 
@@ -18,9 +27,25 @@ export class GameAudio {
     options: GameAudioOptions = {},
   ) {
     this.muted = options.muted ?? false;
+    this.recordCalls = options.recordCalls ?? false;
+  }
+
+  getCallLog(): GameAudioCallLog {
+    return {
+      bgm: [...this.callLog.bgm],
+      se: [...this.callLog.se],
+    };
+  }
+
+  clearCallLog(): void {
+    this.callLog.bgm.length = 0;
+    this.callLog.se.length = 0;
   }
 
   async playBgm(bgmId: string, fadeInMs?: number): Promise<void> {
+    if (this.recordCalls) {
+      this.callLog.bgm.push(bgmId);
+    }
     if (this.muted) {
       return;
     }
@@ -47,6 +72,9 @@ export class GameAudio {
   }
 
   playSe(seId: string): void {
+    if (this.recordCalls) {
+      this.callLog.se.push(seId);
+    }
     if (this.muted) {
       return;
     }

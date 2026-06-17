@@ -1,6 +1,7 @@
 import type { BattleLogEntry, BattleUnit, Faction } from "@srpg/shared";
 import Phaser from "phaser";
 import { GAME_HEIGHT, GAME_WIDTH } from "../constants.js";
+import { REGISTRY_KEYS } from "../game/registry.js";
 import {
   defenderHpTimeline,
   extractStrikePlaybackSteps,
@@ -69,7 +70,30 @@ export class BattleScene extends Phaser.Scene {
     this.fxLayer = this.add.layer();
     this.fxLayer.setDepth(30);
 
+    if (this.registry.get(REGISTRY_KEYS.e2eHoldBattleScene) === true) {
+      void this.mountStaticPreview();
+      return;
+    }
+
     void this.runPlayback().finally(() => this.finish());
+  }
+
+  private async mountStaticPreview(): Promise<void> {
+    const steps = extractStrikePlaybackSteps(this.payload.logs);
+    if (steps.length === 0) {
+      return;
+    }
+    const actorId = steps[0]!.actorId;
+    const targetId = steps[0]!.targetId;
+    const actor = this.findUnit(actorId);
+    const target = this.findUnit(targetId);
+    if (!actor || !target) {
+      return;
+    }
+    this.mountUnit(actor, "left");
+    this.mountUnit(target, "right");
+    const hpTimeline = defenderHpTimeline(target.hp, steps, targetId);
+    this.setUnitHp(targetId, hpTimeline[0] ?? target.hp);
   }
 
   private finish(): void {

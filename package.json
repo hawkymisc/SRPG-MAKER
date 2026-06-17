@@ -9,6 +9,7 @@
     "test": "pnpm -r test",
     "test:golden": "tsx e2e/golden/harness.mts",
     "test:e2e": "playwright test",
+    "pretest:e2e": "tsx scripts/export-e2e-fixture.mts",
     "pretest:e2e:export": "tsx scripts/export-e2e-fixture.mts",
     "test:e2e:export": "playwright test --project=export",
     "test:e2e:editor": "playwright test --project=editor",

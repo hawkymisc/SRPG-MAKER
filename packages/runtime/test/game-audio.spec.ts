@@ -36,6 +36,13 @@ describe("GameAudio", () => {
     expect(Howl).not.toHaveBeenCalled();
   });
 
+  it("records call ids when recordCalls is enabled", async () => {
+    const audio = new GameAudio("http://test", { muted: true, recordCalls: true });
+    await audio.playBgm("bgm_intro");
+    audio.playSe("se_hit");
+    expect(audio.getCallLog()).toEqual({ bgm: ["bgm_intro"], se: ["se_hit"] });
+  });
+
   it("plays BGM with Howl loop", async () => {
     const audio = new GameAudio("http://test");
     await audio.playBgm("bgm_battle");
