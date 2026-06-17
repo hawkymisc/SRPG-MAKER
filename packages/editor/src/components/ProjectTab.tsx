@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ChapterSchema, mapFileStem } from "@srpg/shared";
 import { useProjectStore } from "../store/projectStore.js";
-import { createProjectFileSystem } from "../lib/project/createFileSystem.js";
+import { createProjectStorageAdapter } from "../lib/project/createFileSystem.js";
 import { getElectronBridge } from "../lib/project/electronBridge.js";
 import { loadSampleTemplate } from "../lib/project/loadTemplate.js";
 import { saveProjectAtomic } from "../lib/project/saveProject.js";
@@ -17,7 +17,12 @@ import { exportElectron } from "../lib/export/exportElectron.js";
 import { exportCapacitor } from "../lib/export/exportCapacitor.js";
 
 export function ProjectTab() {
-  const projectFs = useMemo(() => createProjectFileSystem(), []);
+  const storageBackend = useProjectStore((s) => s.storageBackend);
+  const setStorageBackend = useProjectStore((s) => s.setStorageBackend);
+  const storageAdapter = useMemo(
+    () => createProjectStorageAdapter(storageBackend),
+    [storageBackend],
+  );
   const isDesktopEditor = useMemo(() => getElectronBridge() !== undefined, []);
   const project = useProjectStore((s) => s.project);
   const dirty = useProjectStore((s) => s.dirty);
@@ -60,7 +65,11 @@ export function ProjectTab() {
   };
 
   const handleOpen = async () => {
-    const opened = await projectFs.openProject();
+    if (!storageAdapter.available) {
+      setError(storageAdapter.unavailableReason ?? "ストレージが利用できません");
+      return;
+    }
+    const opened = await storageAdapter.openProject();
     if (opened) {
       openProjectData(opened.name, opened.project, {
         storageKind: opened.storageKind,
@@ -72,20 +81,27 @@ export function ProjectTab() {
 
   const handleSave = async () => {
     if (!project) return;
+    if (!storageAdapter.available) {
+      setError(storageAdapter.unavailableReason ?? "ストレージが利用できません");
+      return;
+    }
     setError(null);
     try {
       const key = fileName ?? `${project.name}.json`;
-      if (projectFs.nativeFolder || "showSaveFilePicker" in window) {
-        const next = await projectFs.saveProject(
-          project,
+      if (storageAdapter.supportsNativeFolder || "showSaveFilePicker" in window) {
+        const next = await storageAdapter.saveProject(
+          { project, assets: projectAssets },
           {
             fileName: key,
             storageKind,
             projectLocation,
           },
-          projectAssets,
         );
-        applySaveTarget(next);
+        applySaveTarget({
+          fileName: next.name,
+          storageKind: next.storageKind,
+          projectLocation: next.projectLocation,
+        });
       } else {
         const target = new MemoryWriteTarget();
         await saveProjectAtomic({
@@ -178,6 +194,23 @@ export function ProjectTab() {
       {isDesktopEditor ? (
         <p className="hint" data-testid="desktop-editor-badge">
           デスクトップ版 — フォルダ形式のネイティブ保存に対応
+        </p>
+      ) : null}
+      <div className="storage-backend-row">
+        <label htmlFor="storage-backend-select">保存バックエンド</label>
+        <select
+          id="storage-backend-select"
+          value={storageBackend}
+          onChange={(e) => setStorageBackend(e.target.value as "local" | "cloud")}
+          data-testid="storage-backend-select"
+        >
+          <option value="local">ローカル（ファイル / フォルダ）</option>
+          <option value="cloud">クラウド（準備中）</option>
+        </select>
+      </div>
+      {storageBackend === "cloud" && storageAdapter.unavailableReason ? (
+        <p className="hint" data-testid="storage-backend-hint">
+          {storageAdapter.unavailableReason}
         </p>
       ) : null}
       {error ? <p className="error" role="alert">{error}</p> : null}

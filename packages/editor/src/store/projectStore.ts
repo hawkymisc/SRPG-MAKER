@@ -30,6 +30,11 @@ import { createHistory, executeCommand, redo, undo, type Command, type HistorySt
 import { toggleEnabledPlugin } from "../lib/project/plugins.js";
 import type { ProjectSaveTarget, ProjectStorageKind } from "../lib/project/fileSystem.js";
 import type { ProjectAssetFiles } from "../lib/project/projectAssets.js";
+import {
+  loadStorageBackendPreference,
+  saveStorageBackendPreference,
+  type StorageBackendKind,
+} from "../lib/project/projectStorageAdapter.js";
 import { normalizeAssetPath } from "../lib/project/projectAssets.js";
 
 export type EditorTab = "project" | "database" | "map" | "testplay" | "events" | "assets";
@@ -62,6 +67,7 @@ interface ProjectStore {
   fileName: string | null;
   storageKind: ProjectStorageKind;
   projectLocation: string | null;
+  storageBackend: StorageBackendKind;
   runtimeDistUrl: string;
   mapEdit: MapEditState;
   testPlaySeed: number;
@@ -81,6 +87,7 @@ interface ProjectStore {
   applySaveTarget: (target: ProjectSaveTarget) => void;
   addProjectAsset: (path: string, data: Uint8Array) => void;
   removeProjectAsset: (path: string) => void;
+  setStorageBackend: (kind: StorageBackendKind) => void;
   setActiveTab: (tab: EditorTab) => void;
   setDbTab: (tab: DbTab) => void;
   selectDbEntry: (id: string | null) => void;
@@ -200,6 +207,7 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
   fileName: null,
   storageKind: "json",
   projectLocation: null,
+  storageBackend: loadStorageBackendPreference(),
   mapEdit: defaultMapEdit(),
   testPlaySeed: 42_001,
   testPlayInvincible: false,
@@ -273,6 +281,11 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
       delete next[normalized];
       return { projectAssets: next, dirty: true };
     });
+  },
+
+  setStorageBackend(kind) {
+    saveStorageBackendPreference(kind);
+    set({ storageBackend: kind });
   },
 
   setActiveTab(tab) {

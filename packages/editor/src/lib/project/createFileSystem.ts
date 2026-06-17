@@ -1,13 +1,23 @@
-import { getElectronBridge } from "./electronBridge.js";
+import { CloudProjectStorageAdapter } from "./cloudStorageAdapter.js";
+import { createBrowserFileSystem } from "./fileSystem.js";
 import { createElectronFileSystem } from "./electronFileSystem.js";
-import { createBrowserFileSystem, type ProjectFileSystem } from "./fileSystem.js";
+import { getElectronBridge } from "./electronBridge.js";
+import { LocalProjectStorageAdapter } from "./localProjectStorageAdapter.js";
+import type { ProjectStorageAdapter, StorageBackendKind } from "./projectStorageAdapter.js";
 
-export function createProjectFileSystem(): ProjectFileSystem {
+export function createProjectFileSystem() {
   const bridge = getElectronBridge();
   if (bridge) {
     return createElectronFileSystem(bridge);
   }
   return createBrowserFileSystem();
+}
+
+export function createProjectStorageAdapter(kind: StorageBackendKind): ProjectStorageAdapter {
+  if (kind === "cloud") {
+    return new CloudProjectStorageAdapter();
+  }
+  return new LocalProjectStorageAdapter(createProjectFileSystem());
 }
 
 export type {
@@ -16,3 +26,11 @@ export type {
   ProjectSaveTarget,
   ProjectStorageKind,
 } from "./fileSystem.js";
+
+export type {
+  OpenedProjectBundle,
+  ProjectBundle,
+  ProjectStorageAdapter,
+  StorageBackendKind,
+  StoredProjectRef,
+} from "./projectStorageAdapter.js";

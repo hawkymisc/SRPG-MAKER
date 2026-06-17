@@ -438,6 +438,21 @@ select {
   margin-top: 1.25rem;
 }
 
+.storage-backend-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.storage-backend-row select {
+  background: #1e1e2e;
+  color: inherit;
+  border: 1px solid #3a3a55;
+  padding: 0.25rem 0.4rem;
+}
+
 .asset-table {
   width: 100%;
   border-collapse: collapse;

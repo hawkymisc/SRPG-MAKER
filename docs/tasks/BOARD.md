@@ -6,16 +6,16 @@
 ## 凡例
 チケットID: `M<番号>-T<番号>`(例: M1-T2)。状態: BACKLOG / IN_PROGRESS / REVIEW / DONE / BLOCKED
 
-## 現在のマイルストーン: M8 (進行中)
+## 現在のマイルストーン: M8 (完了)
 
-### M8 (進行中) — フェーズ3（クラウド保存・素材管理）
+### M8 (完了) — フェーズ3（クラウド保存・素材管理）
 
 | ID | タスク | 担当エージェント | 状態 | 備考 |
 |----|--------|------------------|------|------|
 | M8-T1 | クラウド保存 方式選定 | オーケストレーター | DONE | ADR 0009 |
 | M8-T2 | プロジェクトのインポート/エクスポート改善 | editor-dev | DONE | assets/ フォルダ読み書き |
 | M8-T3 | 素材(画像/音声)管理UI | editor-dev | DONE | 素材タブ Ctrl+6 |
-| M8-T4 | ストレージ実装（ローカル/クラウド抽象化） | editor-dev | BACKLOG | 保存先切替、同期の単位 |
+| M8-T4 | ストレージ実装（ローカル/クラウド抽象化） | editor-dev | DONE | ProjectStorageAdapter |
 | M8-T5 | 書き出しへ assets 同梱 | editor-dev + runtime-dev | DONE | HTML5/Electron/Capacitor |
 
 ### M7 (完了) — フェーズ3（戦闘演出・モバイル・イベント音声）
@@ -121,3 +121,5 @@
 - 2026-06-16 M8 着手: フェーズ3の残項目（クラウド保存・素材ストア）に向けた方針策定。
 - 2026-06-16 M8-T2/T5 完了: assets/ フォルダ読み書き + 書き出し zip 同梱。
 - 2026-06-17 M8-T3 完了: 素材タブ（画像/BGM/SE 追加・一覧・削除）。
+- 2026-06-17 M8-T4 完了: ProjectStorageAdapter（local/cloud UI 切替）。
+- 2026-06-17 M8 完了: フェーズ3素材・ストレージ境界。docs/reports/M8-phase3-acceptance.md
