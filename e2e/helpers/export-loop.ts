@@ -5,6 +5,8 @@ import { expect, type Download, type Page } from "@playwright/test";
 
 const E2E_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
+let exportDownloadExtractSeq = 0;
+
 export const EXPORT_MOUNT_ORIGIN = "http://127.0.0.1:5199";
 
 export type ExportZipEntries = Record<string, Uint8Array>;
@@ -50,7 +52,14 @@ async function unzipDownloadToEntries(download: Download): Promise<ExportZipEntr
   const { mkdirSync, rmSync } = await import("node:fs");
   const { execFileSync } = await import("node:child_process");
   const { platform } = await import("node:os");
-  const extractRoot = join(E2E_ROOT, "..", "test-results", "export-download", `${Date.now()}`);
+  exportDownloadExtractSeq += 1;
+  const extractRoot = join(
+    E2E_ROOT,
+    "..",
+    "test-results",
+    "export-download",
+    `run-${exportDownloadExtractSeq}`,
+  );
   const zipPath = join(extractRoot, "export.zip");
   mkdirSync(extractRoot, { recursive: true });
   await download.saveAs(zipPath);

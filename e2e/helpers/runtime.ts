@@ -36,38 +36,24 @@ export async function enterBattleFromTitleScreen(host: RuntimeHost): Promise<voi
   await canvas.waitFor({ state: "visible", timeout: RUNTIME_TEST_TIMEOUT_MS });
   await canvas.click({ position: TITLE_CANVAS_CLICK });
 
-  const deadline = Date.now() + RUNTIME_TEST_TIMEOUT_MS;
-  while (Date.now() < deadline) {
-    if (await battleMapTestApiReady(host)) {
-      return;
-    }
+  await expect
+    .poll(
+      async () => {
+        if (await battleMapTestApiReady(host)) {
+          return true;
+        }
 
-    await pressEnter(host);
+        await pressEnter(host);
+        if (await battleMapTestApiReady(host)) {
+          return true;
+        }
 
-    const readyAfterEnter = await host
-      .waitForFunction(() => window.__RUNTIME_TEST__?.getState !== undefined, undefined, {
-        timeout: 3_000,
-      })
-      .then(() => true)
-      .catch(() => false);
-    if (readyAfterEnter) {
-      return;
-    }
-
-    await pressDigit(host, "4");
-
-    const readyAfterDeploy = await host
-      .waitForFunction(() => window.__RUNTIME_TEST__?.getState !== undefined, undefined, {
-        timeout: 3_000,
-      })
-      .then(() => true)
-      .catch(() => false);
-    if (readyAfterDeploy) {
-      return;
-    }
-  }
-
-  throw new Error("BattleMap test API did not become available");
+        await pressDigit(host, "4");
+        return battleMapTestApiReady(host);
+      },
+      { timeout: RUNTIME_TEST_TIMEOUT_MS },
+    )
+    .toBe(true);
 }
 
 /** Skip title screen and wait until battle test hooks are available. */
