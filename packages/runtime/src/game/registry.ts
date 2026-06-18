@@ -17,6 +17,7 @@ export const REGISTRY_KEYS = {
   events: "events",
   supports: "supports",
   combatHooks: "combatHooks",
+  e2eHoldBattleScene: "e2eHoldBattleScene",
 } as const;
 
 export interface RuntimeRegistry {

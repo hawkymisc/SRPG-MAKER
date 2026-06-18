@@ -14,6 +14,13 @@
 本プロジェクトでは非決定性=規約違反(ADR-0002)。隔離(skip)で済ませず、原因を特定するまで該当領域の開発を止める。
 典型原因:RNGを経由しない乱数 / Setの反復順序依存 / 時刻依存 / 非同期の競合。`git bisect` とシード固定再実行で切り分ける。
 
+**Playwright E2E** が同一シナリオで CI 3 回連続失敗した場合は `.github/ISSUE_TEMPLATE/e2e-flake-report.md` から Issue を起票する。実行・スクショ更新手順は `docs/reports/E2E-coverage.md` を参照。
+
+## E2E スクショ差分（意図した UI 変更）
+1. ローカルで `pnpm test:e2e:update`（または `--project=chromium --update-snapshots`）を実行
+2. PR に更新理由と差分説明を記載（ゴールデンマスター用の `.allow-golden-update` は不要）
+3. CI が `ubuntu-latest` の場合、win32 専用スクショのみでは Linux CI が落ちる可能性がある — 詳細は `docs/reports/E2E-coverage.md`
+
 ## エージェントが同じ失敗をループしている
 2回同じアプローチで失敗したら、3回目を試させる前に止める。指示を変えずにリトライさせない。
 (a)タスクをより小さく分割し直す、(b)前提情報(仕様節・関連ファイル)を委任文に追加する、(c)別エージェントにセカンドオピニオンを求める、の順で介入。それでも駄目ならBLOCKED。

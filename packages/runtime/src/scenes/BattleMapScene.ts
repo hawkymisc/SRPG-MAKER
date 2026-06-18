@@ -57,6 +57,7 @@ export class BattleMapScene extends Phaser.Scene {
   private choiceDialog!: ChoiceDialog;
   private eventController!: EventController;
   private gameAudio!: GameAudio;
+  private battleScreenPlayedFlag = false;
 
   private mode: UiMode = "idle";
   private selectedUnitId: string | null = null;
@@ -90,7 +91,10 @@ export class BattleMapScene extends Phaser.Scene {
     new MapGrid(this, this.chapter.map, this.chapter.database);
     this.unitSprites = new UnitSprites(this);
     this.combatFx = new CombatFx(this);
-    this.gameAudio = new GameAudio(import.meta.env.BASE_URL, { muted: this.autoPlayAll });
+    this.gameAudio = new GameAudio(import.meta.env.BASE_URL, {
+      muted: this.autoPlayAll,
+      recordCalls: true,
+    });
     this.cursor = new Cursor(this);
     this.cursor.setMapSize(this.chapter.map.width, this.chapter.map.height);
     this.highlight = new TileHighlight(this);
@@ -232,6 +236,8 @@ export class BattleMapScene extends Phaser.Scene {
 
   getTestApi(): RuntimeTestApi {
     return {
+      getSceneKey: () => this.scene.key,
+      isSceneActive: (key) => this.scene.manager.isActive(key),
       getState: () => this.session.state,
       getMode: () => this.mode,
       getSession: () => this.session,
@@ -266,7 +272,37 @@ export class BattleMapScene extends Phaser.Scene {
         this.messageWindow.advance();
       },
       isMessageOpen: () => this.messageWindow.isOpen(),
+      getAudioLog: () => this.gameAudio.getCallLog(),
+      performTestAttack: async () => {
+        const battleScenePlayed = await this.runTestAttack();
+        return { battleScenePlayed };
+      },
+      showBattleSceneSample: () => {
+        this.launchHeldBattleSceneSample();
+      },
+      dismissHeldBattleScene: () => {
+        this.registry.set(REGISTRY_KEYS.e2eHoldBattleScene, false);
+        if (this.scene.isActive(BATTLE_SCENE_KEY)) {
+          this.scene.stop(BATTLE_SCENE_KEY);
+        }
+      },
+      testScreenShake: async () => {
+        this.cameras.main.shake(200, 0.004);
+        await this.delay(200);
+      },
+      playTestAudio: async (cmd) => {
+        if (cmd.bgm) {
+          await this.gameAudio.playBgm(cmd.bgm);
+        }
+        if (cmd.se) {
+          this.gameAudio.playSe(cmd.se);
+        }
+      },
       prepareScreenshot: (view) => {
+        if (view === "battle_scene") {
+          this.launchHeldBattleSceneSample();
+          return;
+        }
         this.inputLocked = false;
         let player = this.session.state.units.find(
           (u) => u.hp > 0 && u.faction === "player" && !u.hasActed,
@@ -279,31 +315,7 @@ export class BattleMapScene extends Phaser.Scene {
         }
         this.selectedUnitId = player.instanceId;
         if (view === "combat_preview") {
-          const enemies = this.session.state.units.filter(
-            (u) => u.hp > 0 && u.faction === "enemy",
-          );
-          const reachable = calcMovementRange(this.session.state, player.instanceId);
-          let moveTarget: { x: number; y: number } | undefined;
-          for (const enemy of enemies) {
-            for (const tile of reachable) {
-              if (Math.abs(tile.x - enemy.x) + Math.abs(tile.y - enemy.y) === 1) {
-                moveTarget = { x: tile.x, y: tile.y };
-                break;
-              }
-            }
-            if (moveTarget) {
-              break;
-            }
-          }
-          if (moveTarget) {
-            this.session.apply({
-              type: "Move",
-              actor: player.instanceId,
-              x: moveTarget.x,
-              y: moveTarget.y,
-            });
-            player = this.getUnit(player.instanceId);
-          }
+          this.prepareCombatPreviewForUnit(player);
         }
         this.cursor.setGrid(player.x, player.y);
         if (view === "action_menu") {
@@ -327,6 +339,88 @@ export class BattleMapScene extends Phaser.Scene {
         this.refreshView();
       },
     };
+  }
+
+  private prepareCombatPreviewForUnit(player: BattleUnit): void {
+    const enemies = this.session.state.units.filter((u) => u.hp > 0 && u.faction === "enemy");
+    const reachable = calcMovementRange(this.session.state, player.instanceId);
+    let moveTarget: { x: number; y: number } | undefined;
+    for (const enemy of enemies) {
+      for (const tile of reachable) {
+        if (Math.abs(tile.x - enemy.x) + Math.abs(tile.y - enemy.y) === 1) {
+          moveTarget = { x: tile.x, y: tile.y };
+          break;
+        }
+      }
+      if (moveTarget) {
+        break;
+      }
+    }
+    if (moveTarget) {
+      this.session.apply({
+        type: "Move",
+        actor: player.instanceId,
+        x: moveTarget.x,
+        y: moveTarget.y,
+      });
+      player = this.getUnit(player.instanceId);
+    }
+    this.cursor.setGrid(player.x, player.y);
+  }
+
+  private async runTestAttack(): Promise<boolean> {
+    this.battleScreenPlayedFlag = false;
+    let player = this.session.state.units.find(
+      (u) => u.hp > 0 && u.faction === "player" && !u.hasActed,
+    );
+    if (!player) {
+      player = this.session.state.units.find((u) => u.hp > 0 && u.faction === "player");
+    }
+    if (!player) {
+      return false;
+    }
+    this.selectedUnitId = player.instanceId;
+    this.prepareCombatPreviewForUnit(player);
+    const targets = getAttackableTargets(this.session.state, player.instanceId);
+    const target = targets[0];
+    if (!target) {
+      return false;
+    }
+    this.cursor.setGrid(target.x, target.y);
+    await this.tryAttack(target.x, target.y);
+    return this.battleScreenPlayedFlag;
+  }
+
+  private launchHeldBattleSceneSample(): void {
+    const player = this.session.state.units.find((u) => u.hp > 0 && u.faction === "player");
+    const enemy = this.session.state.units.find((u) => u.hp > 0 && u.faction === "enemy");
+    if (!player || !enemy) {
+      return;
+    }
+    const log: BattleLogEntry = {
+      kind: "damage",
+      turn: this.session.state.turn,
+      phase: this.session.state.phase,
+      actor: player.instanceId,
+      target: enemy.instanceId,
+      message: "E2E sample strike",
+      strike: {
+        hit: true,
+        crit: false,
+        damage: 3,
+        hitRoll: 50,
+        hitRate: 90,
+        critRate: 10,
+        attackPower: 8,
+      },
+    };
+    this.registry.set(REGISTRY_KEYS.e2eHoldBattleScene, true);
+    this.scene.launch(BATTLE_SCENE_KEY, {
+      logs: [log],
+      primaryTargetId: enemy.instanceId,
+      units: this.session.state.units,
+      parentSceneKey: this.scene.key,
+    });
   }
 
   private bindInput(): void {
@@ -620,6 +714,8 @@ export class BattleMapScene extends Phaser.Scene {
     if (!battleScene) {
       return false;
     }
+
+    this.battleScreenPlayedFlag = true;
 
     await new Promise<void>((resolve) => {
       this.events.once(BATTLE_PLAYBACK_COMPLETE, resolve);

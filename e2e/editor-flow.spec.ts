@@ -1,57 +1,16 @@
-import { expect, test, type Frame, type Page } from "@playwright/test";
-
-const FIXED_SEED = 42_001;
-const AUTO_PLAY_STEP_LIMIT = 800;
-
-async function gotoTab(page: Page, tabNumber: 1 | 2 | 3 | 4): Promise<void> {
-  await page.keyboard.press(`Control+${tabNumber}`);
-}
-
-async function getRuntimeFrame(page: Page): Promise<Frame> {
-  await expect
-    .poll(() => page.frames().find((f) => /:5174/.test(f.url()) && f !== page.mainFrame()))
-    .not.toBeUndefined();
-  const frame = page.frames().find((f) => /:5174/.test(f.url()) && f !== page.mainFrame());
-  if (!frame) {
-    throw new Error("runtime frame is not ready");
-  }
-  return frame;
-}
-
-async function startBattleInFrame(page: Page): Promise<Frame> {
-  const frame = await getRuntimeFrame(page);
-  const canvas = frame.locator("canvas");
-  await canvas.waitFor({ state: "visible", timeout: 30_000 });
-  await canvas.click({ position: { x: 260, y: 210 } });
-  await frame.locator("body").press("Enter");
-  await frame.waitForFunction(() => window.__RUNTIME_TEST__ !== undefined, undefined, {
-    timeout: 30_000,
-  });
-  return frame;
-}
-
-async function autoPlayToOutcome(frame: Frame): Promise<"win" | "lose" | "ongoing"> {
-  return frame.evaluate(async (stepLimit) => {
-    const api = window.__RUNTIME_TEST__;
-    if (!api) {
-      throw new Error("__RUNTIME_TEST__ is not available");
-    }
-    for (let i = 0; i < stepLimit; i += 1) {
-      const outcome = api.getState().outcome;
-      if (outcome !== "ongoing") {
-        return outcome;
-      }
-      await api.stepAutoPlay();
-    }
-    return api.getState().outcome;
-  }, AUTO_PLAY_STEP_LIMIT);
-}
+import { expect, test } from "@playwright/test";
+import {
+  FIXED_SEED,
+  autoPlayToOutcome,
+  gotoTab,
+  startBattleInFrame,
+  waitForEditorReady,
+} from "./helpers/index.js";
 
 test.describe("editor end-to-end flow", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByTestId("editor-app")).toBeVisible();
-    await expect(page.getByTestId("project-meta")).toBeVisible({ timeout: 30_000 });
+    await waitForEditorReady(page);
   });
 
   test("new project → edit map → place enemy → test play → victory", async ({ page }) => {

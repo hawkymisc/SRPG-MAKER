@@ -14,6 +14,7 @@ packages/*/coverage/
 
 # Playwright
 e2e/fixtures/exported-game/
+e2e/fixtures/export-variants/
 test-results/
 playwright-report/
 blob-report/

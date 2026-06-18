@@ -23,6 +23,7 @@ import { CampaignSession } from "../game/CampaignSession.js";
 import { REGISTRY_KEYS } from "../game/registry.js";
 import { CampaignSaveManager } from "../save/CampaignSaveManager.js";
 import { MessageWindow } from "../ui/MessageWindow.js";
+import { installBaseTestHooks } from "../testHooks.js";
 
 type BaseMode = "menu" | "formation" | "shop" | "talk" | "promotion" | "support";
 
@@ -88,6 +89,19 @@ export class BaseScene extends Phaser.Scene {
 
     this.renderMenu();
     this.bindInput();
+    installBaseTestHooks(this);
+  }
+
+  getBaseBodyTextForTest(): string {
+    return this.bodyText.text;
+  }
+
+  getBaseTestApi(): import("../testHooks.js").RuntimeTestApi {
+    return {
+      getSceneKey: () => "Base",
+      isSceneActive: (key) => this.scene.manager.isActive(key),
+      getBaseBodyText: () => this.getBaseBodyTextForTest(),
+    };
   }
 
   private currentChapter(): Chapter | undefined {
