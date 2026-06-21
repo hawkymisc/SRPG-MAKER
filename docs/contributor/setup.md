@@ -5,9 +5,23 @@
 | 項目 | バージョン |
 |------|------------|
 | Node.js | **22+**（`package.json` engines） |
-| pnpm | 9+ 推奨 |
+| pnpm | 10+（`npm install -g pnpm` または `corepack enable pnpm`） |
 | jq | フックが使用（`.claude/hooks/`） |
 | Git | 通常の開発フロー |
+
+## pnpm のインストール
+
+Node.js 22+ に同梱の Corepack を使う方法が簡単です。
+
+```bash
+corepack enable pnpm
+```
+
+Windows で `EPERM` エラーが出る場合（Node.js が `C:\Program Files` にある場合）は、代わりに npm 経由でインストールしてください。
+
+```bash
+npm install -g pnpm
+```
 
 ## クローンと依存
 
@@ -93,3 +107,4 @@ pnpm --filter @srpg/runtime build
 | `pretest:e2e` 失敗 | `tsx scripts/export-e2e-fixture.mts` を単体実行してログ確認 |
 | jq not found | OS に jq をインストール（フック用） |
 | ポート競合 | 5173 / 5174 を使用中のプロセスを終了 |
+| `pnpm` が見つからない (Windows) | `npm install -g pnpm` で再インストール |

@@ -1,72 +1,286 @@
-:root {
+/* ============================================================
+   Theme tokens — Dark (default) & Light
+   ============================================================ */
+:root,
+[data-theme="dark"] {
   color-scheme: dark;
-  font-family: system-ui, "Segoe UI", sans-serif;
-  line-height: 1.4;
-  color: #e8e8ef;
-  background: #12121c;
+
+  --color-bg-base:       #16131e;
+  --color-bg-surface:    #1e1a28;
+  --color-bg-raised:     #262232;
+  --color-bg-input:      #1a1624;
+  --color-bg-hover:      #2e2940;
+
+  --color-border:        #3a3450;
+  --color-border-subtle: #2e2844;
+  --color-border-accent: #7c6a3d;
+
+  --color-text:          #e0dce8;
+  --color-text-muted:    #9992a8;
+  --color-text-heading:  #f0e8d8;
+
+  --color-accent:        #c4a265;
+  --color-accent-hover:  #d4b478;
+  --color-accent-text:   #12101a;
+
+  --color-active-bg:     #3d3260;
+  --color-active-border: #c4a265;
+
+  --color-error:         #e85858;
+  --color-success:       #6ab87a;
+
+  --color-player:        #5eaaff;
+  --color-enemy:         #ff5e5e;
+  --color-third:         #d4a72c;
+
+  --shadow-sm:  0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-md:  0 2px 8px rgba(0, 0, 0, 0.5);
+  --shadow-lg:  0 4px 16px rgba(0, 0, 0, 0.6);
+
+  --radius-sm:  4px;
+  --radius-md:  6px;
+  --radius-lg:  10px;
+
+  --font-body:    "Inter", system-ui, "Segoe UI", sans-serif;
+  --font-heading: "Cinzel", "Times New Roman", serif;
 }
 
+[data-theme="light"] {
+  color-scheme: light;
+
+  --color-bg-base:       #f5f0e6;
+  --color-bg-surface:    #eee8da;
+  --color-bg-raised:     #e5dece;
+  --color-bg-input:      #faf6ee;
+  --color-bg-hover:      #e0d8c6;
+
+  --color-border:        #c8bfa8;
+  --color-border-subtle: #d8d0bc;
+  --color-border-accent: #8b7340;
+
+  --color-text:          #2c2618;
+  --color-text-muted:    #6b6050;
+  --color-text-heading:  #3a2e18;
+
+  --color-accent:        #7a5e28;
+  --color-accent-hover:  #8b6e38;
+  --color-accent-text:   #f8f4ec;
+
+  --color-active-bg:     #d8ceb5;
+  --color-active-border: #8b7340;
+
+  --color-error:         #b83030;
+  --color-success:       #3a7a44;
+
+  --color-player:        #2a70c0;
+  --color-enemy:         #c03030;
+  --color-third:         #9a7818;
+
+  --shadow-sm:  0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-md:  0 2px 8px rgba(0, 0, 0, 0.12);
+  --shadow-lg:  0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* ============================================================
+   Base reset & typography
+   ============================================================ */
 * {
   box-sizing: border-box;
 }
 
 body {
   margin: 0;
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-text);
+  background: var(--color-bg-base);
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 button,
 input,
-select {
+select,
+textarea {
   font: inherit;
+  color: inherit;
 }
 
+h1, h2, h3, h4 {
+  font-family: var(--font-heading);
+  color: var(--color-text-heading);
+  letter-spacing: 0.02em;
+}
+
+/* ============================================================
+   Header
+   ============================================================ */
 .app-header {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 1rem;
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid #2a2a3d;
+  padding: 0.6rem 1.25rem;
+  background: var(--color-bg-surface);
+  border-bottom: 2px solid var(--color-border-accent);
+  box-shadow: var(--shadow-sm);
 }
 
 .app-header h1 {
   margin: 0;
-  font-size: 1.1rem;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--color-accent);
+  white-space: nowrap;
 }
 
 .project-title {
-  color: #9aa0b8;
-  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  font-size: 0.88rem;
+  font-family: var(--font-body);
+  font-style: italic;
 }
 
+.header-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* ============================================================
+   Theme toggle
+   ============================================================ */
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  background: var(--color-bg-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: 1.1rem;
+  line-height: 1;
+  transition: background-color 0.15s, border-color 0.15s;
+}
+
+.theme-toggle:hover {
+  background: var(--color-bg-hover);
+  border-color: var(--color-accent);
+}
+
+/* ============================================================
+   Main tabs
+   ============================================================ */
 .main-tabs {
   display: flex;
-  gap: 0.25rem;
-  padding: 0.5rem 1rem;
-  border-bottom: 1px solid #2a2a3d;
+  gap: 2px;
+  padding: 0 1rem;
+  background: var(--color-bg-surface);
+  border-bottom: 1px solid var(--color-border);
 }
 
-.main-tabs button,
-.subtabs button {
-  background: #1e1e2e;
-  color: inherit;
-  border: 1px solid #33334d;
-  padding: 0.4rem 0.75rem;
+.main-tabs button {
+  position: relative;
+  background: transparent;
+  color: var(--color-text-muted);
+  border: none;
+  padding: 0.6rem 1rem;
   cursor: pointer;
+  font-family: var(--font-heading);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  transition: color 0.15s, background 0.15s;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
 }
 
-.main-tabs button.active,
-.subtabs button.active,
-.toolbar button.active {
-  background: #3d5afe;
-  border-color: #3d5afe;
+.main-tabs button:hover {
+  color: var(--color-text);
+  background: var(--color-bg-hover);
 }
 
+.main-tabs button.active {
+  color: var(--color-accent);
+  background: var(--color-bg-base);
+}
+
+.main-tabs button.active::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--color-accent);
+}
+
+/* ============================================================
+   Main content area
+   ============================================================ */
 .app-main {
-  padding: 1rem;
+  padding: 1.25rem;
 }
 
 .panel h2 {
   margin-top: 0;
+  margin-bottom: 0.75rem;
+  font-size: 1.2rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--color-border-accent);
+}
+
+.panel h3 {
+  font-size: 0.95rem;
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+/* ============================================================
+   Buttons (shared)
+   ============================================================ */
+.toolbar button,
+.db-list button,
+.events-list button,
+.command-add-bar button,
+.chapter-panel button,
+.plugin-panel button,
+.debug-panel button {
+  background: var(--color-bg-raised);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+}
+
+.toolbar button:hover,
+.db-list button:hover,
+.events-list button:hover,
+.command-add-bar button:hover,
+.chapter-panel button:hover,
+.plugin-panel button:hover,
+.debug-panel button:hover {
+  background: var(--color-bg-hover);
+  border-color: var(--color-accent);
+}
+
+.toolbar button:disabled,
+.command-add-bar button:disabled,
+.chapter-panel button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.toolbar button.active,
+.subtabs button.active {
+  background: var(--color-accent);
+  color: var(--color-accent-text);
+  border-color: var(--color-accent);
+  box-shadow: var(--shadow-sm);
 }
 
 .toolbar {
@@ -76,42 +290,153 @@ select {
   margin-bottom: 1rem;
 }
 
-.toolbar button,
-.db-list button {
-  background: #252538;
-  color: inherit;
-  border: 1px solid #3a3a55;
-  padding: 0.35rem 0.7rem;
-  cursor: pointer;
+/* ============================================================
+   Subtabs (DB, etc.)
+   ============================================================ */
+.subtabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-bottom: 0.75rem;
 }
 
+.main-tabs button,
+.subtabs button {
+  background: var(--color-bg-raised);
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+  padding: 0.4rem 0.8rem;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  font-weight: 500;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.subtabs button:hover {
+  color: var(--color-text);
+  background: var(--color-bg-hover);
+}
+
+.subtabs button.active {
+  background: var(--color-accent);
+  color: var(--color-accent-text);
+  border-color: var(--color-accent);
+}
+
+/* ============================================================
+   Form elements
+   ============================================================ */
+.schema-form input[type="text"],
+.schema-form input[type="number"],
+.schema-form select,
+.storage-backend-row select,
+.map-toolbar select,
+.events-toolbar input,
+.debug-panel input[type="number"],
+input[type="text"],
+input[type="number"],
+select {
+  background: var(--color-bg-input);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  padding: 0.3rem 0.5rem;
+  border-radius: var(--radius-sm);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.schema-form input[type="text"]:focus,
+.schema-form input[type="number"]:focus,
+.schema-form select:focus,
+input[type="text"]:focus,
+input[type="number"]:focus,
+select:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px rgba(196, 162, 101, 0.25);
+}
+
+.schema-form input[type="text"],
+.schema-form input[type="number"],
+.schema-form select {
+  max-width: 20rem;
+}
+
+.schema-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.schema-form .schema-field {
+  margin-bottom: 0.5rem;
+}
+
+/* ============================================================
+   Meta grid
+   ============================================================ */
 .meta {
   display: grid;
   grid-template-columns: 8rem 1fr;
-  gap: 0.25rem 1rem;
+  gap: 0.3rem 1rem;
+  padding: 0.75rem;
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
 }
 
+.meta dt {
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.meta dd {
+  margin: 0;
+}
+
+/* ============================================================
+   Hints & errors
+   ============================================================ */
 .error {
-  color: #ff7b7b;
+  color: var(--color-error);
+  padding: 0.4rem 0.6rem;
+  background: rgba(232, 88, 88, 0.08);
+  border-left: 3px solid var(--color-error);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
 }
 
 .hint {
-  color: #8a90a8;
+  color: var(--color-text-muted);
   font-size: 0.85rem;
 }
 
+.optional {
+  color: var(--color-text-muted);
+  font-size: 0.85em;
+}
+
+/* ============================================================
+   Database layout
+   ============================================================ */
 .db-panel .subtabs {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.25rem;
+  gap: 3px;
   margin-bottom: 0.75rem;
 }
 
 .db-layout {
   display: grid;
-  grid-template-columns: 12rem 1fr;
+  grid-template-columns: 13rem 1fr;
   gap: 1rem;
   min-height: 24rem;
+}
+
+.db-list {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 0.5rem;
 }
 
 .db-list ul {
@@ -123,74 +448,129 @@ select {
 .db-list li button {
   width: 100%;
   text-align: left;
-  margin-bottom: 0.2rem;
+  margin-bottom: 2px;
+  border-radius: var(--radius-sm);
+  padding: 0.35rem 0.6rem;
+  font-size: 0.9rem;
+}
+
+.db-list li button.active {
+  background: var(--color-active-bg);
+  border-color: var(--color-active-border);
+  color: var(--color-accent);
 }
 
 .db-form {
-  border: 1px solid #2a2a3d;
-  padding: 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  background: var(--color-bg-surface);
   overflow: auto;
 }
 
-.schema-form .schema-field {
-  margin-bottom: 0.5rem;
-}
-
-.schema-form label {
+.db-form-toolbar {
   display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--color-border-subtle);
 }
 
-.schema-form input[type="text"],
-.schema-form input[type="number"],
-.schema-form select {
-  max-width: 20rem;
-  background: #1a1a28;
-  color: inherit;
-  border: 1px solid #3a3a55;
-  padding: 0.25rem 0.4rem;
-}
-
+/* ============================================================
+   Fieldsets
+   ============================================================ */
 .schema-fieldset {
-  border: 1px solid #333;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
   margin: 0.5rem 0;
-  padding: 0.5rem;
+  padding: 0.75rem;
+  background: var(--color-bg-surface);
 }
 
-.optional {
-  color: #888;
-  font-size: 0.85em;
+.schema-fieldset legend {
+  font-family: var(--font-heading);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-accent);
+  padding: 0 0.4rem;
+}
+
+/* ============================================================
+   Map editor
+   ============================================================ */
+.map-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.map-toolbar label {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.9rem;
 }
 
 .map-layout {
   display: flex;
-  gap: 1rem;
+  gap: 1.25rem;
   flex-wrap: wrap;
 }
 
 .map-palette {
-  min-width: 10rem;
+  min-width: 11rem;
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 0.75rem;
+}
+
+.map-palette h3 {
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
+}
+
+.map-palette h3:first-child {
+  margin-top: 0;
 }
 
 .palette-grid {
   display: grid;
   grid-template-columns: repeat(2, 4rem);
-  gap: 0.25rem;
+  gap: 3px;
 }
 
 .palette-grid button {
-  height: 2rem;
-  border: 1px solid #444;
+  height: 2.25rem;
+  border: 2px solid transparent;
   color: #fff;
   cursor: pointer;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.palette-grid button:hover {
+  border-color: var(--color-accent);
+}
+
+.palette-grid button.active {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px var(--color-accent);
 }
 
 .map-grid {
   display: grid;
   gap: 1px;
-  background: #000;
+  background: rgba(0, 0, 0, 0.3);
   padding: 1px;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
 }
 
 .map-cell {
@@ -200,36 +580,95 @@ select {
   padding: 0;
   cursor: crosshair;
   position: relative;
+  transition: filter 0.1s;
+}
+
+.map-cell:hover {
+  filter: brightness(1.2);
 }
 
 .unit-marker {
   font-size: 14px;
   line-height: 28px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
 }
 
-.debug-panel {
+/* ============================================================
+   Map sidebar lists
+   ============================================================ */
+.map-palette select,
+.map-palette label {
   display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  margin-bottom: 1rem;
-  padding: 0.75rem;
-  border: 1px solid #333;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.85rem;
+  margin-bottom: 0.3rem;
 }
 
-.runtime-frame {
+.map-palette select {
   width: 100%;
-  max-width: 520px;
-  height: 400px;
-  border: 1px solid #444;
-  margin-top: 1rem;
-  background: #000;
 }
 
+.reinforcement-list,
+.map-event-list {
+  list-style: none;
+  margin: 0.35rem 0 0;
+  padding: 0;
+  font-size: 0.85rem;
+}
+
+.reinforcement-list li,
+.map-event-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.35rem;
+  padding: 0.2rem 0;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.reinforcement-list li button,
+.map-event-list li button {
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: 0.1rem 0.3rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+}
+
+.reinforcement-list li button:hover,
+.map-event-list li button:hover {
+  color: var(--color-error);
+  background: rgba(232, 88, 88, 0.1);
+}
+
+.win-defend-fields {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.win-defend-fields input {
+  width: 4rem;
+}
+
+/* ============================================================
+   Events editor
+   ============================================================ */
 .events-layout {
   display: grid;
-  grid-template-columns: 12rem 1fr;
+  grid-template-columns: 13rem 1fr;
   gap: 1rem;
   min-height: 24rem;
+}
+
+.events-list {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 0.5rem;
 }
 
 .events-list ul {
@@ -241,12 +680,23 @@ select {
 .events-list li button {
   width: 100%;
   text-align: left;
-  margin-bottom: 0.2rem;
+  margin-bottom: 2px;
+  border-radius: var(--radius-sm);
+  padding: 0.35rem 0.6rem;
+  font-size: 0.9rem;
+}
+
+.events-list li button.active {
+  background: var(--color-active-bg);
+  border-color: var(--color-active-border);
+  color: var(--color-accent);
 }
 
 .events-detail {
-  border: 1px solid #2a2a3d;
-  padding: 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  background: var(--color-bg-surface);
   overflow: auto;
 }
 
@@ -256,62 +706,8 @@ select {
   gap: 0.75rem;
   align-items: flex-end;
   margin-bottom: 0.75rem;
-}
-
-.command-list {
-  list-style: none;
-  margin: 0.5rem 0;
-  padding: 0;
-}
-
-.command-list li {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  margin-bottom: 0.25rem;
-}
-
-.command-list li.active .cmd-select {
-  outline: 1px solid #3d5afe;
-}
-
-.cmd-select {
-  flex: 1;
-  text-align: left;
-  background: #252538;
-  color: inherit;
-  border: 1px solid #3a3a55;
-  padding: 0.25rem 0.5rem;
-  cursor: pointer;
-}
-
-.cmd-actions button {
-  background: #1e1e2e;
-  color: inherit;
-  border: 1px solid #33334d;
-  padding: 0.15rem 0.35rem;
-  cursor: pointer;
-}
-
-.command-add-bar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-bottom: 0.5rem;
-}
-
-.map-event-list {
-  list-style: none;
-  margin: 0.35rem 0 0;
-  padding: 0;
-}
-
-.map-event-list li {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.25rem;
-  font-size: 0.85rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--color-border-subtle);
 }
 
 .events-editor-grid {
@@ -325,17 +721,86 @@ select {
   min-width: 0;
 }
 
+/* ============================================================
+   Command list
+   ============================================================ */
+.command-add-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.command-list {
+  list-style: none;
+  margin: 0.5rem 0;
+  padding: 0;
+}
+
+.command-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 3px;
+}
+
+.cmd-select {
+  flex: 1;
+  text-align: left;
+  background: var(--color-bg-raised);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  padding: 0.3rem 0.55rem;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  font-size: 0.88rem;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.cmd-select:hover {
+  background: var(--color-bg-hover);
+  border-color: var(--color-accent);
+}
+
+.command-list li.active .cmd-select {
+  border-color: var(--color-accent);
+  background: var(--color-active-bg);
+  color: var(--color-accent);
+}
+
+.cmd-actions button {
+  background: var(--color-bg-raised);
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+  padding: 0.15rem 0.4rem;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.cmd-actions button:hover {
+  background: var(--color-bg-hover);
+  color: var(--color-text);
+  border-color: var(--color-accent);
+}
+
+/* ============================================================
+   Dialogue preview
+   ============================================================ */
 .dialogue-preview {
-  border: 1px solid #2a2a3d;
-  background: #171724;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-surface);
   padding: 0.75rem;
   position: sticky;
   top: 0;
+  border-radius: var(--radius-md);
 }
 
 .dialogue-preview h3 {
   margin: 0 0 0.5rem;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
+  color: var(--color-accent);
 }
 
 .dialogue-preview-nav {
@@ -347,13 +812,33 @@ select {
   font-size: 0.85rem;
 }
 
+.dialogue-preview-nav button {
+  background: var(--color-bg-raised);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.dialogue-preview-nav button:hover:not(:disabled) {
+  border-color: var(--color-accent);
+}
+
+.dialogue-preview-nav button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 .dialogue-preview-message,
 .dialogue-preview-choices {
-  border: 2px solid #4fc3f7;
-  border-radius: 6px;
-  background: rgba(0, 0, 0, 0.55);
+  border: 2px solid var(--color-border-accent);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-base);
   padding: 0.75rem;
-  min-height: 8rem;
+  min-height: 7rem;
+  box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.2);
 }
 
 .dialogue-preview-message {
@@ -362,33 +847,37 @@ select {
 }
 
 .dialogue-preview-face {
-  width: 4rem;
-  height: 4rem;
-  border: 2px solid #ffd54f;
-  border-radius: 4px;
-  background: #263238;
-  color: #ffd54f;
+  width: 3.5rem;
+  height: 3.5rem;
+  border: 2px solid var(--color-accent);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-raised);
+  color: var(--color-accent);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   font-weight: bold;
+  font-family: var(--font-heading);
   flex-shrink: 0;
 }
 
 .dialogue-preview-speaker {
-  color: #ffd54f;
-  font-weight: bold;
-  margin-bottom: 0.35rem;
+  color: var(--color-accent);
+  font-weight: 600;
+  font-family: var(--font-heading);
+  margin-bottom: 0.3rem;
+  font-size: 0.95rem;
 }
 
 .dialogue-preview-text {
   white-space: pre-wrap;
-  line-height: 1.5;
+  line-height: 1.6;
+  font-size: 0.9rem;
 }
 
 .dialogue-preview-label {
-  color: #81c784;
+  color: var(--color-success);
   font-weight: bold;
   margin: 0 0 0.35rem;
 }
@@ -400,7 +889,12 @@ select {
 }
 
 .dialogue-preview-choices li {
-  padding: 0.25rem 0;
+  padding: 0.3rem 0.5rem;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.dialogue-preview-choices li:last-child {
+  border-bottom: none;
 }
 
 .dialogue-preview-steps {
@@ -414,13 +908,105 @@ select {
 .dialogue-preview-steps button {
   width: 100%;
   text-align: left;
-  background: #252538;
-  color: inherit;
-  border: 1px solid #3a3a55;
-  padding: 0.3rem 0.45rem;
-  margin-bottom: 0.25rem;
+  background: var(--color-bg-raised);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  padding: 0.3rem 0.5rem;
+  margin-bottom: 2px;
   cursor: pointer;
   font-size: 0.8rem;
+  border-radius: var(--radius-sm);
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.dialogue-preview-steps button:hover {
+  background: var(--color-bg-hover);
+}
+
+.dialogue-preview-steps button.active {
+  border-color: var(--color-accent);
+  background: var(--color-active-bg);
+  color: var(--color-accent);
+}
+
+/* ============================================================
+   Test play
+   ============================================================ */
+.debug-panel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-surface);
+}
+
+.debug-panel label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.9rem;
+}
+
+.debug-panel dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.15rem 0.75rem;
+  margin: 0;
+  font-size: 0.88rem;
+}
+
+.debug-panel dt {
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.debug-panel dd {
+  margin: 0;
+}
+
+.runtime-frame {
+  width: 100%;
+  max-width: 520px;
+  height: 400px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  margin-top: 1rem;
+  background: #000;
+}
+
+/* ============================================================
+   Plugin & chapter panels
+   ============================================================ */
+.chapter-panel,
+.plugin-panel {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.chapter-list {
+  list-style: none;
+  margin: 0.5rem 0;
+  padding: 0;
+}
+
+.chapter-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid var(--color-border-subtle);
+  font-size: 0.9rem;
+}
+
+.chapter-list li.active {
+  background: var(--color-active-bg);
+  border-radius: var(--radius-sm);
+  padding-left: 0.4rem;
+  padding-right: 0.4rem;
 }
 
 .plugin-list {
@@ -432,27 +1018,27 @@ select {
 .plugin-list li {
   margin-bottom: 0.35rem;
   font-size: 0.9rem;
+  padding: 0.25rem 0;
 }
 
 .plugin-panel h3 {
   margin-top: 1.25rem;
 }
 
+/* ============================================================
+   Storage backend
+   ============================================================ */
 .storage-backend-row {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
   font-size: 0.9rem;
 }
 
-.storage-backend-row select {
-  background: #1e1e2e;
-  color: inherit;
-  border: 1px solid #3a3a55;
-  padding: 0.25rem 0.4rem;
-}
-
+/* ============================================================
+   Assets
+   ============================================================ */
 .asset-table {
   width: 100%;
   border-collapse: collapse;
@@ -460,24 +1046,61 @@ select {
   font-size: 0.9rem;
 }
 
-.asset-table th,
+.asset-table th {
+  text-align: left;
+  font-family: var(--font-heading);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.5rem 0.5rem;
+  border-bottom: 2px solid var(--color-border-accent);
+}
+
 .asset-table td {
-  border-bottom: 1px solid #2a2a3d;
+  border-bottom: 1px solid var(--color-border-subtle);
   padding: 0.45rem 0.5rem;
   vertical-align: middle;
+}
+
+.asset-table tbody tr:hover {
+  background: var(--color-bg-hover);
 }
 
 .asset-preview {
   width: 40px;
   height: 40px;
   object-fit: contain;
-  background: #1a1a28;
-  border: 1px solid #3a3a55;
+  background: var(--color-bg-input);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
 }
 
 .asset-preview--none {
   display: inline-block;
   width: 40px;
   text-align: center;
-  color: #6b7280;
+  color: var(--color-text-muted);
+}
+
+/* ============================================================
+   Scrollbar styling (Webkit)
+   ============================================================ */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg-base);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
 }

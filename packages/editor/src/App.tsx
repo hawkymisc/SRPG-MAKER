@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useProjectStore } from "./store/projectStore.js";
+import { useTheme } from "./hooks/useTheme.js";
 import { ProjectTab } from "./components/ProjectTab.js";
 import { DatabaseTab } from "./components/DatabaseTab.js";
 import { MapTab } from "./components/MapTab.js";
@@ -22,6 +23,7 @@ export function App() {
   const project = useProjectStore((s) => s.project);
   const initNewProject = useProjectStore((s) => s.initNewProject);
   const dirty = useProjectStore((s) => s.dirty);
+  const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
     if (!project) {
@@ -52,6 +54,17 @@ export function App() {
             {dirty ? " *" : ""}
           </span>
         ) : null}
+        <div className="header-right">
+          <button
+            type="button"
+            className="theme-toggle"
+            onClick={toggleTheme}
+            aria-label={theme === "dark" ? "ライトモードに切替" : "ダークモードに切替"}
+            data-testid="theme-toggle"
+          >
+            {theme === "dark" ? "\u2600" : "\u263D"}
+          </button>
+        </div>
       </header>
       <nav className="main-tabs" aria-label="メインタブ">
         {TABS.map((tab) => (
