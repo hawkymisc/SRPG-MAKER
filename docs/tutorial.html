@@ -1,0 +1,2924 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SRPGツクール チュートリアル</title>
+<style>
+/* ========== Base Reset & Typography ========== */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+}
+
+body {
+  font-family: 'Noto Sans JP', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Hiragino Sans', 'Yu Gothic UI', sans-serif;
+  background: #0f0f1a;
+  color: #e0e0e0;
+  line-height: 1.8;
+  overflow-x: hidden;
+}
+
+a {
+  color: #3d5afe;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+a:hover {
+  color: #536dfe;
+}
+
+h1, h2, h3, h4 {
+  color: #ffffff;
+  line-height: 1.4;
+}
+
+h2 {
+  font-size: 1.75rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #1e1e3a;
+}
+
+h3 {
+  font-size: 1.3rem;
+  margin: 1.5rem 0 0.75rem;
+}
+
+h4 {
+  font-size: 1.1rem;
+  margin: 1.2rem 0 0.5rem;
+}
+
+p {
+  margin-bottom: 0.8rem;
+}
+
+ul, ol {
+  margin: 0.5rem 0 1rem 1.5rem;
+}
+
+li {
+  margin-bottom: 0.4rem;
+}
+
+strong {
+  color: #ffffff;
+}
+
+/* ========== Sidebar ========== */
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 250px;
+  height: 100vh;
+  background: #0a0a14;
+  border-right: 1px solid #1e1e3a;
+  overflow-y: auto;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s ease;
+}
+
+.sidebar-header {
+  padding: 20px;
+  border-bottom: 1px solid #1e1e3a;
+  flex-shrink: 0;
+}
+
+.sidebar-logo {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #3d5afe;
+  letter-spacing: 0.05em;
+}
+
+.sidebar-subtitle {
+  font-size: 0.7rem;
+  color: #888;
+  margin-top: 2px;
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 8px 0;
+}
+
+.sidebar a {
+  display: block;
+  padding: 10px 20px;
+  color: #999;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+  border-left: 3px solid transparent;
+  position: relative;
+}
+
+.sidebar a:hover {
+  color: #e0e0e0;
+  background: rgba(61, 90, 254, 0.05);
+}
+
+.sidebar a.active {
+  background: rgba(61, 90, 254, 0.2);
+  border-left: 3px solid #3d5afe;
+  color: #ffffff;
+}
+
+.sidebar a .nav-number {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #1e1e3a;
+  color: #888;
+  font-size: 0.7rem;
+  text-align: center;
+  line-height: 22px;
+  margin-right: 10px;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.sidebar a.active .nav-number {
+  background: #3d5afe;
+  color: #fff;
+}
+
+.sidebar a::before {
+  display: none;
+}
+
+/* ========== Hamburger Menu (Mobile) ========== */
+.hamburger {
+  display: none;
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 200;
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  background: #1a1a2e;
+  border: 1px solid #2a2a4a;
+  cursor: pointer;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.hamburger span {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: #e0e0e0;
+  border-radius: 1px;
+  transition: all 0.3s;
+}
+
+.hamburger.open span:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+
+.hamburger.open span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger.open span:nth-child(3) {
+  transform: rotate(-45deg) translate(5px, -5px);
+}
+
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 90;
+}
+
+/* ========== Main Content ========== */
+.main-content {
+  margin-left: 250px;
+  min-height: 100vh;
+}
+
+/* ========== Hero Section ========== */
+.hero {
+  position: relative;
+  padding: 80px 60px 60px;
+  background: linear-gradient(135deg, #0f0f1a 0%, #1a1a3e 50%, #0f0f1a 100%);
+  border-bottom: 1px solid #1e1e3a;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(61, 90, 254, 0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.hero::after {
+  content: '';
+  position: absolute;
+  bottom: -30%;
+  left: -10%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(0, 200, 83, 0.05) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  max-width: 900px;
+}
+
+.hero-badge {
+  display: inline-block;
+  padding: 4px 14px;
+  background: rgba(61, 90, 254, 0.15);
+  border: 1px solid rgba(61, 90, 254, 0.3);
+  border-radius: 20px;
+  font-size: 0.75rem;
+  color: #3d5afe;
+  margin-bottom: 16px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.hero h1 {
+  font-size: 2.8rem;
+  font-weight: 800;
+  margin-bottom: 12px;
+  background: linear-gradient(135deg, #ffffff 0%, #b0bec5 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero h1 .accent {
+  background: linear-gradient(135deg, #3d5afe 0%, #00c853 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+.hero-subtitle {
+  font-size: 1.15rem;
+  color: #999;
+  margin-bottom: 40px;
+}
+
+/* ========== Roadmap ========== */
+.roadmap {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  padding: 0 10px;
+  margin-top: 40px;
+}
+
+.roadmap::before {
+  content: '';
+  position: absolute;
+  top: 20px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #333;
+}
+
+.roadmap-step {
+  text-align: center;
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-width: 0;
+}
+
+.roadmap-step .number {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #3d5afe;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #fff;
+  box-shadow: 0 0 12px rgba(61, 90, 254, 0.3);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.roadmap-step:hover .number {
+  transform: scale(1.15);
+  box-shadow: 0 0 20px rgba(61, 90, 254, 0.5);
+}
+
+.roadmap-step .label {
+  font-size: 0.7rem;
+  color: #888;
+  line-height: 1.3;
+  max-width: 80px;
+  margin: 0 auto;
+}
+
+/* ========== Section ========== */
+.section {
+  padding: 60px;
+  border-bottom: 1px solid #1a1a2e;
+  max-width: 900px;
+  animation: fadeInUp 0.4s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.section-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  font-size: 1.4rem;
+}
+
+.section-icon.blue {
+  background: rgba(61, 90, 254, 0.15);
+  color: #3d5afe;
+}
+
+.section-icon.green {
+  background: rgba(0, 200, 83, 0.15);
+  color: #00c853;
+}
+
+.section-icon.purple {
+  background: rgba(156, 39, 176, 0.15);
+  color: #ce93d8;
+}
+
+.section-icon.orange {
+  background: rgba(255, 152, 0, 0.15);
+  color: #ff9800;
+}
+
+/* CSS-only icons via pseudo-elements */
+.icon-start::before {
+  content: '';
+  display: block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid currentColor;
+  border-radius: 50%;
+  position: relative;
+}
+
+.icon-start::after {
+  content: '';
+  display: block;
+  width: 0;
+  height: 0;
+  border-left: 8px solid currentColor;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  position: relative;
+  top: -15px;
+  left: 8px;
+}
+
+.icon-layout::before {
+  content: '';
+  display: block;
+  width: 22px;
+  height: 18px;
+  border: 2px solid currentColor;
+  border-radius: 3px;
+  position: relative;
+}
+
+.icon-layout::after {
+  content: '';
+  display: block;
+  width: 7px;
+  height: 14px;
+  border-right: 2px solid currentColor;
+  position: relative;
+  top: -18px;
+  left: 2px;
+}
+
+.icon-project::before {
+  content: '';
+  display: block;
+  width: 20px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-radius: 2px;
+  position: relative;
+  top: 4px;
+}
+
+.icon-project::after {
+  content: '';
+  display: block;
+  width: 10px;
+  height: 4px;
+  background: currentColor;
+  border-radius: 2px 2px 0 0;
+  position: relative;
+  top: -16px;
+  left: 0;
+}
+
+/* ========== Step Card ========== */
+.step-card {
+  background: #1a1a2e;
+  border-radius: 12px;
+  padding: 24px;
+  margin: 16px 0;
+  border-left: 4px solid #3d5afe;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.step-card:hover {
+  transform: translateX(4px);
+  box-shadow: -4px 0 20px rgba(61, 90, 254, 0.1);
+}
+
+.step-card h4 {
+  margin-top: 0;
+}
+
+.step-card.green {
+  border-left-color: #00c853;
+}
+
+.step-card.orange {
+  border-left-color: #ff9800;
+}
+
+/* ========== Editor Layout Diagram ========== */
+.editor-layout {
+  border: 2px solid #333;
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 20px 0;
+  font-size: 0.85rem;
+}
+
+.editor-layout .header {
+  background: #1e1e3a;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #333;
+}
+
+.editor-layout .header-title {
+  color: #ccc;
+  font-weight: 600;
+}
+
+.editor-layout .header-unsaved {
+  color: #ff9800;
+  font-size: 0.9rem;
+}
+
+.editor-layout .tabs {
+  display: flex;
+  gap: 4px;
+  padding: 0 12px;
+  background: #141428;
+  border-bottom: 1px solid #333;
+}
+
+.editor-layout .tab {
+  padding: 8px 16px;
+  border-radius: 4px 4px 0 0;
+  cursor: default;
+  font-size: 0.8rem;
+  color: #888;
+  transition: all 0.2s;
+  border-bottom: 2px solid transparent;
+}
+
+.editor-layout .tab.active {
+  background: #3d5afe;
+  color: #fff;
+  border-bottom-color: #3d5afe;
+}
+
+.editor-layout .tab:not(.active):hover {
+  color: #ccc;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.editor-layout .content-area {
+  background: #12121c;
+  padding: 40px 20px;
+  text-align: center;
+  color: #555;
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ========== Shortcut Table ========== */
+.shortcut-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+}
+
+.shortcut-table th {
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 2px solid #2a2a4a;
+  color: #999;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.shortcut-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #1e1e3a;
+}
+
+.shortcut-table tr:hover td {
+  background: rgba(61, 90, 254, 0.05);
+}
+
+.shortcut-table kbd {
+  background: #2a2a4a;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+  font-size: 0.8rem;
+  border: 1px solid #3a3a5a;
+  color: #ccc;
+}
+
+/* ========== Code Block ========== */
+.code-block {
+  background: #1a1a2e;
+  border-radius: 8px;
+  padding: 16px;
+  overflow-x: auto;
+  margin: 12px 0;
+  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  border: 1px solid #2a2a4a;
+  position: relative;
+}
+
+.code-block::before {
+  content: attr(data-lang);
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  font-size: 0.65rem;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.code-block .comment {
+  color: #6a6a8a;
+}
+
+.code-block .command {
+  color: #00c853;
+}
+
+.code-block .flag {
+  color: #ff9800;
+}
+
+.code-block .url {
+  color: #3d5afe;
+}
+
+.code-block .prompt {
+  color: #888;
+  user-select: none;
+}
+
+/* ========== Tips & Warnings ========== */
+.tip {
+  background: rgba(0, 200, 83, 0.1);
+  border-left: 4px solid #00c853;
+  padding: 12px 16px;
+  border-radius: 0 8px 8px 0;
+  margin: 16px 0;
+}
+
+.tip::before {
+  content: 'TIP';
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #00c853;
+  letter-spacing: 0.1em;
+  margin-bottom: 4px;
+}
+
+.warning {
+  background: rgba(255, 152, 0, 0.1);
+  border-left: 4px solid #ff9800;
+  padding: 12px 16px;
+  border-radius: 0 8px 8px 0;
+  margin: 16px 0;
+}
+
+.warning::before {
+  content: 'NOTE';
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #ff9800;
+  letter-spacing: 0.1em;
+  margin-bottom: 4px;
+}
+
+/* ========== Feature Grid ========== */
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  margin: 20px 0;
+}
+
+.feature-item {
+  background: #1a1a2e;
+  border-radius: 10px;
+  padding: 20px;
+  border: 1px solid #2a2a4a;
+  transition: border-color 0.2s, transform 0.2s;
+}
+
+.feature-item:hover {
+  border-color: #3d5afe;
+  transform: translateY(-2px);
+}
+
+.feature-item h4 {
+  margin: 0 0 8px;
+  font-size: 0.95rem;
+}
+
+.feature-item p {
+  font-size: 0.85rem;
+  color: #999;
+  margin: 0;
+}
+
+/* ========== Chapter Panel Demo ========== */
+.chapter-panel {
+  background: #12121c;
+  border: 1px solid #2a2a4a;
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 16px 0;
+}
+
+.chapter-panel-header {
+  background: #1e1e3a;
+  padding: 10px 16px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #ccc;
+  border-bottom: 1px solid #2a2a4a;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.chapter-panel-header .btn-small {
+  background: #3d5afe;
+  color: #fff;
+  border: none;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  cursor: default;
+}
+
+.chapter-item {
+  padding: 10px 16px;
+  border-bottom: 1px solid #1a1a2e;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.85rem;
+  transition: background 0.2s;
+}
+
+.chapter-item:hover {
+  background: rgba(61, 90, 254, 0.05);
+}
+
+.chapter-item .radio {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid #555;
+  flex-shrink: 0;
+}
+
+.chapter-item .radio.selected {
+  border-color: #3d5afe;
+  background: radial-gradient(circle, #3d5afe 40%, transparent 40%);
+}
+
+.chapter-item .chapter-name {
+  flex: 1;
+  color: #ddd;
+}
+
+.chapter-item .chapter-map {
+  color: #888;
+  font-size: 0.75rem;
+}
+
+.chapter-item .drag-handle {
+  color: #555;
+  cursor: grab;
+  font-size: 0.7rem;
+  letter-spacing: 2px;
+}
+
+/* ========== Save Method Cards ========== */
+.save-methods {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin: 16px 0;
+}
+
+.save-method {
+  background: #1a1a2e;
+  border: 1px solid #2a2a4a;
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.save-method h4 {
+  font-size: 0.9rem;
+  margin: 0 0 6px;
+}
+
+.save-method p {
+  font-size: 0.8rem;
+  color: #999;
+  margin: 0;
+}
+
+.save-method .badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.save-method .badge.browser {
+  background: rgba(61, 90, 254, 0.2);
+  color: #3d5afe;
+}
+
+.save-method .badge.desktop {
+  background: rgba(0, 200, 83, 0.2);
+  color: #00c853;
+}
+
+.save-method .badge.auto {
+  background: rgba(156, 39, 176, 0.2);
+  color: #ce93d8;
+}
+
+/* ========== Responsive ========== */
+@media (max-width: 768px) {
+  .hamburger {
+    display: flex;
+  }
+
+  .sidebar {
+    transform: translateX(-100%);
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .sidebar-overlay.open {
+    display: block;
+  }
+
+  .main-content {
+    margin-left: 0;
+  }
+
+  .hero {
+    padding: 80px 20px 40px;
+  }
+
+  .hero h1 {
+    font-size: 1.8rem;
+  }
+
+  .section {
+    padding: 40px 20px;
+  }
+
+  .roadmap {
+    flex-wrap: wrap;
+    gap: 16px;
+    justify-content: center;
+  }
+
+  .roadmap::before {
+    display: none;
+  }
+
+  .roadmap-step {
+    flex: 0 0 auto;
+  }
+
+  .editor-layout .tabs {
+    flex-wrap: wrap;
+  }
+}
+
+/* ========== Print ========== */
+@media print {
+  .sidebar,
+  .hamburger,
+  .sidebar-overlay {
+    display: none !important;
+  }
+
+  .main-content {
+    margin-left: 0 !important;
+  }
+
+  body {
+    background: #fff;
+    color: #222;
+  }
+
+  .hero {
+    background: none;
+    border-bottom: 2px solid #ccc;
+  }
+
+  .hero h1 {
+    -webkit-text-fill-color: #222;
+  }
+
+  .step-card,
+  .code-block,
+  .feature-item,
+  .chapter-panel,
+  .save-method {
+    background: #f5f5f5;
+    border-color: #ccc;
+  }
+
+  .tip {
+    background: #e8f5e9;
+  }
+
+  .warning {
+    background: #fff3e0;
+  }
+
+  .shortcut-table kbd {
+    background: #eee;
+    border-color: #ccc;
+    color: #222;
+  }
+}
+
+/* ========== Scroll animations ========== */
+.fade-in {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.fade-in.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+</style>
+</head>
+<body>
+
+<!-- Hamburger Button (Mobile) -->
+<button class="hamburger" id="hamburger" aria-label="メニューを開く">
+  <span></span>
+  <span></span>
+  <span></span>
+</button>
+
+<!-- Sidebar Overlay (Mobile) -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- Sidebar Navigation -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">SRPGツクール</div>
+    <div class="sidebar-subtitle">Tutorial Guide</div>
+  </div>
+  <div class="sidebar-nav">
+    <a href="#section-intro" class="active">
+      <span class="nav-number">1</span>はじめに
+    </a>
+    <a href="#section-layout">
+      <span class="nav-number">2</span>画面構成
+    </a>
+    <a href="#section-project">
+      <span class="nav-number">3</span>プロジェクト
+    </a>
+    <a href="#section-database">
+      <span class="nav-number">4</span>データベース
+    </a>
+    <a href="#section-map">
+      <span class="nav-number">5</span>マップエディタ
+    </a>
+    <a href="#section-event">
+      <span class="nav-number">6</span>イベント
+    </a>
+    <a href="#section-testplay">
+      <span class="nav-number">7</span>テストプレイ
+    </a>
+    <a href="#section-export">
+      <span class="nav-number">8</span>素材・書き出し・Tips
+    </a>
+  </div>
+</nav>
+
+<!-- Main Content -->
+<div class="main-content">
+
+  <!-- ===== Section 0: Hero ===== -->
+  <header class="hero" id="hero">
+    <div class="hero-content">
+      <div class="hero-badge">Tutorial v1.0</div>
+      <h1><span class="accent">SRPGツクール</span> チュートリアル</h1>
+      <p class="hero-subtitle">はじめてのシミュレーションRPG制作 — 全8ステップで完成まで導きます</p>
+
+      <div class="roadmap">
+        <div class="roadmap-step">
+          <div class="number">1</div>
+          <div class="label">はじめに</div>
+        </div>
+        <div class="roadmap-step">
+          <div class="number">2</div>
+          <div class="label">画面構成</div>
+        </div>
+        <div class="roadmap-step">
+          <div class="number">3</div>
+          <div class="label">プロジェクト</div>
+        </div>
+        <div class="roadmap-step">
+          <div class="number">4</div>
+          <div class="label">データ ベース</div>
+        </div>
+        <div class="roadmap-step">
+          <div class="number">5</div>
+          <div class="label">マップ エディタ</div>
+        </div>
+        <div class="roadmap-step">
+          <div class="number">6</div>
+          <div class="label">イベント</div>
+        </div>
+        <div class="roadmap-step">
+          <div class="number">7</div>
+          <div class="label">テスト プレイ</div>
+        </div>
+        <div class="roadmap-step">
+          <div class="number">8</div>
+          <div class="label">素材・ 書き出し</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== Section 1: はじめに ===== -->
+  <section class="section fade-in" id="section-intro">
+    <div class="section-icon blue icon-start"></div>
+    <h2>1. はじめに</h2>
+
+    <h3>SRPGツクールとは</h3>
+    <p>SRPGツクールは、<strong>シミュレーションRPG（SRPG）</strong>を制作するためのオーサリングツールです。
+    ブラウザベースのビジュアルエディタで、マップの作成、ユニットやクラスのデータベース管理、イベントの組み立て、そしてテストプレイまでを一貫して行えます。</p>
+
+    <div class="feature-grid fade-in">
+      <div class="feature-item">
+        <h4>ビジュアルエディタ</h4>
+        <p>コーディング不要。マップもデータもイベントもGUIで作成できます。</p>
+      </div>
+      <div class="feature-item">
+        <h4>リアルタイムテスト</h4>
+        <p>編集内容をすぐにテストプレイで確認。高速な試行錯誤が可能です。</p>
+      </div>
+      <div class="feature-item">
+        <h4>マルチプラットフォーム</h4>
+        <p>HTML5・デスクトップ（Electron）・モバイルへ書き出し対応。</p>
+      </div>
+      <div class="feature-item">
+        <h4>Git対応データ形式</h4>
+        <p>プロジェクトデータはJSONフォルダ形式。チーム開発にも適しています。</p>
+      </div>
+    </div>
+
+    <h3>必要環境</h3>
+    <div class="step-card">
+      <table class="shortcut-table">
+        <thead>
+          <tr>
+            <th>ソフトウェア</th>
+            <th>必要バージョン</th>
+            <th>備考</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>ブラウザ</td>
+            <td><strong>Chrome / Edge 最新版</strong></td>
+            <td>Firefox, Safari も動作しますが推奨は Chrome 系</td>
+          </tr>
+          <tr>
+            <td>Node.js</td>
+            <td><kbd>22+</kbd></td>
+            <td>LTS版を推奨</td>
+          </tr>
+          <tr>
+            <td>pnpm</td>
+            <td><kbd>9+</kbd></td>
+            <td><code>corepack enable</code> で導入可能</td>
+          </tr>
+          <tr>
+            <td>Git</td>
+            <td>任意</td>
+            <td>プロジェクトのバージョン管理用</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>インストール手順</h3>
+    <div class="step-card">
+      <h4>Step 1: リポジトリのクローン</h4>
+      <div class="code-block" data-lang="bash">
+<span class="prompt">$ </span><span class="command">git clone</span> https://github.com/your-org/srpg-maker.git
+<span class="prompt">$ </span><span class="command">cd</span> srpg-maker</div>
+    </div>
+
+    <div class="step-card">
+      <h4>Step 2: 依存パッケージのインストール</h4>
+      <div class="code-block" data-lang="bash">
+<span class="prompt">$ </span><span class="command">pnpm install</span></div>
+      <div class="tip">
+        pnpmが未インストールの場合は <code>corepack enable</code> を先に実行してください。Node.js 22 には corepack が同梱されています。
+      </div>
+    </div>
+
+    <h3>起動方法</h3>
+    <div class="step-card">
+      <h4>ブラウザ版（推奨）</h4>
+      <div class="code-block" data-lang="bash">
+<span class="prompt">$ </span><span class="command">pnpm dev:editor</span>
+<span class="comment"># エディタが起動します → <span class="url">http://localhost:5173</span></span></div>
+    </div>
+
+    <div class="step-card">
+      <h4>デスクトップ版（Electron）</h4>
+      <div class="code-block" data-lang="bash">
+<span class="comment"># ターミナル1: エディタサーバー</span>
+<span class="prompt">$ </span><span class="command">pnpm dev:editor</span>
+
+<span class="comment"># ターミナル2: Electronアプリ</span>
+<span class="prompt">$ </span><span class="command">pnpm dev:editor:electron</span></div>
+    </div>
+
+    <div class="step-card green">
+      <h4>テストプレイ用ランタイム</h4>
+      <div class="code-block" data-lang="bash">
+<span class="prompt">$ </span><span class="command">pnpm dev:runtime</span>
+<span class="comment"># ゲームランタイムが起動します → <span class="url">http://localhost:5174</span></span></div>
+      <div class="warning">
+        テストプレイを行うには、エディタとは別にランタイムサーバーも起動する必要があります。
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Section 2: 画面構成を知ろう ===== -->
+  <section class="section fade-in" id="section-layout">
+    <div class="section-icon green icon-layout"></div>
+    <h2>2. 画面構成を知ろう</h2>
+
+    <p>SRPGツクールのエディタは、以下のような構成になっています。まずは全体像を把握しましょう。</p>
+
+    <h3>エディタの全体レイアウト</h3>
+    <div class="editor-layout fade-in">
+      <div class="header">
+        <span class="header-title">マイプロジェクト</span>
+        <span class="header-unsaved">* 未保存の変更があります</span>
+      </div>
+      <div class="tabs">
+        <div class="tab">プロジェクト</div>
+        <div class="tab active">データベース</div>
+        <div class="tab">マップ</div>
+        <div class="tab">テストプレイ</div>
+        <div class="tab">イベント</div>
+        <div class="tab">素材</div>
+      </div>
+      <div class="content-area">
+        選択したタブの内容がここに表示されます
+      </div>
+    </div>
+
+    <h4>画面各部の説明</h4>
+    <ul>
+      <li><strong>ヘッダー</strong> — プロジェクト名が表示されます。未保存の変更がある場合は <code>*</code> マークが付きます。</li>
+      <li><strong>メインタブ</strong> — 6つのタブで機能を切り替えます。各タブにはショートカットキーが割り当てられています。</li>
+      <li><strong>コンテンツ領域</strong> — 選択中のタブに応じた編集画面が表示されます。</li>
+    </ul>
+
+    <h3>ショートカットキー一覧</h3>
+    <p>タブの切り替えはキーボードショートカットで素早く行えます。</p>
+    <table class="shortcut-table fade-in">
+      <thead>
+        <tr>
+          <th>ショートカット</th>
+          <th>タブ</th>
+          <th>説明</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><kbd>Ctrl</kbd> + <kbd>1</kbd></td>
+          <td>プロジェクト</td>
+          <td>章（シナリオ）管理と保存</td>
+        </tr>
+        <tr>
+          <td><kbd>Ctrl</kbd> + <kbd>2</kbd></td>
+          <td>データベース</td>
+          <td>ユニット・クラス・スキル等のデータ編集</td>
+        </tr>
+        <tr>
+          <td><kbd>Ctrl</kbd> + <kbd>3</kbd></td>
+          <td>マップ</td>
+          <td>マップの作成と地形配置</td>
+        </tr>
+        <tr>
+          <td><kbd>Ctrl</kbd> + <kbd>4</kbd></td>
+          <td>テストプレイ</td>
+          <td>ゲームの実行テスト</td>
+        </tr>
+        <tr>
+          <td><kbd>Ctrl</kbd> + <kbd>5</kbd></td>
+          <td>イベント</td>
+          <td>ゲーム進行イベントの作成</td>
+        </tr>
+        <tr>
+          <td><kbd>Ctrl</kbd> + <kbd>6</kbd></td>
+          <td>素材</td>
+          <td>画像・音声素材の管理</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="tip">
+      各タブの詳しい使い方は、以降のセクションで順番に解説していきます。
+    </div>
+  </section>
+
+  <!-- ===== Section 3: プロジェクトタブ ===== -->
+  <section class="section fade-in" id="section-project">
+    <div class="section-icon purple icon-project"></div>
+    <h2>3. プロジェクトタブ</h2>
+
+    <p>プロジェクトタブでは、ゲーム全体の構成を管理します。章（シナリオ）の作成と順序管理、保存と書き出しを行います。</p>
+
+    <h3>サンプルプロジェクトを読み込む</h3>
+    <div class="step-card">
+      <p>初めて使う場合は、サンプルプロジェクトを読み込んで動作を確認しましょう。</p>
+      <ol>
+        <li>エディタを起動し、プロジェクトタブ（<kbd>Ctrl</kbd> + <kbd>1</kbd>）を開きます</li>
+        <li>画面上部の <strong>「新規（サンプル）」</strong> ボタンをクリックします</li>
+        <li>サンプルデータが読み込まれ、章・ユニット・マップが自動的にセットアップされます</li>
+      </ol>
+      <div class="tip">
+        サンプルプロジェクトには、チュートリアルで使用するすべてのデータが含まれています。まずはこれをベースに各機能を学びましょう。
+      </div>
+    </div>
+
+    <h3>章（シナリオ）管理パネル</h3>
+    <p>SRPGツクールでは、ゲーム内のステージを<strong>「章（Chapter）」</strong>として管理します。各章には1つのマップが紐付き、章の順序がゲームの進行順序になります。</p>
+
+    <div class="chapter-panel fade-in">
+      <div class="chapter-panel-header">
+        章リスト
+        <span class="btn-small">+ 章を追加</span>
+      </div>
+      <div class="chapter-item">
+        <div class="radio selected"></div>
+        <span class="chapter-name">第1章: 王国の危機</span>
+        <span class="chapter-map">草原マップ</span>
+        <span class="drag-handle">⠿</span>
+      </div>
+      <div class="chapter-item">
+        <div class="radio"></div>
+        <span class="chapter-name">第2章: 森の戦い</span>
+        <span class="chapter-map">森林マップ</span>
+        <span class="drag-handle">⠿</span>
+      </div>
+      <div class="chapter-item">
+        <div class="radio"></div>
+        <span class="chapter-name">第3章: 最終決戦</span>
+        <span class="chapter-map">城マップ</span>
+        <span class="drag-handle">⠿</span>
+      </div>
+    </div>
+
+    <h4>操作方法</h4>
+    <ul>
+      <li><strong>章名の編集</strong> — 章名をダブルクリックすると、テキストを直接編集できます。</li>
+      <li><strong>マップの紐付け</strong> — 各章の右側にあるマップ名をクリックすると、紐付けるマップを選択できます。</li>
+      <li><strong>開始章の指定</strong> — 左端のラジオボタンで、ゲーム開始時に最初にプレイされる章を指定します。</li>
+      <li><strong>並び順の変更</strong> — 右端のドラッグハンドル（⠿）をドラッグして、章の順序を変更できます。</li>
+    </ul>
+
+    <h3>保存方法</h3>
+    <p>作成したプロジェクトの保存方法は、実行環境によって異なります。</p>
+
+    <div class="save-methods fade-in">
+      <div class="save-method">
+        <div class="badge browser">Browser</div>
+        <h4>ブラウザ版</h4>
+        <p>プロジェクト全体を1つのJSONファイルとしてダウンロードします。次回はファイルを読み込んで再開できます。</p>
+      </div>
+      <div class="save-method">
+        <div class="badge desktop">Desktop</div>
+        <h4>デスクトップ版</h4>
+        <p>フォルダ形式で保存されます。各データが個別のJSONファイルになるため、Gitでのバージョン管理に適しています。</p>
+      </div>
+      <div class="save-method">
+        <div class="badge auto">Auto</div>
+        <h4>自動バックアップ</h4>
+        <p>5世代分の自動バックアップが保持されます。予期しないデータ消失に備える安心機能です。</p>
+      </div>
+    </div>
+
+    <h3>書き出し（エクスポート）</h3>
+    <p>完成したゲームは、複数のプラットフォーム向けに書き出すことができます。</p>
+
+    <div class="step-card">
+      <table class="shortcut-table">
+        <thead>
+          <tr>
+            <th>出力形式</th>
+            <th>説明</th>
+            <th>用途</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>HTML5</strong></td>
+            <td>Webブラウザで動作するゲームを出力</td>
+            <td>Webサイトへの公開、itch.io等</td>
+          </tr>
+          <tr>
+            <td><strong>Electron</strong></td>
+            <td>Windows / macOS / Linux用の実行ファイルを出力</td>
+            <td>ダウンロード配布</td>
+          </tr>
+          <tr>
+            <td><strong>モバイル</strong></td>
+            <td>Capacitor経由でiOS / Android向けにビルド</td>
+            <td>アプリストア配信</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="warning">
+      書き出し機能の詳細設定については、セクション8「素材・書き出し・Tips」で解説します。
+    </div>
+  </section>
+
+  <!-- ===== Section 4: データベースタブ ===== -->
+  <section id="section-database" class="section fade-in">
+    <h2><span class="nav-number">4</span> データベースタブ</h2>
+
+    <p>
+      データベースタブ（<strong>Ctrl+2</strong>）ではゲームに登場するすべてのデータを定義します。
+      左のリストから項目を選び、右のフォームで編集します。変更は即座に反映されます（未保存状態になります）。
+    </p>
+
+    <!-- UI構成図 -->
+    <div class="step-card">
+      <h3>UI構成</h3>
+      <div style="background: #0f0f1a; border: 1px solid #2a2a4a; border-radius: 8px; padding: 16px; font-family: monospace; font-size: 0.85rem; line-height: 1.6; overflow-x: auto;">
+        <div style="background: #1e1e3a; padding: 8px 12px; border-radius: 4px 4px 0 0; border-bottom: 2px solid #3d5afe; margin: -16px -16px 12px -16px; padding: 12px 16px;">
+          <span style="color: #3d5afe; font-weight: bold;">サブタブ:</span>
+          <span style="background: #3d5afe; color: #fff; padding: 2px 8px; border-radius: 3px; margin: 0 2px;">ユニット</span>
+          <span style="background: #2a2a4a; color: #aaa; padding: 2px 8px; border-radius: 3px; margin: 0 2px;">クラス</span>
+          <span style="background: #2a2a4a; color: #aaa; padding: 2px 8px; border-radius: 3px; margin: 0 2px;">武器</span>
+          <span style="background: #2a2a4a; color: #aaa; padding: 2px 8px; border-radius: 3px; margin: 0 2px;">アイテム</span>
+          <span style="background: #2a2a4a; color: #aaa; padding: 2px 8px; border-radius: 3px; margin: 0 2px;">スキル</span>
+          <span style="background: #2a2a4a; color: #aaa; padding: 2px 8px; border-radius: 3px; margin: 0 2px;">地形</span>
+        </div>
+        <div style="display: flex; gap: 12px;">
+          <div style="flex: 0 0 140px; border: 1px solid #2a2a4a; border-radius: 4px; padding: 8px;">
+            <div style="color: #3d5afe; font-size: 0.8rem; margin-bottom: 6px;">[＋ 追加]</div>
+            <div style="color: #fff; padding: 3px 6px; background: #3d5afe33; border-radius: 3px; margin-bottom: 3px;">・アルム</div>
+            <div style="color: #aaa; padding: 3px 6px; margin-bottom: 3px;">・ルカ</div>
+            <div style="color: #aaa; padding: 3px 6px;">・山賊</div>
+          </div>
+          <div style="flex: 1; border: 1px solid #2a2a4a; border-radius: 4px; padding: 8px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+              <span style="color: #888; font-size: 0.8rem;">ID: unit_001</span>
+              <span style="color: #e57373; font-size: 0.8rem;">[削除]</span>
+            </div>
+            <div style="margin-bottom: 4px;">名前: <span style="border-bottom: 1px solid #3d5afe; color: #fff; padding: 0 8px;">アルム</span></div>
+            <div style="margin-bottom: 4px;">クラス: <span style="border-bottom: 1px solid #3d5afe; color: #fff; padding: 0 8px;">ロード ▼</span></div>
+            <div style="margin-bottom: 4px;">レベル: <span style="border-bottom: 1px solid #3d5afe; color: #fff; padding: 0 8px;">1</span></div>
+            <div style="color: #aaa; font-size: 0.8rem;">HP: [25] 力: [8] 魔力: [2] 技: [6] 速: [7] ...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- サブタブ1: ユニット -->
+    <div class="step-card">
+      <h3>4-1. ユニット</h3>
+      <p>ゲームに登場するキャラクターを定義します。</p>
+
+      <h4>基本情報</h4>
+      <ul>
+        <li><strong>名前</strong> — キャラクターの表示名</li>
+        <li><strong>所属クラス</strong> — クラスタブで定義したクラスを選択</li>
+        <li><strong>初期レベル</strong> — 加入時のレベル</li>
+      </ul>
+
+      <h4>能力値（9パラメータ）</h4>
+      <table class="shortcut-table">
+        <thead>
+          <tr>
+            <th>パラメータ</th>
+            <th>略称</th>
+            <th>説明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>HP</td><td>hp</td><td>体力。0で戦闘不能</td></tr>
+          <tr><td>力</td><td>str</td><td>物理攻撃力に影響</td></tr>
+          <tr><td>魔力</td><td>mag</td><td>魔法攻撃力に影響</td></tr>
+          <tr><td>技</td><td>skl</td><td>命中率・必殺率に影響</td></tr>
+          <tr><td>速さ</td><td>spd</td><td>回避・追撃判定に影響</td></tr>
+          <tr><td>幸運</td><td>lck</td><td>命中・回避・必殺回避に影響</td></tr>
+          <tr><td>守備</td><td>def</td><td>物理ダメージを軽減</td></tr>
+          <tr><td>魔防</td><td>res</td><td>魔法ダメージを軽減</td></tr>
+          <tr><td>移動</td><td>mov</td><td>1ターンに移動できるマス数</td></tr>
+        </tbody>
+      </table>
+
+      <h4>成長率</h4>
+      <p>レベルアップ時に各能力が上昇する確率（0〜100%）を設定します。</p>
+
+      <h4>初期所持品・スキル</h4>
+      <ul>
+        <li><strong>初期所持品</strong> — 武器・アイテムタブで定義したアイテムから選択（最大5個）</li>
+        <li><strong>スキル</strong> — スキルタブで定義したスキルから選択</li>
+      </ul>
+
+      <h4>サンプルデータ</h4>
+      <table class="shortcut-table">
+        <thead>
+          <tr><th>名前</th><th>クラス</th><th>Lv</th><th>HP</th><th>力</th><th>魔</th><th>技</th><th>速</th><th>運</th><th>守</th><th>魔防</th><th>移動</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>アルム</td><td>ロード</td><td>1</td><td>25</td><td>8</td><td>2</td><td>6</td><td>7</td><td>5</td><td>5</td><td>3</td><td>5</td></tr>
+          <tr><td>ルカ</td><td>兵士</td><td>1</td><td>22</td><td>7</td><td>1</td><td>5</td><td>4</td><td>3</td><td>7</td><td>2</td><td>4</td></tr>
+        </tbody>
+      </table>
+
+      <div class="tip">
+        ユニットを先に定義してからマップに配置しましょう。マップエディタでは定義済みユニットの一覧から選んで配置します。
+      </div>
+    </div>
+
+    <!-- サブタブ2: クラス -->
+    <div class="step-card">
+      <h3>4-2. クラス</h3>
+      <p>ユニットの職業（兵種）を定義します。クラスによって移動タイプや使用可能武器が決まります。</p>
+
+      <h4>基本設定</h4>
+      <ul>
+        <li><strong>名前</strong> — クラスの表示名（例: ロード、兵士、魔道士）</li>
+        <li><strong>移動タイプ</strong> — 地形との相性を決定（下表参照）</li>
+        <li><strong>基準能力値</strong> — クラスが持つベース補正値</li>
+        <li><strong>使用可能武器種</strong> — 剣 / 槍 / 斧 / 弓 / 魔法から複数選択可</li>
+        <li><strong>能力上限</strong> — 各パラメータの最大値（任意設定）</li>
+        <li><strong>転職先クラス</strong> — クラスチェンジ時の遷移先</li>
+      </ul>
+
+      <h4>移動タイプの効果</h4>
+      <table class="shortcut-table">
+        <thead>
+          <tr><th>移動タイプ</th><th>特徴</th><th>地形影響</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>歩兵</strong></td><td>標準的な移動</td><td>森・山で移動コスト増加</td></tr>
+          <tr><td><strong>騎兵</strong></td><td>平地で高速移動</td><td>森で大幅コスト増、山は進入不可</td></tr>
+          <tr><td><strong>飛行</strong></td><td>地形無視で移動</td><td>全地形コスト1（弓に弱い）</td></tr>
+          <tr><td><strong>重装</strong></td><td>高防御・低移動</td><td>森・山で移動コスト増加</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- サブタブ3: 武器 -->
+    <div class="step-card">
+      <h3>4-3. 武器</h3>
+      <p>武器の性能と種別を設定します。</p>
+
+      <h4>武器パラメータ</h4>
+      <table class="shortcut-table">
+        <thead>
+          <tr><th>項目</th><th>説明</th><th>例（鉄の剣）</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>武器種</td><td>剣 / 槍 / 斧 / 弓 / 魔法</td><td>剣</td></tr>
+          <tr><td>威力 (might)</td><td>攻撃力に加算</td><td>5</td></tr>
+          <tr><td>命中 (hit)</td><td>命中率に加算</td><td>90</td></tr>
+          <tr><td>必殺 (crit)</td><td>必殺率に加算</td><td>0</td></tr>
+          <tr><td>射程 (min〜max)</td><td>攻撃可能距離</td><td>1〜1</td></tr>
+          <tr><td>重さ (weight)</td><td>攻速に影響</td><td>5</td></tr>
+          <tr><td>耐久 (durability)</td><td>使用可能回数</td><td>45</td></tr>
+        </tbody>
+      </table>
+
+      <h4>武器の三すくみ</h4>
+      <p>近接武器には相性関係（三すくみ）があります。弓と魔法は中立です。</p>
+
+      <!-- 三すくみ図 -->
+      <div style="display: flex; justify-content: center; margin: 1.5rem 0;">
+        <div style="position: relative; width: 220px; height: 200px;">
+          <!-- 剣 -->
+          <div style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); text-align: center;">
+            <div style="background: #3d5afe; color: #fff; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem; margin: 0 auto;">剣</div>
+          </div>
+          <!-- 斧 -->
+          <div style="position: absolute; bottom: 10px; left: 10px; text-align: center;">
+            <div style="background: #4caf50; color: #fff; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem; margin: 0 auto;">斧</div>
+          </div>
+          <!-- 槍 -->
+          <div style="position: absolute; bottom: 10px; right: 10px; text-align: center;">
+            <div style="background: #e57373; color: #fff; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem; margin: 0 auto;">槍</div>
+          </div>
+          <!-- 矢印: 剣→斧 -->
+          <div style="position: absolute; top: 55px; left: 30px; color: #4caf50; font-size: 0.75rem; transform: rotate(-30deg);">▶ 有利</div>
+          <!-- 矢印: 斧→槍 -->
+          <div style="position: absolute; bottom: 5px; left: 50%; transform: translateX(-50%); color: #4caf50; font-size: 0.75rem;">▶ 有利</div>
+          <!-- 矢印: 槍→剣 -->
+          <div style="position: absolute; top: 55px; right: 30px; color: #4caf50; font-size: 0.75rem; transform: rotate(30deg);">有利 ◀</div>
+        </div>
+      </div>
+
+      <h4>三すくみの効果</h4>
+      <table class="shortcut-table">
+        <thead>
+          <tr><th>状態</th><th>威力補正</th><th>命中補正</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>有利</strong>（剣vs斧 等）</td><td>+1</td><td>+15</td></tr>
+          <tr><td><strong>不利</strong>（剣vs槍 等）</td><td>-1</td><td>-15</td></tr>
+          <tr><td><strong>中立</strong>（同種 / 弓 / 魔法）</td><td>±0</td><td>±0</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- サブタブ4: アイテム -->
+    <div class="step-card">
+      <h3>4-4. アイテム</h3>
+      <p>消費アイテムを定義します。現在のバージョンでは回復アイテムに対応しています。</p>
+
+      <h4>アイテム設定</h4>
+      <ul>
+        <li><strong>種別</strong> — 現在は「回復」のみ</li>
+        <li><strong>回復量</strong> — 使用時のHP回復量</li>
+        <li><strong>使用回数</strong> — 使い切ると消滅</li>
+      </ul>
+
+      <h4>サンプル</h4>
+      <table class="shortcut-table">
+        <thead>
+          <tr><th>名前</th><th>種別</th><th>回復量</th><th>使用回数</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>傷薬</td><td>回復</td><td>10</td><td>3</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- サブタブ5: スキル -->
+    <div class="step-card">
+      <h3>4-5. スキル</h3>
+      <p>ユニットに付与できる特殊能力を定義します。</p>
+
+      <h4>スキル設定</h4>
+      <ul>
+        <li><strong>名前</strong> — スキルの表示名</li>
+        <li><strong>説明文</strong> — 効果の説明テキスト</li>
+        <li><strong>必殺補正</strong> — 必殺率への加算値</li>
+      </ul>
+
+      <h4>サンプル</h4>
+      <table class="shortcut-table">
+        <thead>
+          <tr><th>名前</th><th>説明</th><th>必殺補正</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>急所狙い</td><td>弱点を見抜き必殺率を高める</td><td>+10</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- サブタブ6: 地形 -->
+    <div class="step-card">
+      <h3>4-6. 地形</h3>
+      <p>マップタイルの地形効果を定義します。地形はマップエディタで配置するタイルに紐づきます。</p>
+
+      <h4>地形パラメータ</h4>
+      <ul>
+        <li><strong>移動コスト</strong> — 移動タイプ別の消費移動力</li>
+        <li><strong>回避補正</strong> — この地形に居るユニットの回避率ボーナス</li>
+        <li><strong>防御補正</strong> — この地形に居るユニットの被ダメージ軽減</li>
+        <li><strong>ターン回復量</strong> — ターン終了時のHP回復（砦など）</li>
+        <li><strong>進入不可フラグ</strong> — 特定の移動タイプが進入できない設定</li>
+      </ul>
+
+      <h4>地形効果比較表</h4>
+      <table class="shortcut-table">
+        <thead>
+          <tr><th>地形</th><th>歩兵コスト</th><th>騎兵コスト</th><th>飛行コスト</th><th>重装コスト</th><th>回避補正</th><th>防御補正</th><th>回復</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>平地</strong></td><td>1</td><td>1</td><td>1</td><td>1</td><td>0</td><td>0</td><td>0</td></tr>
+          <tr><td><strong>森</strong></td><td>2</td><td>3</td><td>1</td><td>2</td><td>+20</td><td>+1</td><td>0</td></tr>
+          <tr><td><strong>砦</strong></td><td>2</td><td>2</td><td>1</td><td>2</td><td>+20</td><td>+2</td><td>5</td></tr>
+          <tr><td><strong>山</strong></td><td>3</td><td>—</td><td>1</td><td>4</td><td>+30</td><td>+2</td><td>0</td></tr>
+          <tr><td><strong>水</strong></td><td>—</td><td>—</td><td>1</td><td>—</td><td>0</td><td>0</td><td>0</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size: 0.85rem; color: #888;">※ 「—」は進入不可を表します</p>
+    </div>
+
+    <!-- 戦闘計算式 -->
+    <div class="step-card">
+      <h3>戦闘計算式の概要</h3>
+      <p>データベースで設定した値がどのように戦闘に反映されるか、計算式をまとめます。</p>
+
+      <div class="code-block">
+        <div><strong>攻撃力</strong> = 力（or 魔力） + 武器威力 + 三すくみ補正</div>
+        <div><strong>ダメージ</strong> = max(0, 攻撃力 - 守備（or 魔防） - 地形防御補正)</div>
+        <div style="margin-top: 0.5rem;"><strong>命中率</strong> = (技×2 + 幸運/2 + 武器命中 + 三すくみ命中)</div>
+        <div style="padding-left: 4rem;">− (相手速さ×2 + 相手幸運 + 地形回避)</div>
+        <div style="margin-top: 0.5rem;"><strong>必殺率</strong> = 技/2 + 武器必殺 − 相手幸運</div>
+        <div style="margin-top: 0.5rem;"><strong>追撃条件</strong>: 速さ差 ≥ 4 で追撃発生（2回攻撃）</div>
+        <div><strong>必殺ダメージ</strong> = 通常ダメージ × 3</div>
+      </div>
+
+      <div class="warning">
+        計算式の詳細やカスタマイズについては仕様書（docs/spec.md 5.2章）を参照してください。
+        ここに記載しているのは既定値です。
+      </div>
+    </div>
+
+  </section>
+
+<!-- ===== Section 5: マップエディタ ===== -->
+<section class="section fade-in" id="section-map">
+  <div class="section-icon orange" style="position:relative;">
+    <div style="width:18px;height:18px;border:2px solid currentColor;border-radius:2px;position:relative;">
+      <div style="position:absolute;top:50%;left:0;right:0;height:2px;background:currentColor;"></div>
+      <div style="position:absolute;left:50%;top:0;bottom:0;width:2px;background:currentColor;"></div>
+    </div>
+  </div>
+  <h2>5. マップエディタ</h2>
+
+  <p>マップタブ（<kbd>Ctrl</kbd> + <kbd>3</kbd>）ではゲームの戦場を作成します。地形を描画し、ユニットを配置し、勝敗条件を設定します。</p>
+
+  <!-- 5-1: マップの基本操作 -->
+  <h3>マップの基本操作</h3>
+
+  <div class="step-card">
+    <h4>マップの選択</h4>
+    <p>ツールバー左端のドロップダウンから、編集対象のマップを選択します。マップはデータベースで事前に定義しておく必要があります。</p>
+  </div>
+
+  <div class="step-card">
+    <h4>描画ツール</h4>
+    <p>3種類のツールを切り替えて地形を描画します。</p>
+    <table class="shortcut-table">
+      <thead>
+        <tr>
+          <th>ツール</th>
+          <th>操作</th>
+          <th>用途</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>ペンツール</strong></td>
+          <td>セルをクリック / ドラッグ</td>
+          <td>1セルずつ地形を塗る。細かい調整に最適</td>
+        </tr>
+        <tr>
+          <td><strong>矩形ツール</strong></td>
+          <td>始点クリック → 終点クリック</td>
+          <td>2点で矩形範囲をまとめて塗りつぶし</td>
+        </tr>
+        <tr>
+          <td><strong>塗りつぶしツール</strong></td>
+          <td>セルをクリック</td>
+          <td>同じ地形タイプの連結領域を一括で塗り替え</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="step-card">
+    <h4>レイヤー</h4>
+    <p>マップは <strong>2層構造</strong> になっています。ツールバーのレイヤードロップダウンで切り替えます。</p>
+    <ul>
+      <li><strong>bottom（下層）</strong> — 地面の基本地形を配置します（平原、水、山など）</li>
+      <li><strong>top（上層）</strong> — 下層の上に重ねて描画するオブジェクトを配置します（森、砦など）</li>
+    </ul>
+  </div>
+
+  <!-- 5-2: 地形パレット -->
+  <h3>地形パレット</h3>
+  <p>画面左のパレットから地形を選択します。各地形にはゲーム内で効果（回避率ボーナスなど）が設定されています。</p>
+
+  <div class="step-card">
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin:8px 0;">
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#12121c;border-radius:8px;border:1px solid #2a2a4a;">
+        <div style="width:36px;height:36px;border-radius:6px;background:#6b8e4e;flex-shrink:0;"></div>
+        <div>
+          <div style="font-size:0.85rem;font-weight:600;color:#fff;">平原</div>
+          <div style="font-size:0.7rem;color:#888;">Plain</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#12121c;border-radius:8px;border:1px solid #2a2a4a;">
+        <div style="width:36px;height:36px;border-radius:6px;background:#2d5a27;flex-shrink:0;"></div>
+        <div>
+          <div style="font-size:0.85rem;font-weight:600;color:#fff;">森</div>
+          <div style="font-size:0.7rem;color:#888;">Forest</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#12121c;border-radius:8px;border:1px solid #2a2a4a;">
+        <div style="width:36px;height:36px;border-radius:6px;background:#8b7355;flex-shrink:0;"></div>
+        <div>
+          <div style="font-size:0.85rem;font-weight:600;color:#fff;">砦</div>
+          <div style="font-size:0.7rem;color:#888;">Fort</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#12121c;border-radius:8px;border:1px solid #2a2a4a;">
+        <div style="width:36px;height:36px;border-radius:6px;background:#6b6b6b;flex-shrink:0;"></div>
+        <div>
+          <div style="font-size:0.85rem;font-weight:600;color:#fff;">山</div>
+          <div style="font-size:0.7rem;color:#888;">Mountain</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#12121c;border-radius:8px;border:1px solid #2a2a4a;">
+        <div style="width:36px;height:36px;border-radius:6px;background:#3d85c6;flex-shrink:0;"></div>
+        <div>
+          <div style="font-size:0.85rem;font-weight:600;color:#fff;">水</div>
+          <div style="font-size:0.7rem;color:#888;">Water</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5-3: ユニット配置 -->
+  <h3>ユニット配置</h3>
+  <p>地形を描画したら、次はユニットをマップ上に配置します。ツールバーの<strong>「配置」</strong>ボタンでユニット配置モードに切り替えます。</p>
+
+  <div class="step-card">
+    <h4>配置の手順</h4>
+    <ol>
+      <li><strong>ユニット選択</strong> — パレットからデータベースに定義済みのユニットを選びます</li>
+      <li><strong>陣営選択</strong> — ユニットの所属陣営を指定します
+        <ul>
+          <li><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#3d5afe;vertical-align:middle;margin-right:4px;"></span> <strong>プレイヤー</strong>（青）— プレイヤーが操作する自軍ユニット</li>
+          <li><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#e53935;vertical-align:middle;margin-right:4px;"></span> <strong>敵</strong>（赤）— AIが操作する敵軍ユニット</li>
+          <li><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#fdd835;vertical-align:middle;margin-right:4px;"></span> <strong>第三勢力</strong>（黄）— 独自行動をとる中立ユニット</li>
+        </ul>
+      </li>
+      <li><strong>AI選択</strong> — 敵・第三勢力ユニットの行動パターンを指定します（下表参照）</li>
+      <li><strong>配置</strong> — マップ上のセルをクリックしてユニットを配置</li>
+      <li><strong>削除</strong> — <kbd>Shift</kbd> + クリックで配置済みユニットを除去</li>
+    </ol>
+  </div>
+
+  <div class="step-card">
+    <h4>AIタイプ一覧</h4>
+    <table class="shortcut-table">
+      <thead>
+        <tr>
+          <th>AIタイプ</th>
+          <th>内部名</th>
+          <th>行動パターン</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>突撃</strong></td>
+          <td><code>charge</code></td>
+          <td>最も近いプレイヤーユニットに向かって移動・攻撃する。積極的な敵に最適</td>
+        </tr>
+        <tr>
+          <td><strong>待ち伏せ</strong></td>
+          <td><code>ambush</code></td>
+          <td>初期位置に留まり、攻撃範囲に入った敵のみ攻撃する。一定範囲内に入ると突撃に切替</td>
+        </tr>
+        <tr>
+          <td><strong>守備</strong></td>
+          <td><code>guard</code></td>
+          <td>初期位置周辺から離れず防衛。拠点や要所を守らせるのに使用</td>
+        </tr>
+        <tr>
+          <td><strong>移動のみ</strong></td>
+          <td><code>move_only</code></td>
+          <td>攻撃せず移動のみ。NPC・逃走ユニット・イベント用のキャラクターに使用</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="tip">
+    プレイヤー陣営のユニットにはAI設定は不要です（プレイヤーが直接操作します）。
+  </div>
+
+  <!-- 5-4: 勝利条件・敗北条件 -->
+  <h3>勝利条件・敗北条件</h3>
+  <p>各マップにはクリア判定のための勝利条件と、ゲームオーバーとなる敗北条件を設定します。</p>
+
+  <div class="step-card">
+    <h4>勝利条件（4種）</h4>
+    <table class="shortcut-table">
+      <thead>
+        <tr>
+          <th>タイプ</th>
+          <th>内部名</th>
+          <th>説明</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>敵全滅</strong></td>
+          <td><code>defeat_all_enemies</code></td>
+          <td>マップ上の敵軍ユニットをすべて撃破するとクリア</td>
+        </tr>
+        <tr>
+          <td><strong>ボス撃破</strong></td>
+          <td><code>defeat_boss</code></td>
+          <td>指定したボスユニットを撃破するとクリア。ボスIDを指定する</td>
+        </tr>
+        <tr>
+          <td><strong>生存</strong></td>
+          <td><code>survive_turns</code></td>
+          <td>指定ターン数だけ生存（全滅せず耐える）するとクリア。防衛戦向け</td>
+        </tr>
+        <tr>
+          <td><strong>拠点防衛</strong></td>
+          <td><code>defend_point</code></td>
+          <td>指定座標を敵に占領されずに守り切るとクリア。座標を指定する</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="step-card">
+    <h4>敗北条件</h4>
+    <ul>
+      <li><strong>自軍全滅</strong> — プレイヤー陣営のユニットがすべて撃破された（デフォルトON）</li>
+      <li><strong>ターン上限超過</strong> — 指定ターン数を超えてもクリアできなかった場合（オプション）</li>
+    </ul>
+  </div>
+
+  <div class="warning">
+    勝利条件は章ごとに1つ設定します。ゲーム中にイベントの <code>CHANGE_OBJECTIVE</code> コマンドで動的に差し替えることも可能です（セクション6参照）。
+  </div>
+
+  <!-- 5-5: 増援の設定 -->
+  <h3>増援の設定</h3>
+  <p>マップの途中で追加ユニットを出現させる「増援」を設定できます。画面左パレット下部の<strong>「増援」</strong>セクションから管理します。</p>
+
+  <div class="step-card">
+    <h4>増援パラメータ</h4>
+    <table class="shortcut-table">
+      <thead>
+        <tr>
+          <th>パラメータ</th>
+          <th>説明</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>出現ターン</strong></td>
+          <td>増援が登場するターン番号</td>
+        </tr>
+        <tr>
+          <td><strong>座標</strong></td>
+          <td>ユニットが出現するマップ上の位置（x, y）</td>
+        </tr>
+        <tr>
+          <td><strong>ユニット</strong></td>
+          <td>出現させるユニット（DBから選択）</td>
+        </tr>
+        <tr>
+          <td><strong>陣営</strong></td>
+          <td>プレイヤー / 敵 / 第三勢力</td>
+        </tr>
+        <tr>
+          <td><strong>AI</strong></td>
+          <td>行動パターン（charge / ambush / guard / move_only）</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="tip">
+    増援はイベントの <code>SPAWN_UNIT</code> コマンドでも配置できます。条件分岐と組み合わせてより柔軟な増援ロジックを実現したい場合はイベント側を使いましょう。
+  </div>
+
+  <!-- 5-6: Undo/Redo -->
+  <h3>元に戻す / やり直し（Undo / Redo）</h3>
+  <div class="step-card">
+    <p>マップ編集には履歴機能があります。誤った操作をしてもすぐに取り消せます。</p>
+    <table class="shortcut-table">
+      <thead>
+        <tr>
+          <th>操作</th>
+          <th>ショートカット</th>
+          <th>説明</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>元に戻す</strong></td>
+          <td><kbd>Ctrl</kbd> + <kbd>Z</kbd></td>
+          <td>直前の編集操作を取り消す</td>
+        </tr>
+        <tr>
+          <td><strong>やり直し</strong></td>
+          <td><kbd>Ctrl</kbd> + <kbd>Y</kbd></td>
+          <td>取り消した操作を再度適用する</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="margin-top:12px;font-size:0.85rem;color:#999;">ツールバーの「↶」「↷」ボタンでも同じ操作が可能です。</p>
+  </div>
+
+  <!-- 5-7: マップエディタの画面構成図 -->
+  <h3>マップエディタの画面構成</h3>
+
+  <div class="editor-layout fade-in">
+    <div class="header">
+      <span class="header-title">マップエディタ</span>
+      <span style="font-size:0.75rem;color:#888;">Ctrl + 3</span>
+    </div>
+    <!-- ツールバー行 -->
+    <div style="background:#1e1e3a;padding:10px 16px;border-bottom:1px solid #333;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+      <div style="background:#12121c;border:1px solid #2a2a4a;border-radius:4px;padding:4px 12px;font-size:0.75rem;color:#ccc;">
+        マップ <span style="color:#555;">▼</span>
+      </div>
+      <div style="display:flex;gap:2px;">
+        <div style="background:#3d5afe;border-radius:4px;padding:4px 10px;font-size:0.7rem;color:#fff;cursor:default;">ペン</div>
+        <div style="background:#2a2a4a;border-radius:4px;padding:4px 10px;font-size:0.7rem;color:#999;cursor:default;">矩形</div>
+        <div style="background:#2a2a4a;border-radius:4px;padding:4px 10px;font-size:0.7rem;color:#999;cursor:default;">塗潰</div>
+      </div>
+      <div style="width:1px;height:20px;background:#333;"></div>
+      <div style="background:#2a2a4a;border-radius:4px;padding:4px 10px;font-size:0.7rem;color:#ff9800;cursor:default;">配置</div>
+      <div style="width:1px;height:20px;background:#333;"></div>
+      <div style="background:#12121c;border:1px solid #2a2a4a;border-radius:4px;padding:4px 12px;font-size:0.75rem;color:#ccc;">
+        レイヤー: bottom <span style="color:#555;">▼</span>
+      </div>
+      <div style="margin-left:auto;display:flex;gap:4px;">
+        <div style="background:#2a2a4a;border-radius:4px;padding:4px 8px;font-size:0.75rem;color:#999;">↶</div>
+        <div style="background:#2a2a4a;border-radius:4px;padding:4px 8px;font-size:0.75rem;color:#999;">↷</div>
+      </div>
+    </div>
+    <!-- メイン領域: パレット + グリッド -->
+    <div style="display:flex;min-height:280px;">
+      <!-- 左パレット -->
+      <div style="width:140px;background:#141428;border-right:1px solid #333;padding:12px;flex-shrink:0;">
+        <div style="font-size:0.65rem;color:#888;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;">地形パレット</div>
+        <div style="display:flex;flex-direction:column;gap:4px;">
+          <div style="display:flex;align-items:center;gap:6px;padding:4px 6px;background:rgba(61,90,254,0.1);border-radius:4px;cursor:default;">
+            <div style="width:20px;height:20px;border-radius:3px;background:#6b8e4e;"></div>
+            <span style="font-size:0.75rem;color:#ccc;">平原</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;padding:4px 6px;border-radius:4px;cursor:default;">
+            <div style="width:20px;height:20px;border-radius:3px;background:#2d5a27;"></div>
+            <span style="font-size:0.75rem;color:#999;">森</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;padding:4px 6px;border-radius:4px;cursor:default;">
+            <div style="width:20px;height:20px;border-radius:3px;background:#8b7355;"></div>
+            <span style="font-size:0.75rem;color:#999;">砦</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;padding:4px 6px;border-radius:4px;cursor:default;">
+            <div style="width:20px;height:20px;border-radius:3px;background:#6b6b6b;"></div>
+            <span style="font-size:0.75rem;color:#999;">山</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;padding:4px 6px;border-radius:4px;cursor:default;">
+            <div style="width:20px;height:20px;border-radius:3px;background:#3d85c6;"></div>
+            <span style="font-size:0.75rem;color:#999;">水</span>
+          </div>
+        </div>
+        <div style="margin-top:16px;border-top:1px solid #2a2a4a;padding-top:8px;">
+          <div style="font-size:0.65rem;color:#888;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px;">設定</div>
+          <div style="font-size:0.72rem;color:#999;margin-bottom:4px;">勝利条件</div>
+          <div style="font-size:0.72rem;color:#999;margin-bottom:4px;">敗北条件</div>
+          <div style="font-size:0.72rem;color:#999;">増援</div>
+        </div>
+      </div>
+      <!-- 右マップグリッド -->
+      <div style="flex:1;background:#12121c;padding:16px;display:flex;align-items:center;justify-content:center;">
+        <div style="display:grid;grid-template-columns:repeat(10,28px);grid-template-rows:repeat(7,28px);gap:2px;">
+          <!-- row 1 -->
+          <div style="background:#6b8e4e;border-radius:2px;"></div>
+          <div style="background:#6b8e4e;border-radius:2px;"></div>
+          <div style="background:#6b8e4e;border-radius:2px;"></div>
+          <div style="background:#2d5a27;border-radius:2px;"></div>
+          <div style="background:#2d5a27;border-radius:2px;"></div>
+          <div style="background:#6b8e4e;border-radius:2px;"></div>
+          <div style="background:#6b8e4e;border-radius:2px;"></div>
+          <div style="background:#6b6b6b;border-radius:2px;"></div>
+          <div style="background:#6b6b6b;border-radius:2px;"></div>
+          <div style="background:#6b6b6b;border-radius:2px;"></div>
+          <!-- row 2 -->
+          <div style="background:#6b8e4e;border-radius:2px;"></div>
+          <div style="background:#6b8e4e;border-radius:2px;"></div>
+          <div style="background:#2d5a27;border-radius:2px;"></div>
+          <div style="background:#2d5a27;border-radius:2px;"></div>
+          <div style="background:#6b8e4e;border-radius:2px;"></div>
+          <div style="background:#6b8e4e;border-radius:2px;"></div>
+          <div style="background:#6b8e4e;border-radius:2px;"></div>
+          <div style="background:#6b8e4e;border-radius:2px;"></div>
+          <div style="background:#6b6b6b;border-radius:2px;"></div>
+          <div style="background:#6b6b6b;border-radius:2px;"></div>
+          <!-- row 3: player units -->
+          <div style="background:#6b8e4e;border-radius:2px;"></div>
+          <div style="background:#6b8e4e;border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:0.6rem;color:#fff;text-shadow:0 0 4px rgba(61,90,254,0.8);">🔵</div>
+          <div style="background:#6b8e4e;border-radius:2px;"></div>
+          <div style="background:#6b8e4e;border-radius:2px;"></div>
+          <div style="background:#3d85c6;border-radius:2px;"></div>
+          <div style="background:#3d85c6;border-radius:2px;"></div>
+          <div style="background:#6b8e4e;border-radius:2px;"></div>
+          <div style="background:#6b8e4e;border-radius:2px;"></div>
+          <div style="background:#6b8e4e;border-radius:2px;"></div>
+          <div style="background:#6b8e4e;border-radius:2px;"></div>
+          <!-- row 4 -->
+          <div style="background:#6b8e4e;border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:0.6rem;">🔵</div>
+          <div style="background:#8b7355;border-radius:2px;"></div>
+          <div style="background:#6b8e4e;border-radius:2px;"></div>
+          <div style="background:#3d85c6;border-radius:2px;"></div>
+          <div style="background:#3d85c6;border-radius:2px;"></div>
+          <div style="background:#3d85c6;border-radius:2px;"></div>
+          <div style="background:#6b8e4e;border-radius:2px;"></div>
+          <div style="background:#8b7355;border-radius:2px;"></div>
+          <div style="background:#6b8e4e;border-radius:2px;"></div>
+          <div style="background:#6b8e4e;border-radius:2px;"></div>
+          <!-- row 5 -->
+          <div style="background:#6b8e4e;border-radius:2px;"></div>
+          <div style="background:#6b8e4e;border-radius:2px;"></div>
+          <div style="background:#6b8e4e;border-radius:2px;"></div>
+          <div style="background:#6b8e4e;border-radius:2px;"></div>
+          <div style="background:#3d85c6;border-radius:2px;"></div>
+          <div style="background:#6b8e4e;border-radius:2px;"></div>
+          <div style="background:#6b8e4e;border-radius:2px;"></div>
+          <div style="background:#6b8e4e;border-radius:2px;"></div>
+          <div style="background:#6b8e4e;border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:0.6rem;">🔴</div>
+          <div style="background:#6b8e4e;border-radius:2px;"></div>
+          <!-- row 6: enemy units -->
+          <div style="background:#6b6b6b;border-radius:2px;"></div>
+          <div style="background:#6b8e4e;border-radius:2px;"></div>
+          <div style="background:#6b8e4e;border-radius:2px;"></div>
+          <div style="background:#6b8e4e;border-radius:2px;"></div>
+          <div style="background:#6b8e4e;border-radius:2px;"></div>
+          <div style="background:#2d5a27;border-radius:2px;"></div>
+          <div style="background:#2d5a27;border-radius:2px;"></div>
+          <div style="background:#6b8e4e;border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:0.6rem;">🔴</div>
+          <div style="background:#6b8e4e;border-radius:2px;"></div>
+          <div style="background:#6b8e4e;border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:0.6rem;">🔴</div>
+          <!-- row 7 -->
+          <div style="background:#6b6b6b;border-radius:2px;"></div>
+          <div style="background:#6b6b6b;border-radius:2px;"></div>
+          <div style="background:#6b8e4e;border-radius:2px;"></div>
+          <div style="background:#6b8e4e;border-radius:2px;"></div>
+          <div style="background:#6b8e4e;border-radius:2px;"></div>
+          <div style="background:#6b8e4e;border-radius:2px;"></div>
+          <div style="background:#2d5a27;border-radius:2px;"></div>
+          <div style="background:#6b8e4e;border-radius:2px;"></div>
+          <div style="background:#8b7355;border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:0.6rem;">🔴</div>
+          <div style="background:#6b8e4e;border-radius:2px;"></div>
+        </div>
+      </div>
+    </div>
+    <!-- 凡例 -->
+    <div style="background:#1e1e3a;padding:8px 16px;border-top:1px solid #333;display:flex;gap:16px;flex-wrap:wrap;font-size:0.72rem;color:#888;">
+      <span>🔵 プレイヤー</span>
+      <span>🔴 敵</span>
+      <span style="display:inline-flex;align-items:center;gap:4px;"><span style="display:inline-block;width:10px;height:10px;background:#6b8e4e;border-radius:2px;"></span>平原</span>
+      <span style="display:inline-flex;align-items:center;gap:4px;"><span style="display:inline-block;width:10px;height:10px;background:#2d5a27;border-radius:2px;"></span>森</span>
+      <span style="display:inline-flex;align-items:center;gap:4px;"><span style="display:inline-block;width:10px;height:10px;background:#8b7355;border-radius:2px;"></span>砦</span>
+      <span style="display:inline-flex;align-items:center;gap:4px;"><span style="display:inline-block;width:10px;height:10px;background:#6b6b6b;border-radius:2px;"></span>山</span>
+      <span style="display:inline-flex;align-items:center;gap:4px;"><span style="display:inline-block;width:10px;height:10px;background:#3d85c6;border-radius:2px;"></span>水</span>
+    </div>
+  </div>
+
+</section>
+
+<!-- ===== Section 6: イベント ===== -->
+<section class="section fade-in" id="section-event">
+  <div class="section-icon blue" style="position:relative;">
+    <div style="width:18px;height:18px;border:2px solid currentColor;border-radius:2px;position:relative;">
+      <div style="position:absolute;top:4px;left:4px;right:4px;height:2px;background:currentColor;"></div>
+      <div style="position:absolute;top:9px;left:4px;right:8px;height:2px;background:currentColor;"></div>
+    </div>
+  </div>
+  <h2>6. イベント</h2>
+
+  <p>イベントタブ（<kbd>Ctrl</kbd> + <kbd>5</kbd>）では、マップ上で起こる出来事をコマンド列として記述します。会話、増援、BGM変更、勝敗条件の切り替えなどを制御できます。</p>
+
+  <!-- 6-1: トリガー -->
+  <h3>トリガー（7種）</h3>
+  <p>イベントがいつ発火するかを決める条件です。1つのイベントに1つのトリガーを設定します。</p>
+
+  <div class="step-card">
+    <table class="shortcut-table">
+      <thead>
+        <tr>
+          <th>トリガー</th>
+          <th>内部名</th>
+          <th>発火タイミング</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>章開始</strong></td>
+          <td><code>chapterStart</code></td>
+          <td>章の開始時に1回だけ発火。オープニング会話や初期演出に使用</td>
+        </tr>
+        <tr>
+          <td><strong>章クリア</strong></td>
+          <td><code>chapterEnd</code></td>
+          <td>章のクリア時に発火。エンディング演出や次章への導入に使用</td>
+        </tr>
+        <tr>
+          <td><strong>ターン開始</strong></td>
+          <td><code>turnStart</code></td>
+          <td>指定ターンの開始時に発火。ターン番号を指定する</td>
+        </tr>
+        <tr>
+          <td><strong>ユニット撃破</strong></td>
+          <td><code>unitDefeated</code></td>
+          <td>指定ユニットが撃破された時に発火。ユニットIDを指定する</td>
+        </tr>
+        <tr>
+          <td><strong>マス到達</strong></td>
+          <td><code>tileReached</code></td>
+          <td>指定マスにユニットが到達した時に発火。座標を指定する</td>
+        </tr>
+        <tr>
+          <td><strong>会話</strong></td>
+          <td><code>talk</code></td>
+          <td>隣接したユニット同士が「会話」コマンドを実行した時に発火</td>
+        </tr>
+        <tr>
+          <td><strong>宝箱</strong></td>
+          <td><code>chestOpened</code></td>
+          <td>宝箱が配置されたマスを調べた時に発火</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 6-2: コマンド一覧 -->
+  <h3>コマンド一覧（15種・凍結）</h3>
+  <p>トリガーで発火したイベントは、以下のコマンドを上から順に実行します。15種で仕様が凍結されています。</p>
+
+  <!-- メッセージ系 -->
+  <div class="step-card" style="border-left-color:#3d5afe;">
+    <h4><span style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:0.65rem;font-weight:600;background:rgba(61,90,254,0.2);color:#3d5afe;margin-right:6px;">メッセージ系</span></h4>
+    <table class="shortcut-table">
+      <thead>
+        <tr>
+          <th>コマンド</th>
+          <th>パラメータ</th>
+          <th>説明</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>SHOW_MESSAGE</strong></td>
+          <td>話者ID、顔グラID、テキスト</td>
+          <td>メッセージウィンドウにテキストを表示する</td>
+        </tr>
+        <tr>
+          <td><strong>SHOW_CHOICES</strong></td>
+          <td>選択肢（2〜6個）、格納先変数</td>
+          <td>プレイヤーに選択肢を表示。選択した番号（index）を変数に格納する</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 変数・条件系 -->
+  <div class="step-card" style="border-left-color:#00c853;">
+    <h4><span style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:0.65rem;font-weight:600;background:rgba(0,200,83,0.2);color:#00c853;margin-right:6px;">変数・条件系</span></h4>
+    <table class="shortcut-table">
+      <thead>
+        <tr>
+          <th>コマンド</th>
+          <th>パラメータ</th>
+          <th>説明</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>SET_VARIABLE</strong></td>
+          <td>変数名、演算子（=, +, -, ×）、値</td>
+          <td>変数を操作する。フラグ管理や計算に使用</td>
+        </tr>
+        <tr>
+          <td><strong>SET_SWITCH</strong></td>
+          <td>スイッチ名、操作（ON / OFF / トグル）</td>
+          <td>スイッチ（ON/OFF値）を切り替える</td>
+        </tr>
+        <tr>
+          <td><strong>BRANCH</strong></td>
+          <td>条件式、then節、else節</td>
+          <td>条件分岐。変数 / スイッチ / ユニット生存 で分岐。ネスト最大5段</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ユニット操作系 -->
+  <div class="step-card" style="border-left-color:#ff9800;">
+    <h4><span style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:0.65rem;font-weight:600;background:rgba(255,152,0,0.2);color:#ff9800;margin-right:6px;">ユニット操作系</span></h4>
+    <table class="shortcut-table">
+      <thead>
+        <tr>
+          <th>コマンド</th>
+          <th>パラメータ</th>
+          <th>説明</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>SPAWN_UNIT</strong></td>
+          <td>ユニットID、座標、陣営、AI</td>
+          <td>ユニットをマップ上に出現させる</td>
+        </tr>
+        <tr>
+          <td><strong>REMOVE_UNIT</strong></td>
+          <td>ユニットID、演出（フェード / ワープ / なし）</td>
+          <td>ユニットをマップから離脱させる</td>
+        </tr>
+        <tr>
+          <td><strong>MOVE_UNIT</strong></td>
+          <td>ユニットID、目的座標</td>
+          <td>ユニットを指定マスへ移動演出つきで動かす</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 演出系 -->
+  <div class="step-card" style="border-left-color:#ce93d8;">
+    <h4><span style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:0.65rem;font-weight:600;background:rgba(156,39,176,0.2);color:#ce93d8;margin-right:6px;">演出系</span></h4>
+    <table class="shortcut-table">
+      <thead>
+        <tr>
+          <th>コマンド</th>
+          <th>パラメータ</th>
+          <th>説明</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>CAMERA_FOCUS</strong></td>
+          <td>座標 または ユニットID</td>
+          <td>カメラを指定位置 / ユニットにパンする</td>
+        </tr>
+        <tr>
+          <td><strong>PLAY_BGM</strong></td>
+          <td>BGM ID</td>
+          <td>BGMを変更する</td>
+        </tr>
+        <tr>
+          <td><strong>PLAY_SE</strong></td>
+          <td>SE ID</td>
+          <td>効果音を1回再生する</td>
+        </tr>
+        <tr>
+          <td><strong>SCREEN_EFFECT</strong></td>
+          <td>エフェクト種別、パラメータ</td>
+          <td>画面効果（フェードイン / フェードアウト / シェイク / ティント）</td>
+        </tr>
+        <tr>
+          <td><strong>WAIT</strong></td>
+          <td>ミリ秒</td>
+          <td>指定時間だけ待機する</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ゲーム進行系 -->
+  <div class="step-card" style="border-left-color:#e53935;">
+    <h4><span style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:0.65rem;font-weight:600;background:rgba(229,57,53,0.2);color:#e53935;margin-right:6px;">ゲーム進行系</span></h4>
+    <table class="shortcut-table">
+      <thead>
+        <tr>
+          <th>コマンド</th>
+          <th>パラメータ</th>
+          <th>説明</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>CHANGE_OBJECTIVE</strong></td>
+          <td>新しい勝利条件</td>
+          <td>章の勝敗条件を差し替える。戦況変化の演出に</td>
+        </tr>
+        <tr>
+          <td><strong>GOTO_CHAPTER</strong></td>
+          <td>章ID</td>
+          <td>別の章へ移動する。現在のイベントは即終了</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 6-3: イベントの作り方 -->
+  <h3>イベントの作り方</h3>
+  <p>以下のステップでイベントを作成します。</p>
+
+  <div class="step-card">
+    <h4>Step 1: イベントタブを開く</h4>
+    <p><kbd>Ctrl</kbd> + <kbd>5</kbd> でイベントタブに切り替えます。</p>
+  </div>
+  <div class="step-card">
+    <h4>Step 2: イベントを新規作成</h4>
+    <p>画面上部の<strong>「追加」</strong>ボタンをクリックして、新しいイベントを作成します。</p>
+  </div>
+  <div class="step-card">
+    <h4>Step 3: トリガーを選択</h4>
+    <p>トリガードロップダウンから発火条件を選びます（例: <code>chapterStart</code>）。</p>
+  </div>
+  <div class="step-card">
+    <h4>Step 4: コマンドを追加</h4>
+    <p>コマンドの種別をドロップダウンから選び、<strong>「追加」</strong>ボタンでコマンドリストに追加します。</p>
+  </div>
+  <div class="step-card">
+    <h4>Step 5: パラメータを編集</h4>
+    <p>追加したコマンドをクリックして、右パネルでパラメータ（テキスト、座標、IDなど）を編集します。</p>
+  </div>
+  <div class="step-card">
+    <h4>Step 6: 順序の変更・削除</h4>
+    <p><strong>↑↓</strong>ボタンでコマンドの実行順序を変更、<strong>×</strong>ボタンで削除できます。</p>
+  </div>
+
+  <!-- 6-4: よくあるイベントパターン -->
+  <h3>よくあるイベントパターン</h3>
+
+  <div class="step-card green">
+    <h4>パターン1: 章開始メッセージ</h4>
+    <p style="font-size:0.85rem;color:#999;margin-bottom:12px;">章が始まった時にストーリー演出を挿入する基本パターン。</p>
+    <div style="display:flex;flex-direction:column;gap:6px;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:0.65rem;font-weight:600;background:rgba(0,200,83,0.2);color:#00c853;">トリガー</span>
+        <code>chapterStart</code>
+      </div>
+      <div style="margin-left:16px;border-left:2px solid #2a2a4a;padding-left:12px;">
+        <div style="display:flex;align-items:center;gap:6px;padding:4px 0;">
+          <span style="color:#3d5afe;font-size:0.8rem;">❶</span>
+          <code>SHOW_MESSAGE</code>
+          <span style="color:#888;font-size:0.8rem;">— 「敵が攻めてきた！迎え撃て！」</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-card green">
+    <h4>パターン2: ターン3で増援</h4>
+    <p style="font-size:0.85rem;color:#999;margin-bottom:12px;">指定ターンに増援ユニットを登場させるパターン。</p>
+    <div style="display:flex;flex-direction:column;gap:6px;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:0.65rem;font-weight:600;background:rgba(0,200,83,0.2);color:#00c853;">トリガー</span>
+        <code>turnStart</code>
+        <span style="color:#888;font-size:0.8rem;">（ターン3）</span>
+      </div>
+      <div style="margin-left:16px;border-left:2px solid #2a2a4a;padding-left:12px;">
+        <div style="display:flex;align-items:center;gap:6px;padding:4px 0;">
+          <span style="color:#3d5afe;font-size:0.8rem;">❶</span>
+          <code>SHOW_MESSAGE</code>
+          <span style="color:#888;font-size:0.8rem;">— 「援軍が到着した！」</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;padding:4px 0;">
+          <span style="color:#3d5afe;font-size:0.8rem;">❷</span>
+          <code>SPAWN_UNIT</code>
+          <span style="color:#888;font-size:0.8rem;">— 味方ユニットを (2, 8) に配置</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-card green">
+    <h4>パターン3: ボス撃破で勝利条件変更</h4>
+    <p style="font-size:0.85rem;color:#999;margin-bottom:12px;">ボスを倒した後に勝利条件を変更して新たな目標を提示するパターン。</p>
+    <div style="display:flex;flex-direction:column;gap:6px;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:0.65rem;font-weight:600;background:rgba(0,200,83,0.2);color:#00c853;">トリガー</span>
+        <code>unitDefeated</code>
+        <span style="color:#888;font-size:0.8rem;">（ボスID指定）</span>
+      </div>
+      <div style="margin-left:16px;border-left:2px solid #2a2a4a;padding-left:12px;">
+        <div style="display:flex;align-items:center;gap:6px;padding:4px 0;">
+          <span style="color:#3d5afe;font-size:0.8rem;">❶</span>
+          <code>CHANGE_OBJECTIVE</code>
+          <span style="color:#888;font-size:0.8rem;">— 勝利条件を「生存5ターン」に変更</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;padding:4px 0;">
+          <span style="color:#3d5afe;font-size:0.8rem;">❷</span>
+          <code>SHOW_MESSAGE</code>
+          <span style="color:#888;font-size:0.8rem;">— 「敵の増援が来る！5ターン耐えろ！」</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6-5: 会話プレビュー -->
+  <h3>会話プレビュー</h3>
+  <div class="step-card">
+    <p><code>SHOW_MESSAGE</code> や <code>SHOW_CHOICES</code> コマンドを選択すると、右パネルに会話ウィンドウのプレビューが表示されます。</p>
+    <!-- プレビューモック -->
+    <div style="margin-top:12px;background:#12121c;border:1px solid #2a2a4a;border-radius:8px;overflow:hidden;max-width:420px;">
+      <div style="padding:6px 12px;background:#1e1e3a;font-size:0.7rem;color:#888;border-bottom:1px solid #2a2a4a;display:flex;justify-content:space-between;align-items:center;">
+        <span>会話プレビュー</span>
+        <span style="font-size:0.65rem;color:#555;">2 / 3</span>
+      </div>
+      <div style="padding:16px;">
+        <div style="display:flex;gap:12px;align-items:flex-start;">
+          <div style="width:48px;height:48px;background:#2a2a4a;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:0.6rem;color:#555;">顔グラ</div>
+          <div>
+            <div style="font-size:0.75rem;font-weight:600;color:#3d5afe;margin-bottom:4px;">アレン</div>
+            <div style="font-size:0.85rem;color:#e0e0e0;line-height:1.6;">敵が攻めてきた！<br>全員、迎え撃つぞ！</div>
+          </div>
+        </div>
+      </div>
+      <div style="padding:8px 12px;border-top:1px solid #2a2a4a;display:flex;justify-content:center;gap:8px;">
+        <div style="background:#2a2a4a;border-radius:4px;padding:3px 10px;font-size:0.7rem;color:#999;cursor:default;">◀ 前</div>
+        <div style="background:#3d5afe;border-radius:4px;padding:3px 10px;font-size:0.7rem;color:#fff;cursor:default;">次 ▶</div>
+      </div>
+    </div>
+    <p style="margin-top:12px;font-size:0.85rem;color:#999;">ステップ送りボタン（◀ ▶）でコマンド列を順番に確認できます。</p>
+  </div>
+
+  <!-- 6-6: イベントエディタの画面構成図 -->
+  <h3>イベントエディタの画面構成</h3>
+
+  <div class="editor-layout fade-in">
+    <div class="header">
+      <span class="header-title">イベントエディタ</span>
+      <span style="font-size:0.75rem;color:#888;">Ctrl + 5</span>
+    </div>
+    <!-- ツールバー行 -->
+    <div style="background:#1e1e3a;padding:10px 16px;border-bottom:1px solid #333;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+      <div style="background:#3d5afe;color:#fff;border:none;padding:4px 12px;border-radius:4px;font-size:0.7rem;cursor:default;">+ 追加</div>
+      <div style="background:#2a2a4a;color:#999;border:none;padding:4px 12px;border-radius:4px;font-size:0.7rem;cursor:default;">複製</div>
+      <div style="background:#2a2a4a;color:#999;border:none;padding:4px 12px;border-radius:4px;font-size:0.7rem;cursor:default;">削除</div>
+    </div>
+    <!-- メイン領域: イベントリスト + コマンド + プレビュー -->
+    <div style="display:flex;min-height:300px;">
+      <!-- 左: イベントリスト -->
+      <div style="width:160px;background:#141428;border-right:1px solid #333;flex-shrink:0;">
+        <div style="padding:8px 12px;font-size:0.65rem;color:#888;text-transform:uppercase;letter-spacing:0.1em;border-bottom:1px solid #2a2a4a;">イベント一覧</div>
+        <div style="padding:8px 12px;background:rgba(61,90,254,0.1);border-left:3px solid #3d5afe;font-size:0.8rem;color:#fff;">開幕メッセージ</div>
+        <div style="padding:8px 12px;font-size:0.8rem;color:#999;border-bottom:1px solid #1a1a2e;">ターン3増援</div>
+        <div style="padding:8px 12px;font-size:0.8rem;color:#999;border-bottom:1px solid #1a1a2e;">ボス撃破</div>
+        <div style="padding:8px 12px;font-size:0.8rem;color:#999;">宝箱イベント</div>
+      </div>
+      <!-- 中央: コマンドリスト -->
+      <div style="flex:1;background:#12121c;border-right:1px solid #333;">
+        <div style="padding:8px 12px;font-size:0.65rem;color:#888;text-transform:uppercase;letter-spacing:0.1em;border-bottom:1px solid #2a2a4a;display:flex;justify-content:space-between;">
+          <span>コマンド</span>
+          <span style="color:#00c853;">chapterStart</span>
+        </div>
+        <div style="padding:0 8px;">
+          <div style="padding:8px;border-bottom:1px solid #1a1a2e;display:flex;align-items:center;gap:8px;background:rgba(61,90,254,0.05);border-radius:4px;margin:4px 0;">
+            <span style="color:#555;font-size:0.7rem;">1</span>
+            <span style="display:inline-block;padding:1px 6px;border-radius:6px;font-size:0.6rem;background:rgba(61,90,254,0.2);color:#3d5afe;">MSG</span>
+            <span style="font-size:0.8rem;color:#ccc;">SHOW_MESSAGE</span>
+            <span style="margin-left:auto;display:flex;gap:2px;">
+              <span style="font-size:0.7rem;color:#555;cursor:default;">↑</span>
+              <span style="font-size:0.7rem;color:#555;cursor:default;">↓</span>
+              <span style="font-size:0.7rem;color:#e53935;cursor:default;">×</span>
+            </span>
+          </div>
+          <div style="padding:8px;border-bottom:1px solid #1a1a2e;display:flex;align-items:center;gap:8px;margin:4px 0;">
+            <span style="color:#555;font-size:0.7rem;">2</span>
+            <span style="display:inline-block;padding:1px 6px;border-radius:6px;font-size:0.6rem;background:rgba(61,90,254,0.2);color:#3d5afe;">MSG</span>
+            <span style="font-size:0.8rem;color:#ccc;">SHOW_MESSAGE</span>
+            <span style="margin-left:auto;display:flex;gap:2px;">
+              <span style="font-size:0.7rem;color:#555;">↑</span>
+              <span style="font-size:0.7rem;color:#555;">↓</span>
+              <span style="font-size:0.7rem;color:#e53935;">×</span>
+            </span>
+          </div>
+          <div style="padding:8px;border-bottom:1px solid #1a1a2e;display:flex;align-items:center;gap:8px;margin:4px 0;">
+            <span style="color:#555;font-size:0.7rem;">3</span>
+            <span style="display:inline-block;padding:1px 6px;border-radius:6px;font-size:0.6rem;background:rgba(156,39,176,0.2);color:#ce93d8;">FX</span>
+            <span style="font-size:0.8rem;color:#ccc;">PLAY_BGM</span>
+            <span style="margin-left:auto;display:flex;gap:2px;">
+              <span style="font-size:0.7rem;color:#555;">↑</span>
+              <span style="font-size:0.7rem;color:#555;">↓</span>
+              <span style="font-size:0.7rem;color:#e53935;">×</span>
+            </span>
+          </div>
+        </div>
+        <!-- コマンド追加UI -->
+        <div style="padding:8px 12px;margin-top:8px;border-top:1px solid #2a2a4a;display:flex;gap:6px;align-items:center;">
+          <div style="background:#1a1a2e;border:1px solid #2a2a4a;border-radius:4px;padding:4px 10px;font-size:0.75rem;color:#ccc;flex:1;">
+            SHOW_MESSAGE <span style="color:#555;">▼</span>
+          </div>
+          <div style="background:#3d5afe;border-radius:4px;padding:4px 10px;font-size:0.7rem;color:#fff;cursor:default;">追加</div>
+        </div>
+      </div>
+      <!-- 右: プレビュー/パラメータ -->
+      <div style="width:200px;background:#141428;flex-shrink:0;">
+        <div style="padding:8px 12px;font-size:0.65rem;color:#888;text-transform:uppercase;letter-spacing:0.1em;border-bottom:1px solid #2a2a4a;">パラメータ</div>
+        <div style="padding:12px;">
+          <div style="margin-bottom:10px;">
+            <div style="font-size:0.7rem;color:#888;margin-bottom:4px;">話者ID</div>
+            <div style="background:#1a1a2e;border:1px solid #2a2a4a;border-radius:4px;padding:4px 8px;font-size:0.75rem;color:#ccc;">allen</div>
+          </div>
+          <div style="margin-bottom:10px;">
+            <div style="font-size:0.7rem;color:#888;margin-bottom:4px;">顔グラ</div>
+            <div style="background:#1a1a2e;border:1px solid #2a2a4a;border-radius:4px;padding:4px 8px;font-size:0.75rem;color:#ccc;">face_allen_01</div>
+          </div>
+          <div>
+            <div style="font-size:0.7rem;color:#888;margin-bottom:4px;">テキスト</div>
+            <div style="background:#1a1a2e;border:1px solid #2a2a4a;border-radius:4px;padding:8px;font-size:0.75rem;color:#ccc;min-height:60px;line-height:1.5;">敵が攻めてきた！迎え撃て！</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6-7: マップとイベントの紐付け -->
+  <h3>マップとイベントの紐付け</h3>
+  <div class="step-card">
+    <p>作成したイベントは、マップタブ（<kbd>Ctrl</kbd> + <kbd>3</kbd>）側で対象マップに紐付ける必要があります。</p>
+    <ol>
+      <li>マップタブを開き、対象のマップを選択します</li>
+      <li>左パネル下部の<strong>「イベント」</strong>セクションを開きます</li>
+      <li><strong>attach</strong>ボタンで使用するイベントIDを紐付け、<strong>detach</strong>ボタンで解除できます</li>
+    </ol>
+    <p style="font-size:0.85rem;color:#999;">1つのマップに複数のイベントを紐付けることができます。同一トリガーのイベントが複数ある場合、リスト順に実行されます。</p>
+  </div>
+
+  <div class="tip">
+    <code>BRANCH</code> コマンドでネスト（入れ子）を使うと複雑な条件分岐が作れますが、ネストは最大<strong>5段</strong>までです。それ以上の深さが必要な場合は、スイッチや変数を活用してロジックを分割しましょう。
+  </div>
+
+  <div class="warning">
+    イベントコマンドは15種で仕様凍結されています。これ以上のコマンドはプラグインAPI（フェーズ2）で拡張予定です。
+  </div>
+
+</section>
+<section id="section-testplay" class="section fade-in">
+  <h2>7. テストプレイ</h2>
+  <p>テストプレイタブ（<kbd>Ctrl+4</kbd>）で、編集中のゲームをすぐにプレイして動作確認ができます。</p>
+
+  <h3>テストプレイの起動方法</h3>
+  <div class="step-card">
+    <p><span class="badge">Step 1</span> ランタイムサーバーを起動（別ターミナルで）</p>
+    <div class="code-block"><code>pnpm dev:runtime</code></div>
+  </div>
+  <div class="step-card">
+    <p><span class="badge">Step 2</span> テストプレイタブ（<kbd>Ctrl+4</kbd>）を開く</p>
+  </div>
+  <div class="step-card">
+    <p><span class="badge">Step 3</span>「テストプレイ開始」ボタンをクリック</p>
+  </div>
+  <div class="step-card">
+    <p><span class="badge">Step 4</span> エディタ内のiframeでゲームが起動します</p>
+    <p style="margin-top:8px; color:#aaa;">※「別ウィンドウで起動」を選ぶと独立したウィンドウでプレイできます</p>
+  </div>
+
+  <h3>章ありプロジェクトの流れ</h3>
+  <div class="step-card">
+    <div style="display:flex; align-items:center; flex-wrap:wrap; gap:8px; font-size:0.95rem;">
+      <span style="background:#3d5afe; color:#fff; padding:6px 14px; border-radius:20px;">タイトル画面</span>
+      <span style="color:#3d5afe; font-size:1.2rem;">→</span>
+      <span style="background:#1e88e5; color:#fff; padding:6px 14px; border-radius:20px;">拠点（編成・ショップ）</span>
+      <span style="color:#3d5afe; font-size:1.2rem;">→</span>
+      <span style="background:#7c4dff; color:#fff; padding:6px 14px; border-radius:20px;">出撃</span>
+      <span style="color:#3d5afe; font-size:1.2rem;">→</span>
+      <span style="background:#e040fb; color:#fff; padding:6px 14px; border-radius:20px;">戦闘マップ</span>
+      <span style="color:#3d5afe; font-size:1.2rem;">→</span>
+      <span style="display:flex; flex-direction:column; gap:4px;">
+        <span style="background:#00c853; color:#fff; padding:4px 12px; border-radius:20px; font-size:0.85rem;">勝利 → 次章へ</span>
+        <span style="background:#ff5252; color:#fff; padding:4px 12px; border-radius:20px; font-size:0.85rem;">敗北 → リトライ</span>
+      </span>
+    </div>
+  </div>
+
+  <h3>デバッグオプション</h3>
+  <table class="shortcut-table">
+    <thead>
+      <tr><th>オプション</th><th>効果</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>デバッグシード</td>
+        <td>戦闘の乱数を固定（デフォルト: <code>42001</code>）。同じ操作で同じ結果を再現できる</td>
+      </tr>
+      <tr>
+        <td>無敵モード</td>
+        <td>プレイヤーユニットがダメージを受けない。バランス調整の途中確認に便利</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>テストプレイで確認すべきチェックリスト</h3>
+  <div class="step-card">
+    <ul style="list-style:none; padding:0; margin:0;">
+      <li style="padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
+        <label style="display:flex; align-items:center; gap:10px; cursor:default;">
+          <span style="width:20px; height:20px; border:2px solid #3d5afe; border-radius:4px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;"></span>
+          勝利条件・敗北条件が意図どおり発火する
+        </label>
+      </li>
+      <li style="padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
+        <label style="display:flex; align-items:center; gap:10px; cursor:default;">
+          <span style="width:20px; height:20px; border:2px solid #3d5afe; border-radius:4px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;"></span>
+          章開始イベントのメッセージ表示
+        </label>
+      </li>
+      <li style="padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
+        <label style="display:flex; align-items:center; gap:10px; cursor:default;">
+          <span style="width:20px; height:20px; border:2px solid #3d5afe; border-radius:4px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;"></span>
+          増援イベントのタイミング
+        </label>
+      </li>
+      <li style="padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
+        <label style="display:flex; align-items:center; gap:10px; cursor:default;">
+          <span style="width:20px; height:20px; border:2px solid #3d5afe; border-radius:4px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;"></span>
+          BGM / SEの切り替え
+        </label>
+      </li>
+      <li style="padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
+        <label style="display:flex; align-items:center; gap:10px; cursor:default;">
+          <span style="width:20px; height:20px; border:2px solid #3d5afe; border-radius:4px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;"></span>
+          拠点の編成上限（maxDeploy）
+        </label>
+      </li>
+      <li style="padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
+        <label style="display:flex; align-items:center; gap:10px; cursor:default;">
+          <span style="width:20px; height:20px; border:2px solid #3d5afe; border-radius:4px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;"></span>
+          ユニットの移動範囲が正しい
+        </label>
+      </li>
+      <li style="padding:6px 0;">
+        <label style="display:flex; align-items:center; gap:10px; cursor:default;">
+          <span style="width:20px; height:20px; border:2px solid #3d5afe; border-radius:4px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;"></span>
+          戦闘ダメージが計算式どおり
+        </label>
+      </li>
+    </ul>
+  </div>
+
+  <h3>うまく動かないとき</h3>
+  <table class="shortcut-table">
+    <thead>
+      <tr><th>症状</th><th>対処</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>何も表示されない</td>
+        <td><code>pnpm dev:runtime</code> が起動しているか確認</td>
+      </tr>
+      <tr>
+        <td>ユニットが表示されない</td>
+        <td>データベースにユニット定義があるか確認</td>
+      </tr>
+      <tr>
+        <td>イベントが発火しない</td>
+        <td>マップにイベントが紐付けされているか確認</td>
+      </tr>
+      <tr>
+        <td>ダメージが0</td>
+        <td>武器の威力や装備を確認</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="tip">
+    <strong>Tip:</strong> テストプレイ内のデータは保存されません。バランス調整にはシード値を固定して同じ戦闘を再現すると効率的です。
+  </div>
+</section>
+
+<section id="section-export" class="section fade-in">
+  <h2>8. 素材・書き出し・Tips</h2>
+  <p>ゲームに使う画像や音楽の管理方法、完成したゲームの配布方法、そして制作に役立つTipsを紹介します。</p>
+
+  <h3>素材管理</h3>
+
+  <h4>素材タブ（Ctrl+6）</h4>
+  <div class="step-card">
+    <ul style="list-style:none; padding:0; margin:0;">
+      <li style="padding:6px 0;">画像を追加 → <code>assets/images/</code></li>
+      <li style="padding:6px 0;">BGMを追加 → <code>assets/audio/bgm/</code></li>
+      <li style="padding:6px 0;">SEを追加 → <code>assets/audio/se/</code></li>
+    </ul>
+    <p style="margin-top:12px; color:#aaa;">一覧からプレビュー（画像のみ）や削除が可能です。</p>
+  </div>
+
+  <h4>推奨形式</h4>
+  <table class="shortcut-table">
+    <thead>
+      <tr><th>種別</th><th>形式</th><th>備考</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>タイル・ユニット画像</td>
+        <td>PNG</td>
+        <td>透過対応。タイルサイズ（32/48/64px）に合わせる</td>
+      </tr>
+      <tr>
+        <td>顔グラフィック</td>
+        <td>PNG</td>
+        <td>会話ウィンドウ用</td>
+      </tr>
+      <tr>
+        <td>BGM / SE</td>
+        <td>OGG or MP3</td>
+        <td>ブラウザ互換優先ならOGG</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h4>イベント・DBとの紐付け</h4>
+  <div class="step-card">
+    <ul style="list-style:none; padding:0; margin:0;">
+      <li style="padding:6px 0;">会話の顔グラ → <code>SHOW_MESSAGE</code> の <code>faceId</code></li>
+      <li style="padding:6px 0;">BGM → <code>PLAY_BGM</code> の <code>bgmId</code>（ファイル名ベース）</li>
+      <li style="padding:6px 0;">SE → <code>PLAY_SE</code> の <code>seId</code></li>
+    </ul>
+  </div>
+
+  <h3>書き出しと配布</h3>
+
+  <h4>3つの書き出し形式</h4>
+  <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:16px; margin:16px 0;">
+    <div class="step-card" style="border-left-color:#00c853;">
+      <h5 style="margin:0 0 12px; color:#00c853;">HTML5</h5>
+      <ul style="padding-left:18px; margin:0;">
+        <li>Web配布に最適（itch.io、GitHub Pages）</li>
+        <li>zipを展開 → <code>game/</code> をWebサーバで公開</li>
+      </ul>
+      <div class="code-block" style="margin-top:12px; font-size:0.85rem;">
+        <code>npx serve .</code><br>
+        <code>python -m http.server 8080</code>
+      </div>
+    </div>
+    <div class="step-card" style="border-left-color:#7c4dff;">
+      <h5 style="margin:0 0 12px; color:#7c4dff;">Electron</h5>
+      <ul style="padding-left:18px; margin:0;">
+        <li>デスクトップ向け実行ファイル</li>
+        <li>Win / macOS / Linux 対応</li>
+        <li>ダウンロード配布に最適</li>
+      </ul>
+    </div>
+    <div class="step-card" style="border-left-color:#e040fb;">
+      <h5 style="margin:0 0 12px; color:#e040fb;">モバイル</h5>
+      <ul style="padding-left:18px; margin:0;">
+        <li>Capacitor経由でiOS/Androidアプリ</li>
+        <li>Android Studio / Xcodeでビルドが必要</li>
+      </ul>
+    </div>
+  </div>
+
+  <h4>配布前チェックリスト</h4>
+  <div class="step-card">
+    <ul style="list-style:none; padding:0; margin:0;">
+      <li style="padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
+        <label style="display:flex; align-items:center; gap:10px; cursor:default;">
+          <span style="width:20px; height:20px; border:2px solid #3d5afe; border-radius:4px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;"></span>
+          別PC / シークレットウィンドウで起動確認
+        </label>
+      </li>
+      <li style="padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
+        <label style="display:flex; align-items:center; gap:10px; cursor:default;">
+          <span style="width:20px; height:20px; border:2px solid #3d5afe; border-radius:4px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;"></span>
+          タイトル → 最終章まで通しプレイ
+        </label>
+      </li>
+      <li style="padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
+        <label style="display:flex; align-items:center; gap:10px; cursor:default;">
+          <span style="width:20px; height:20px; border:2px solid #3d5afe; border-radius:4px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;"></span>
+          素材のライセンス表記
+        </label>
+      </li>
+      <li style="padding:6px 0;">
+        <label style="display:flex; align-items:center; gap:10px; cursor:default;">
+          <span style="width:20px; height:20px; border:2px solid #3d5afe; border-radius:4px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;"></span>
+          セーブデータの保存先案内
+        </label>
+      </li>
+    </ul>
+  </div>
+
+  <h3>キーボードショートカット一覧</h3>
+  <table class="shortcut-table">
+    <thead>
+      <tr><th>ショートカット</th><th>動作</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><kbd>Ctrl+1</kbd></td><td>プロジェクトタブ</td></tr>
+      <tr><td><kbd>Ctrl+2</kbd></td><td>データベースタブ</td></tr>
+      <tr><td><kbd>Ctrl+3</kbd></td><td>マップタブ</td></tr>
+      <tr><td><kbd>Ctrl+4</kbd></td><td>テストプレイタブ</td></tr>
+      <tr><td><kbd>Ctrl+5</kbd></td><td>イベントタブ</td></tr>
+      <tr><td><kbd>Ctrl+6</kbd></td><td>素材タブ</td></tr>
+      <tr><td><kbd>Shift+クリック</kbd></td><td>マップ上のユニット削除</td></tr>
+    </tbody>
+  </table>
+
+  <h3>制作Tips</h3>
+  <div class="tip">
+    <strong>Tip 1:</strong> まずデータベースでユニット・武器を定義してからマップに配置しましょう。
+  </div>
+  <div class="tip">
+    <strong>Tip 2:</strong> テストプレイのシード値を固定すると、同じ操作で同じ結果を再現できてデバッグに便利です。
+  </div>
+  <div class="tip">
+    <strong>Tip 3:</strong> 章開始イベント（<code>chapterStart</code> + <code>SHOW_MESSAGE</code>）でストーリーの導入を書きましょう。
+  </div>
+  <div class="tip">
+    <strong>Tip 4:</strong> 増援は <code>turnStart</code> + <code>SPAWN_UNIT</code> の組み合わせが定番です。
+  </div>
+  <div class="tip">
+    <strong>Tip 5:</strong> 地形効果（森の回避+20、砦の防御+3・回復10）をうまく使ったマップ設計を心がけましょう。
+  </div>
+  <div class="tip">
+    <strong>Tip 6:</strong> 保存はこまめに！ブラウザ版は5世代のバックアップが自動保持されます。
+  </div>
+  <div class="tip">
+    <strong>Tip 7:</strong> 三すくみ（剣 &gt; 斧 &gt; 槍 &gt; 剣）を意識した敵配置で戦略性が生まれます。
+  </div>
+
+  <h3>制作フロー まとめ</h3>
+  <div class="step-card">
+    <ol style="padding-left:20px; margin:0; line-height:2.2;">
+      <li>起動（<code>pnpm dev:editor</code> + <code>pnpm dev:runtime</code>）</li>
+      <li>プロジェクト設定と章構成</li>
+      <li>データベースでユニット・武器・地形を定義</li>
+      <li>マップで地形描画とユニット配置</li>
+      <li>イベントで会話・増援・演出を設定</li>
+      <li>素材の追加（画像・BGM・SE）</li>
+      <li>テストプレイで動作確認</li>
+      <li>書き出しと配布</li>
+    </ol>
+  </div>
+</section>
+
+<footer style="text-align:center; padding:48px 24px 32px; color:rgba(255,255,255,0.5); font-size:0.9rem;">
+  <p style="font-size:1.4rem; margin-bottom:8px; color:rgba(255,255,255,0.8);">Happy Game Making!</p>
+  <p>さあ、あなただけのSRPGを作りましょう。</p>
+</footer>
+
+
+</div><!-- /.main-content -->
+
+<!-- ===== JavaScript ===== -->
+<script>
+(function () {
+  // Hamburger menu toggle
+  var hamburger = document.getElementById('hamburger');
+  var sidebar = document.getElementById('sidebar');
+  var overlay = document.getElementById('sidebarOverlay');
+
+  function toggleMenu() {
+    hamburger.classList.toggle('open');
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('open');
+  }
+
+  hamburger.addEventListener('click', toggleMenu);
+  overlay.addEventListener('click', toggleMenu);
+
+  // Active nav link tracking on scroll
+  var sections = document.querySelectorAll('.section');
+  var navLinks = document.querySelectorAll('.sidebar a');
+
+  function updateActiveNav() {
+    var scrollPos = window.scrollY + 120;
+
+    sections.forEach(function (section) {
+      var top = section.offsetTop;
+      var bottom = top + section.offsetHeight;
+
+      if (scrollPos >= top && scrollPos < bottom) {
+        var id = section.getAttribute('id');
+        navLinks.forEach(function (link) {
+          link.classList.remove('active');
+          if (link.getAttribute('href') === '#' + id) {
+            link.classList.add('active');
+          }
+        });
+      }
+    });
+  }
+
+  window.addEventListener('scroll', updateActiveNav);
+
+  // Close sidebar on nav click (mobile)
+  navLinks.forEach(function (link) {
+    link.addEventListener('click', function () {
+      if (window.innerWidth <= 768) {
+        hamburger.classList.remove('open');
+        sidebar.classList.remove('open');
+        overlay.classList.remove('open');
+      }
+    });
+  });
+
+  // Fade-in on scroll (IntersectionObserver)
+  if ('IntersectionObserver' in window) {
+    var fadeElements = document.querySelectorAll('.fade-in');
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+
+    fadeElements.forEach(function (el) {
+      observer.observe(el);
+    });
+  }
+})();
+</script>
+</body>
+</html>
